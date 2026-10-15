@@ -105,11 +105,49 @@ Students who are unable or unwilling to work in groups may choose to make Projec
 
 ## Outline
 
-INSERT OUTLINE HERE
+Collaboration tools
+- zoom (communication)
+- slack (communication)
+- github (code sharing)
+
+Data Set selected:
+Job Postings
+https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries
+CVs?
+
+Database:
+ - Logical model for normalized database
+ - Entity-Relationship diagram
+
+Possible Analysis
+ - look at job market
+ - retrospective - how have events effected job market/resumes
+ - ^^ Microeconomics trends
+ - geographic variation
+ - what is a valuable skill (by frequency mentioned or salary)
+ 
+ ROLES:
+ 
+ Data Acquisition (Afwan)
+ - Extract skill information from description 
+ - pick N keywords and filter for those results
+ - Database Design
+ Data Preparation and Exploration (Group)
+ - Initial data tidying, Exploratory data analysis, and structuring for R 
+ - Perform all data tidying, transformations, and exploratory data analysis in R
+ - Address data quality issues such as missing values and outliers
+ Editor (Jocelyn)
+ - Mash together everyone's analysis into final code base
+ - Everyone to make smaller edits on github
+ Presentation (TBD)
+
 
 ## Anticipated Challenges
 
-INSERT CHALLENGES HERE  
+- dating of CVs - using proxy of last job
+- Extracting skills from job descriptions - inconsistent?
+- schedule coordination
+
 
 ## Submission Requirements
 
