@@ -1,31 +1,3 @@
-skill,job_count,percentage
-python,163,71.2
-sql,133,58.1
-machine learning,74,32.3
-llm,60,26.2
-statistics,55,24
-data pipelines,54,23.6
-dbt,51,22.3
-aws,47,20.5
-snowflake,38,16.6
-databricks,33,14.4
-azure,30,13.1
-etl,29,12.7
-tableau,29,12.7
-google cloud,28,12.2
-power bi,27,11.8
-pytorch,27,11.8
-r,25,10.9
-spark,25,10.9
-excel,24,10.5
-git,24,10.5
-generative ai,22,9.6
-airflow,20,8.7
-data visualization,19,8.3
-deep learning,18,7.9
-looker,18,7.9
-kubernetes,16,7
-tensorflow,16,7
-nlp,14,6.1
-scikit learn,12,5.2
-docker,11,4.8
+version https://git-lfs.github.com/spec/v1
+oid sha256:5fe27a920686582ddfae9e87f336ec634be9ec4ae3b02ac8df2326f93ed6a3d8
+size 514
