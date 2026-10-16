@@ -1,0 +1,1143 @@
+job_id,skill,mentioned
+358087b9ec0512dd,python,TRUE
+358087b9ec0512dd,statistics,TRUE
+358087b9ec0512dd,pytorch,TRUE
+0abecf91abbbc6e8,python,TRUE
+0abecf91abbbc6e8,sql,TRUE
+0abecf91abbbc6e8,etl,TRUE
+0abecf91abbbc6e8,data pipelines,TRUE
+0abecf91abbbc6e8,google cloud,TRUE
+09e85656429d708e,data pipelines,TRUE
+09e85656429d708e,aws,TRUE
+09e85656429d708e,docker,TRUE
+09e85656429d708e,kubernetes,TRUE
+1038c12002f0586b,python,TRUE
+1038c12002f0586b,pytorch,TRUE
+633ef0b06b526717,sql,TRUE
+633ef0b06b526717,aws,TRUE
+3e2b4adf53a63c4a,python,TRUE
+3e2b4adf53a63c4a,aws,TRUE
+3e2b4adf53a63c4a,tensorflow,TRUE
+3e2b4adf53a63c4a,pytorch,TRUE
+3e2b4adf53a63c4a,llm,TRUE
+3e2b4adf53a63c4a,airflow,TRUE
+3e2b4adf53a63c4a,dbt,TRUE
+4b3a9ffb6cba2605,python,TRUE
+4b3a9ffb6cba2605,sql,TRUE
+4b3a9ffb6cba2605,r,TRUE
+4b3a9ffb6cba2605,excel,TRUE
+4b3a9ffb6cba2605,tableau,TRUE
+4b3a9ffb6cba2605,looker,TRUE
+4b3a9ffb6cba2605,statistics,TRUE
+4b3a9ffb6cba2605,data visualization,TRUE
+a85d09064d9bbd69,python,TRUE
+a85d09064d9bbd69,machine learning,TRUE
+a85d09064d9bbd69,databricks,TRUE
+a85d09064d9bbd69,aws,TRUE
+a85d09064d9bbd69,llm,TRUE
+19c244c7854c5783,python,TRUE
+19c244c7854c5783,machine learning,TRUE
+19c244c7854c5783,databricks,TRUE
+19c244c7854c5783,git,TRUE
+710decbf9953ad95,python,TRUE
+710decbf9953ad95,machine learning,TRUE
+710decbf9953ad95,aws,TRUE
+710decbf9953ad95,azure,TRUE
+710decbf9953ad95,google cloud,TRUE
+710decbf9953ad95,tensorflow,TRUE
+710decbf9953ad95,pytorch,TRUE
+710decbf9953ad95,nlp,TRUE
+710decbf9953ad95,llm,TRUE
+c2ebe4cf14424e6e,python,TRUE
+c2ebe4cf14424e6e,sql,TRUE
+c2ebe4cf14424e6e,looker,TRUE
+c2ebe4cf14424e6e,machine learning,TRUE
+c2ebe4cf14424e6e,aws,TRUE
+c2ebe4cf14424e6e,scikit learn,TRUE
+c2ebe4cf14424e6e,nlp,TRUE
+c2ebe4cf14424e6e,llm,TRUE
+c2ebe4cf14424e6e,airflow,TRUE
+c2ebe4cf14424e6e,dbt,TRUE
+664c2bb218326862,sql,TRUE
+664c2bb218326862,data pipelines,TRUE
+664c2bb218326862,databricks,TRUE
+664c2bb218326862,aws,TRUE
+664c2bb218326862,azure,TRUE
+664c2bb218326862,snowflake,TRUE
+664c2bb218326862,git,TRUE
+664c2bb218326862,airflow,TRUE
+80cbf5974be713c6,python,TRUE
+80cbf5974be713c6,sql,TRUE
+80cbf5974be713c6,machine learning,TRUE
+80cbf5974be713c6,deep learning,TRUE
+80cbf5974be713c6,statistics,TRUE
+80cbf5974be713c6,spark,TRUE
+80cbf5974be713c6,tensorflow,TRUE
+80cbf5974be713c6,pytorch,TRUE
+80cbf5974be713c6,llm,TRUE
+80cbf5974be713c6,generative ai,TRUE
+eb1de185f5457e55,python,TRUE
+eb1de185f5457e55,machine learning,TRUE
+eb1de185f5457e55,aws,TRUE
+eb1de185f5457e55,tensorflow,TRUE
+eb1de185f5457e55,pytorch,TRUE
+eb1de185f5457e55,llm,TRUE
+eb1de185f5457e55,generative ai,TRUE
+eb1de185f5457e55,docker,TRUE
+eb1de185f5457e55,kubernetes,TRUE
+a22424227ff54e88,python,TRUE
+a22424227ff54e88,machine learning,TRUE
+a22424227ff54e88,deep learning,TRUE
+a22424227ff54e88,statistics,TRUE
+a22424227ff54e88,data pipelines,TRUE
+a22424227ff54e88,tensorflow,TRUE
+a22424227ff54e88,pytorch,TRUE
+c203e0835dc737b0,python,TRUE
+c203e0835dc737b0,machine learning,TRUE
+c203e0835dc737b0,deep learning,TRUE
+c203e0835dc737b0,tensorflow,TRUE
+c203e0835dc737b0,pytorch,TRUE
+c2b89a447f679023,statistics,TRUE
+c2b89a447f679023,google cloud,TRUE
+d1925dca14eb2f93,python,TRUE
+d1925dca14eb2f93,sql,TRUE
+d1925dca14eb2f93,tableau,TRUE
+d1925dca14eb2f93,power bi,TRUE
+d1925dca14eb2f93,looker,TRUE
+d1925dca14eb2f93,aws,TRUE
+d1925dca14eb2f93,dbt,TRUE
+a4df07d76efc5265,python,TRUE
+a4df07d76efc5265,sql,TRUE
+a4df07d76efc5265,tableau,TRUE
+a4df07d76efc5265,power bi,TRUE
+a4df07d76efc5265,looker,TRUE
+a4df07d76efc5265,etl,TRUE
+a4df07d76efc5265,data pipelines,TRUE
+a4df07d76efc5265,snowflake,TRUE
+a4df07d76efc5265,llm,TRUE
+a4df07d76efc5265,airflow,TRUE
+a4df07d76efc5265,dbt,TRUE
+418d464d54a60ceb,r,TRUE
+418d464d54a60ceb,statistics,TRUE
+b2d39ec1d6c2ab9c,sql,TRUE
+b2d39ec1d6c2ab9c,spark,TRUE
+b2d39ec1d6c2ab9c,databricks,TRUE
+b2d39ec1d6c2ab9c,snowflake,TRUE
+b2d39ec1d6c2ab9c,llm,TRUE
+b2d39ec1d6c2ab9c,git,TRUE
+b2d39ec1d6c2ab9c,dbt,TRUE
+79f4fdfba8279091,python,TRUE
+79f4fdfba8279091,sql,TRUE
+79f4fdfba8279091,statistics,TRUE
+79f4fdfba8279091,spark,TRUE
+8c0b159c2d22021e,python,TRUE
+8c0b159c2d22021e,sql,TRUE
+8c0b159c2d22021e,statistics,TRUE
+8c0b159c2d22021e,google cloud,TRUE
+8c0b159c2d22021e,git,TRUE
+8c0b159c2d22021e,dbt,TRUE
+f9cb67c9634196b3,python,TRUE
+f9cb67c9634196b3,machine learning,TRUE
+f9cb67c9634196b3,llm,TRUE
+2f94bfb594e5e844,python,TRUE
+2f94bfb594e5e844,sql,TRUE
+2f94bfb594e5e844,etl,TRUE
+2f94bfb594e5e844,databricks,TRUE
+2f94bfb594e5e844,snowflake,TRUE
+2f94bfb594e5e844,git,TRUE
+2f94bfb594e5e844,dbt,TRUE
+89c7d6e66bc7e7fc,python,TRUE
+89c7d6e66bc7e7fc,pytorch,TRUE
+89c7d6e66bc7e7fc,llm,TRUE
+89c7d6e66bc7e7fc,kubernetes,TRUE
+931385bfa831aa5c,python,TRUE
+931385bfa831aa5c,sql,TRUE
+931385bfa831aa5c,data pipelines,TRUE
+931385bfa831aa5c,llm,TRUE
+931385bfa831aa5c,docker,TRUE
+931385bfa831aa5c,kubernetes,TRUE
+931385bfa831aa5c,git,TRUE
+7692ff66079e5d13,excel,TRUE
+841d032580d19552,python,TRUE
+841d032580d19552,sql,TRUE
+841d032580d19552,r,TRUE
+841d032580d19552,excel,TRUE
+841d032580d19552,tableau,TRUE
+841d032580d19552,power bi,TRUE
+841d032580d19552,machine learning,TRUE
+841d032580d19552,statistics,TRUE
+841d032580d19552,data visualization,TRUE
+8d7ddd7861fe23c9,python,TRUE
+8d7ddd7861fe23c9,sql,TRUE
+8d7ddd7861fe23c9,excel,TRUE
+8d7ddd7861fe23c9,tableau,TRUE
+8d7ddd7861fe23c9,power bi,TRUE
+93788ac6cbd7f99c,python,TRUE
+93788ac6cbd7f99c,sql,TRUE
+93788ac6cbd7f99c,machine learning,TRUE
+93788ac6cbd7f99c,statistics,TRUE
+93788ac6cbd7f99c,data visualization,TRUE
+93788ac6cbd7f99c,aws,TRUE
+93788ac6cbd7f99c,azure,TRUE
+93788ac6cbd7f99c,google cloud,TRUE
+93788ac6cbd7f99c,snowflake,TRUE
+a1b83b5c532c96c1,python,TRUE
+a1b83b5c532c96c1,sql,TRUE
+a1b83b5c532c96c1,excel,TRUE
+a1b83b5c532c96c1,statistics,TRUE
+a2ed7d23b7172378,python,TRUE
+a2ed7d23b7172378,machine learning,TRUE
+a2ed7d23b7172378,data pipelines,TRUE
+a2ed7d23b7172378,tensorflow,TRUE
+a2ed7d23b7172378,pytorch,TRUE
+a2ed7d23b7172378,nlp,TRUE
+a2ed7d23b7172378,llm,TRUE
+cca2d498114272a5,etl,TRUE
+cca2d498114272a5,spark,TRUE
+ccd3e49f734aa001,machine learning,TRUE
+ccd3e49f734aa001,deep learning,TRUE
+ccd3e49f734aa001,statistics,TRUE
+ccd3e49f734aa001,tensorflow,TRUE
+ccd3e49f734aa001,pytorch,TRUE
+ccd3e49f734aa001,nlp,TRUE
+ccd3e49f734aa001,llm,TRUE
+d93378ac49925aa7,python,TRUE
+d93378ac49925aa7,sql,TRUE
+d93378ac49925aa7,r,TRUE
+d93378ac49925aa7,power bi,TRUE
+f074700fd590dc57,python,TRUE
+f074700fd590dc57,sql,TRUE
+f074700fd590dc57,machine learning,TRUE
+f074700fd590dc57,etl,TRUE
+f074700fd590dc57,data pipelines,TRUE
+f074700fd590dc57,spark,TRUE
+f074700fd590dc57,databricks,TRUE
+f074700fd590dc57,aws,TRUE
+f074700fd590dc57,azure,TRUE
+f074700fd590dc57,google cloud,TRUE
+bd23ea901b443fa7,python,TRUE
+bd23ea901b443fa7,sql,TRUE
+bd23ea901b443fa7,excel,TRUE
+bd23ea901b443fa7,power bi,TRUE
+bd23ea901b443fa7,data visualization,TRUE
+bd23ea901b443fa7,data pipelines,TRUE
+bd23ea901b443fa7,databricks,TRUE
+a7e9dea0132575d0,python,TRUE
+a7e9dea0132575d0,machine learning,TRUE
+a7e9dea0132575d0,data pipelines,TRUE
+5c72fa17dae3d0a0,sql,TRUE
+5c72fa17dae3d0a0,tableau,TRUE
+5c72fa17dae3d0a0,dbt,TRUE
+f882ddc031eebbd7,python,TRUE
+f882ddc031eebbd7,sql,TRUE
+f882ddc031eebbd7,looker,TRUE
+f882ddc031eebbd7,statistics,TRUE
+f882ddc031eebbd7,snowflake,TRUE
+f882ddc031eebbd7,git,TRUE
+af437cea5e723018,machine learning,TRUE
+af437cea5e723018,spark,TRUE
+bdd15749c5fec719,machine learning,TRUE
+bdd15749c5fec719,aws,TRUE
+bdd15749c5fec719,generative ai,TRUE
+7b9826c03f05e9e4,data pipelines,TRUE
+7b9826c03f05e9e4,llm,TRUE
+90f948c3b8cdd743,python,TRUE
+90f948c3b8cdd743,sql,TRUE
+90f948c3b8cdd743,r,TRUE
+90f948c3b8cdd743,statistics,TRUE
+90f948c3b8cdd743,llm,TRUE
+8fb0770845dce717,python,TRUE
+8fb0770845dce717,sql,TRUE
+8fb0770845dce717,r,TRUE
+8fb0770845dce717,statistics,TRUE
+bcdef25e8f6ac318,python,TRUE
+bcdef25e8f6ac318,sql,TRUE
+bcdef25e8f6ac318,machine learning,TRUE
+bcdef25e8f6ac318,etl,TRUE
+bcdef25e8f6ac318,data pipelines,TRUE
+bcdef25e8f6ac318,aws,TRUE
+bcdef25e8f6ac318,snowflake,TRUE
+bcdef25e8f6ac318,llm,TRUE
+2cbb0d01ff0bfb16,sql,TRUE
+2cbb0d01ff0bfb16,tableau,TRUE
+2cbb0d01ff0bfb16,dbt,TRUE
+47f344985b95e35e,python,TRUE
+47f344985b95e35e,statistics,TRUE
+47f344985b95e35e,google cloud,TRUE
+c8c723497f97c999,sql,TRUE
+c8c723497f97c999,dbt,TRUE
+159c6159b3ca09d6,python,TRUE
+159c6159b3ca09d6,sql,TRUE
+159c6159b3ca09d6,machine learning,TRUE
+159c6159b3ca09d6,statistics,TRUE
+159c6159b3ca09d6,data pipelines,TRUE
+159c6159b3ca09d6,aws,TRUE
+159c6159b3ca09d6,tensorflow,TRUE
+159c6159b3ca09d6,pytorch,TRUE
+159c6159b3ca09d6,llm,TRUE
+a784bb6244b128fe,python,TRUE
+a784bb6244b128fe,sql,TRUE
+a784bb6244b128fe,tableau,TRUE
+a784bb6244b128fe,power bi,TRUE
+a784bb6244b128fe,statistics,TRUE
+a784bb6244b128fe,nlp,TRUE
+a784bb6244b128fe,llm,TRUE
+6602bae6f0a40d19,python,TRUE
+6602bae6f0a40d19,llm,TRUE
+ab07b94cca9ce871,sql,TRUE
+ab07b94cca9ce871,tableau,TRUE
+ab07b94cca9ce871,power bi,TRUE
+86ca860f43502fc8,python,TRUE
+86ca860f43502fc8,sql,TRUE
+86ca860f43502fc8,etl,TRUE
+86ca860f43502fc8,google cloud,TRUE
+86ca860f43502fc8,git,TRUE
+86ca860f43502fc8,airflow,TRUE
+86ca860f43502fc8,dbt,TRUE
+4fc213345a632ea6,sql,TRUE
+310b8f5d7b1407da,python,TRUE
+310b8f5d7b1407da,statistics,TRUE
+310b8f5d7b1407da,data pipelines,TRUE
+310b8f5d7b1407da,tensorflow,TRUE
+310b8f5d7b1407da,pytorch,TRUE
+310b8f5d7b1407da,llm,TRUE
+310b8f5d7b1407da,generative ai,TRUE
+e399b3aab95f4e0f,python,TRUE
+e399b3aab95f4e0f,sql,TRUE
+e399b3aab95f4e0f,excel,TRUE
+e399b3aab95f4e0f,power bi,TRUE
+e399b3aab95f4e0f,etl,TRUE
+e399b3aab95f4e0f,snowflake,TRUE
+e399b3aab95f4e0f,git,TRUE
+0a146a905820b1db,python,TRUE
+0a146a905820b1db,sql,TRUE
+0a146a905820b1db,airflow,TRUE
+0a146a905820b1db,dbt,TRUE
+1a362a23240f3017,python,TRUE
+1a362a23240f3017,sql,TRUE
+1a362a23240f3017,aws,TRUE
+1a362a23240f3017,llm,TRUE
+1a362a23240f3017,dbt,TRUE
+0cd66e93a43be9a4,python,TRUE
+0cd66e93a43be9a4,azure,TRUE
+0cd66e93a43be9a4,llm,TRUE
+0cd66e93a43be9a4,generative ai,TRUE
+0c210253d1d555a1,python,TRUE
+0c210253d1d555a1,sql,TRUE
+0c210253d1d555a1,etl,TRUE
+0c210253d1d555a1,llm,TRUE
+0c210253d1d555a1,dbt,TRUE
+129bbf461e623c6a,python,TRUE
+129bbf461e623c6a,sql,TRUE
+129bbf461e623c6a,google cloud,TRUE
+129bbf461e623c6a,dbt,TRUE
+4f3bdc35e4424277,etl,TRUE
+4f3bdc35e4424277,data pipelines,TRUE
+4f3bdc35e4424277,aws,TRUE
+4f3bdc35e4424277,azure,TRUE
+6c42aa3377fcb5a8,sql,TRUE
+6c42aa3377fcb5a8,excel,TRUE
+6c42aa3377fcb5a8,power bi,TRUE
+783fa45c6a1d30a5,machine learning,TRUE
+d32942ba58c8d3ad,snowflake,TRUE
+f3581f0fb3043e5c,python,TRUE
+f3581f0fb3043e5c,sql,TRUE
+f3581f0fb3043e5c,machine learning,TRUE
+f3581f0fb3043e5c,aws,TRUE
+f3581f0fb3043e5c,azure,TRUE
+f3581f0fb3043e5c,snowflake,TRUE
+f3581f0fb3043e5c,generative ai,TRUE
+f3581f0fb3043e5c,git,TRUE
+f3581f0fb3043e5c,dbt,TRUE
+fa42b40c025eb556,python,TRUE
+fa42b40c025eb556,sql,TRUE
+fa42b40c025eb556,machine learning,TRUE
+fa42b40c025eb556,deep learning,TRUE
+fa42b40c025eb556,data pipelines,TRUE
+fa42b40c025eb556,spark,TRUE
+fa42b40c025eb556,databricks,TRUE
+fd823c1ad6e543f9,python,TRUE
+fd823c1ad6e543f9,machine learning,TRUE
+fd823c1ad6e543f9,deep learning,TRUE
+fd823c1ad6e543f9,statistics,TRUE
+fd823c1ad6e543f9,generative ai,TRUE
+3a6da4e1192b7fac,python,TRUE
+3a6da4e1192b7fac,sql,TRUE
+3a6da4e1192b7fac,data pipelines,TRUE
+b59f02ade8c78f11,python,TRUE
+b59f02ade8c78f11,deep learning,TRUE
+b59f02ade8c78f11,pytorch,TRUE
+7426b9a9a8d10c37,sql,TRUE
+ecfad9e6497515ab,machine learning,TRUE
+ecfad9e6497515ab,etl,TRUE
+ecfad9e6497515ab,data pipelines,TRUE
+ecfad9e6497515ab,generative ai,TRUE
+01439a71a45533a9,python,TRUE
+01439a71a45533a9,deep learning,TRUE
+01439a71a45533a9,data pipelines,TRUE
+01439a71a45533a9,pytorch,TRUE
+0970ffec34788d48,python,TRUE
+0970ffec34788d48,sql,TRUE
+0970ffec34788d48,spark,TRUE
+0970ffec34788d48,dbt,TRUE
+91f5a4aae7a825d0,r,TRUE
+91f5a4aae7a825d0,statistics,TRUE
+b11d22db30e58616,python,TRUE
+b11d22db30e58616,sql,TRUE
+b11d22db30e58616,r,TRUE
+b11d22db30e58616,tableau,TRUE
+b11d22db30e58616,looker,TRUE
+b11d22db30e58616,machine learning,TRUE
+a8aef33b846460f6,python,TRUE
+a8aef33b846460f6,sql,TRUE
+a8aef33b846460f6,data pipelines,TRUE
+a8aef33b846460f6,databricks,TRUE
+a8aef33b846460f6,google cloud,TRUE
+a8aef33b846460f6,snowflake,TRUE
+a8aef33b846460f6,kubernetes,TRUE
+a8aef33b846460f6,git,TRUE
+a8aef33b846460f6,airflow,TRUE
+a8aef33b846460f6,dbt,TRUE
+53e308c6bea8d42c,sql,TRUE
+53e308c6bea8d42c,statistics,TRUE
+53e308c6bea8d42c,databricks,TRUE
+53e308c6bea8d42c,snowflake,TRUE
+53e308c6bea8d42c,dbt,TRUE
+4ee506ecc3ddb070,python,TRUE
+4ee506ecc3ddb070,sql,TRUE
+4ee506ecc3ddb070,tableau,TRUE
+4ee506ecc3ddb070,data visualization,TRUE
+4301b26092e02129,python,TRUE
+4301b26092e02129,sql,TRUE
+4301b26092e02129,machine learning,TRUE
+4301b26092e02129,data visualization,TRUE
+4301b26092e02129,etl,TRUE
+4301b26092e02129,data pipelines,TRUE
+4301b26092e02129,databricks,TRUE
+4301b26092e02129,aws,TRUE
+4301b26092e02129,azure,TRUE
+4301b26092e02129,google cloud,TRUE
+4301b26092e02129,snowflake,TRUE
+4301b26092e02129,llm,TRUE
+8e69ca8641d72286,python,TRUE
+8e69ca8641d72286,sql,TRUE
+8e69ca8641d72286,aws,TRUE
+fdabe84844140c7f,python,TRUE
+fdabe84844140c7f,statistics,TRUE
+249f58373fe158bd,python,TRUE
+249f58373fe158bd,etl,TRUE
+249f58373fe158bd,data pipelines,TRUE
+249f58373fe158bd,spark,TRUE
+249f58373fe158bd,databricks,TRUE
+2adfca16da82e153,sql,TRUE
+2adfca16da82e153,r,TRUE
+2adfca16da82e153,excel,TRUE
+2adfca16da82e153,power bi,TRUE
+2adfca16da82e153,statistics,TRUE
+2adfca16da82e153,etl,TRUE
+2adfca16da82e153,azure,TRUE
+2adfca16da82e153,snowflake,TRUE
+fe17464bab227d02,python,TRUE
+fe17464bab227d02,sql,TRUE
+fe17464bab227d02,looker,TRUE
+fe17464bab227d02,databricks,TRUE
+fe17464bab227d02,dbt,TRUE
+118b48f0ffe9d4b1,python,TRUE
+118b48f0ffe9d4b1,sql,TRUE
+118b48f0ffe9d4b1,excel,TRUE
+118b48f0ffe9d4b1,tableau,TRUE
+118b48f0ffe9d4b1,power bi,TRUE
+118b48f0ffe9d4b1,data visualization,TRUE
+118b48f0ffe9d4b1,databricks,TRUE
+ffc631e84d424e3c,python,TRUE
+ffc631e84d424e3c,statistics,TRUE
+ffc631e84d424e3c,databricks,TRUE
+ffc631e84d424e3c,scikit learn,TRUE
+ffc631e84d424e3c,llm,TRUE
+ffc631e84d424e3c,generative ai,TRUE
+e8a0408385362919,python,TRUE
+e8a0408385362919,llm,TRUE
+13d98d67ad7c8ad6,sql,TRUE
+13d98d67ad7c8ad6,excel,TRUE
+13d98d67ad7c8ad6,power bi,TRUE
+5b07ca5335ca7482,python,TRUE
+5b07ca5335ca7482,machine learning,TRUE
+5b07ca5335ca7482,deep learning,TRUE
+5b07ca5335ca7482,llm,TRUE
+5b07ca5335ca7482,generative ai,TRUE
+d77670cfbf52badc,python,TRUE
+d77670cfbf52badc,sql,TRUE
+d77670cfbf52badc,snowflake,TRUE
+d77670cfbf52badc,llm,TRUE
+d77670cfbf52badc,dbt,TRUE
+1325dbef0240100b,python,TRUE
+1325dbef0240100b,r,TRUE
+d9ad83d1dd9236a0,python,TRUE
+d9ad83d1dd9236a0,sql,TRUE
+d9ad83d1dd9236a0,machine learning,TRUE
+d9ad83d1dd9236a0,etl,TRUE
+d9ad83d1dd9236a0,snowflake,TRUE
+d9ad83d1dd9236a0,llm,TRUE
+d9ad83d1dd9236a0,kubernetes,TRUE
+d9ad83d1dd9236a0,dbt,TRUE
+3549d90482c297f8,python,TRUE
+3549d90482c297f8,sql,TRUE
+3549d90482c297f8,r,TRUE
+3549d90482c297f8,tableau,TRUE
+3549d90482c297f8,power bi,TRUE
+3549d90482c297f8,statistics,TRUE
+3549d90482c297f8,data visualization,TRUE
+3549d90482c297f8,etl,TRUE
+3549d90482c297f8,spark,TRUE
+3549d90482c297f8,snowflake,TRUE
+3549d90482c297f8,dbt,TRUE
+aa65f7046e67e18c,python,TRUE
+aa65f7046e67e18c,machine learning,TRUE
+aa65f7046e67e18c,deep learning,TRUE
+aa65f7046e67e18c,statistics,TRUE
+aa65f7046e67e18c,spark,TRUE
+aa65f7046e67e18c,databricks,TRUE
+aa65f7046e67e18c,google cloud,TRUE
+aa65f7046e67e18c,docker,TRUE
+aa65f7046e67e18c,kubernetes,TRUE
+9cac0dd49337a40b,python,TRUE
+9cac0dd49337a40b,sql,TRUE
+9cac0dd49337a40b,tableau,TRUE
+9cac0dd49337a40b,power bi,TRUE
+9cac0dd49337a40b,looker,TRUE
+9cac0dd49337a40b,snowflake,TRUE
+9cac0dd49337a40b,dbt,TRUE
+19e1abf3c3aa16d5,statistics,TRUE
+19e1abf3c3aa16d5,aws,TRUE
+19e1abf3c3aa16d5,llm,TRUE
+19e1abf3c3aa16d5,kubernetes,TRUE
+b0d12d931e091c3e,python,TRUE
+b0d12d931e091c3e,machine learning,TRUE
+b0d12d931e091c3e,llm,TRUE
+41943b3ac35c8ceb,python,TRUE
+41943b3ac35c8ceb,sql,TRUE
+41943b3ac35c8ceb,data pipelines,TRUE
+41943b3ac35c8ceb,aws,TRUE
+381e1392b9c9efaa,databricks,TRUE
+381e1392b9c9efaa,snowflake,TRUE
+dd203f2ad04410e5,python,TRUE
+dd203f2ad04410e5,machine learning,TRUE
+dd203f2ad04410e5,deep learning,TRUE
+75651a6eb69e1977,python,TRUE
+75651a6eb69e1977,sql,TRUE
+75651a6eb69e1977,tableau,TRUE
+75651a6eb69e1977,data visualization,TRUE
+75651a6eb69e1977,snowflake,TRUE
+75651a6eb69e1977,git,TRUE
+75651a6eb69e1977,airflow,TRUE
+75651a6eb69e1977,dbt,TRUE
+172fad7e9aee36ff,sql,TRUE
+172fad7e9aee36ff,excel,TRUE
+172fad7e9aee36ff,tableau,TRUE
+172fad7e9aee36ff,power bi,TRUE
+172fad7e9aee36ff,azure,TRUE
+33227a9cd9fb27cd,python,TRUE
+33227a9cd9fb27cd,sql,TRUE
+33227a9cd9fb27cd,google cloud,TRUE
+33227a9cd9fb27cd,git,TRUE
+33227a9cd9fb27cd,dbt,TRUE
+fea7bd1226cbd52a,python,TRUE
+fea7bd1226cbd52a,sql,TRUE
+9d03b6daca8a590e,python,TRUE
+9d03b6daca8a590e,sql,TRUE
+9d03b6daca8a590e,machine learning,TRUE
+9d03b6daca8a590e,deep learning,TRUE
+9d03b6daca8a590e,spark,TRUE
+9d03b6daca8a590e,databricks,TRUE
+9d03b6daca8a590e,aws,TRUE
+9d03b6daca8a590e,azure,TRUE
+9d03b6daca8a590e,google cloud,TRUE
+9d03b6daca8a590e,nlp,TRUE
+eddbe6abcbccfbf9,python,TRUE
+eddbe6abcbccfbf9,sql,TRUE
+eddbe6abcbccfbf9,data pipelines,TRUE
+eddbe6abcbccfbf9,databricks,TRUE
+eddbe6abcbccfbf9,aws,TRUE
+eddbe6abcbccfbf9,azure,TRUE
+eddbe6abcbccfbf9,google cloud,TRUE
+eddbe6abcbccfbf9,llm,TRUE
+eddbe6abcbccfbf9,airflow,TRUE
+ab3e3da5926fcb3e,python,TRUE
+ab3e3da5926fcb3e,sql,TRUE
+ab3e3da5926fcb3e,machine learning,TRUE
+ab3e3da5926fcb3e,deep learning,TRUE
+ab3e3da5926fcb3e,aws,TRUE
+ab3e3da5926fcb3e,snowflake,TRUE
+ab3e3da5926fcb3e,llm,TRUE
+05f522b1216b0ac5,python,TRUE
+05f522b1216b0ac5,sql,TRUE
+05f522b1216b0ac5,statistics,TRUE
+097ad412a6f0e060,python,TRUE
+097ad412a6f0e060,sql,TRUE
+097ad412a6f0e060,excel,TRUE
+097ad412a6f0e060,tableau,TRUE
+097ad412a6f0e060,power bi,TRUE
+097ad412a6f0e060,data visualization,TRUE
+097ad412a6f0e060,data pipelines,TRUE
+097ad412a6f0e060,llm,TRUE
+097ad412a6f0e060,generative ai,TRUE
+0f2d12e532d1cd51,machine learning,TRUE
+0f2d12e532d1cd51,deep learning,TRUE
+0f2d12e532d1cd51,data pipelines,TRUE
+0f2d12e532d1cd51,llm,TRUE
+0f2d12e532d1cd51,generative ai,TRUE
+2e1059e5982a92cc,python,TRUE
+2e1059e5982a92cc,sql,TRUE
+2e1059e5982a92cc,tableau,TRUE
+2e1059e5982a92cc,looker,TRUE
+2e1059e5982a92cc,data visualization,TRUE
+2e1059e5982a92cc,data pipelines,TRUE
+2e1059e5982a92cc,generative ai,TRUE
+33dad7ba8902b921,python,TRUE
+33dad7ba8902b921,sql,TRUE
+33dad7ba8902b921,r,TRUE
+33dad7ba8902b921,machine learning,TRUE
+33dad7ba8902b921,statistics,TRUE
+33dad7ba8902b921,databricks,TRUE
+33dad7ba8902b921,generative ai,TRUE
+3bbdd6a4c38a6d4e,python,TRUE
+3bbdd6a4c38a6d4e,sql,TRUE
+3bbdd6a4c38a6d4e,r,TRUE
+3bbdd6a4c38a6d4e,machine learning,TRUE
+3bbdd6a4c38a6d4e,statistics,TRUE
+3bbdd6a4c38a6d4e,generative ai,TRUE
+8788857232b3f8ab,r,TRUE
+8788857232b3f8ab,machine learning,TRUE
+8a9955dd85c55deb,sql,TRUE
+8a9955dd85c55deb,power bi,TRUE
+8a9955dd85c55deb,azure,TRUE
+e4457fb3052a2528,sql,TRUE
+e4457fb3052a2528,power bi,TRUE
+e4457fb3052a2528,looker,TRUE
+4a5e0b9ea336e605,python,TRUE
+4a5e0b9ea336e605,sql,TRUE
+4a5e0b9ea336e605,machine learning,TRUE
+4a5e0b9ea336e605,deep learning,TRUE
+4a5e0b9ea336e605,spark,TRUE
+4a5e0b9ea336e605,databricks,TRUE
+4a5e0b9ea336e605,aws,TRUE
+4a5e0b9ea336e605,azure,TRUE
+4a5e0b9ea336e605,google cloud,TRUE
+4a5e0b9ea336e605,nlp,TRUE
+8bd02e127356a752,python,TRUE
+8bd02e127356a752,sql,TRUE
+8bd02e127356a752,etl,TRUE
+8bd02e127356a752,snowflake,TRUE
+8bd02e127356a752,git,TRUE
+8bd02e127356a752,dbt,TRUE
+b8a9768a4f97d194,python,TRUE
+b8a9768a4f97d194,sql,TRUE
+b8a9768a4f97d194,tableau,TRUE
+b8a9768a4f97d194,looker,TRUE
+b8a9768a4f97d194,data pipelines,TRUE
+b8a9768a4f97d194,aws,TRUE
+b8a9768a4f97d194,snowflake,TRUE
+b8a9768a4f97d194,docker,TRUE
+b8a9768a4f97d194,kubernetes,TRUE
+b8a9768a4f97d194,airflow,TRUE
+b8a9768a4f97d194,dbt,TRUE
+96db456138d33d4b,python,TRUE
+96db456138d33d4b,sql,TRUE
+96db456138d33d4b,spark,TRUE
+96db456138d33d4b,databricks,TRUE
+96db456138d33d4b,google cloud,TRUE
+96db456138d33d4b,airflow,TRUE
+96db456138d33d4b,dbt,TRUE
+2cddb003684d9e51,python,TRUE
+2cddb003684d9e51,sql,TRUE
+2cddb003684d9e51,data pipelines,TRUE
+2cddb003684d9e51,databricks,TRUE
+2cddb003684d9e51,azure,TRUE
+2cddb003684d9e51,git,TRUE
+2cddb003684d9e51,dbt,TRUE
+9d1c3026ed8220b2,python,TRUE
+9d1c3026ed8220b2,google cloud,TRUE
+9d1c3026ed8220b2,tensorflow,TRUE
+9d1c3026ed8220b2,git,TRUE
+15888cc39885c9ea,python,TRUE
+15888cc39885c9ea,sql,TRUE
+15888cc39885c9ea,etl,TRUE
+15888cc39885c9ea,aws,TRUE
+15888cc39885c9ea,snowflake,TRUE
+15888cc39885c9ea,dbt,TRUE
+8dd3fdc0618c0f03,sql,TRUE
+8dd3fdc0618c0f03,looker,TRUE
+8dd3fdc0618c0f03,dbt,TRUE
+68bcb2cbe416c9e2,sql,TRUE
+68bcb2cbe416c9e2,excel,TRUE
+68bcb2cbe416c9e2,power bi,TRUE
+68bcb2cbe416c9e2,azure,TRUE
+bcd987f908e76334,python,TRUE
+bcd987f908e76334,sql,TRUE
+bcd987f908e76334,etl,TRUE
+bcd987f908e76334,snowflake,TRUE
+bcd987f908e76334,llm,TRUE
+bcd987f908e76334,airflow,TRUE
+bcd987f908e76334,dbt,TRUE
+4b1c2d6bfa46893b,python,TRUE
+4b1c2d6bfa46893b,data pipelines,TRUE
+d87d664364df21c7,sql,TRUE
+d87d664364df21c7,power bi,TRUE
+d87d664364df21c7,etl,TRUE
+d87d664364df21c7,data pipelines,TRUE
+d87d664364df21c7,spark,TRUE
+d87d664364df21c7,azure,TRUE
+589f2175611730f0,spark,TRUE
+248398accfc7d66a,python,TRUE
+248398accfc7d66a,machine learning,TRUE
+248398accfc7d66a,google cloud,TRUE
+248398accfc7d66a,nlp,TRUE
+248398accfc7d66a,llm,TRUE
+3390bee578f94d0a,python,TRUE
+3390bee578f94d0a,sql,TRUE
+3390bee578f94d0a,r,TRUE
+3390bee578f94d0a,tableau,TRUE
+3390bee578f94d0a,power bi,TRUE
+3390bee578f94d0a,data visualization,TRUE
+3390bee578f94d0a,databricks,TRUE
+fa098b1482a73733,python,TRUE
+fa098b1482a73733,machine learning,TRUE
+fa098b1482a73733,spark,TRUE
+fa098b1482a73733,aws,TRUE
+fa098b1482a73733,pytorch,TRUE
+fa098b1482a73733,llm,TRUE
+79773de98d26f30b,python,TRUE
+79773de98d26f30b,machine learning,TRUE
+79773de98d26f30b,etl,TRUE
+79773de98d26f30b,data pipelines,TRUE
+79773de98d26f30b,docker,TRUE
+79773de98d26f30b,git,TRUE
+b047fd51ddec6a91,python,TRUE
+b047fd51ddec6a91,sql,TRUE
+b047fd51ddec6a91,data pipelines,TRUE
+b047fd51ddec6a91,spark,TRUE
+b047fd51ddec6a91,aws,TRUE
+b047fd51ddec6a91,airflow,TRUE
+fbba4cafb362a1fa,python,TRUE
+fbba4cafb362a1fa,sql,TRUE
+fbba4cafb362a1fa,data pipelines,TRUE
+fbba4cafb362a1fa,aws,TRUE
+fbba4cafb362a1fa,snowflake,TRUE
+e4bd7f3b9ca2c283,python,TRUE
+e4bd7f3b9ca2c283,databricks,TRUE
+e4bd7f3b9ca2c283,snowflake,TRUE
+e63970e3046e096a,python,TRUE
+e63970e3046e096a,sql,TRUE
+e63970e3046e096a,machine learning,TRUE
+e63970e3046e096a,statistics,TRUE
+e63970e3046e096a,aws,TRUE
+e63970e3046e096a,azure,TRUE
+e63970e3046e096a,google cloud,TRUE
+e63970e3046e096a,nlp,TRUE
+e63970e3046e096a,llm,TRUE
+78e2fa43a5f6f22e,python,TRUE
+78e2fa43a5f6f22e,pytorch,TRUE
+78e2fa43a5f6f22e,kubernetes,TRUE
+9aa8811de90597ea,python,TRUE
+9aa8811de90597ea,machine learning,TRUE
+9aa8811de90597ea,deep learning,TRUE
+9aa8811de90597ea,tensorflow,TRUE
+9aa8811de90597ea,pytorch,TRUE
+9aa8811de90597ea,scikit learn,TRUE
+9aa8811de90597ea,docker,TRUE
+9aa8811de90597ea,kubernetes,TRUE
+a8823863aa8c5ceb,python,TRUE
+a8823863aa8c5ceb,excel,TRUE
+df690d9fd33045a7,python,TRUE
+df690d9fd33045a7,sql,TRUE
+f7425e10f35218c1,python,TRUE
+f7425e10f35218c1,sql,TRUE
+f7425e10f35218c1,looker,TRUE
+f7425e10f35218c1,data pipelines,TRUE
+f7425e10f35218c1,snowflake,TRUE
+f7425e10f35218c1,llm,TRUE
+f7425e10f35218c1,dbt,TRUE
+3c0b389c4ea911a7,python,TRUE
+3c0b389c4ea911a7,machine learning,TRUE
+3c0b389c4ea911a7,data pipelines,TRUE
+3c0b389c4ea911a7,pytorch,TRUE
+b97e5635f667fba5,sql,TRUE
+b97e5635f667fba5,dbt,TRUE
+74565f759acb0a69,python,TRUE
+74565f759acb0a69,sql,TRUE
+74565f759acb0a69,r,TRUE
+74565f759acb0a69,tableau,TRUE
+74565f759acb0a69,looker,TRUE
+74565f759acb0a69,machine learning,TRUE
+74565f759acb0a69,data visualization,TRUE
+74565f759acb0a69,data pipelines,TRUE
+9b4d528fa1a10da5,python,TRUE
+9b4d528fa1a10da5,sql,TRUE
+9b4d528fa1a10da5,r,TRUE
+9b4d528fa1a10da5,tableau,TRUE
+9b4d528fa1a10da5,looker,TRUE
+9b4d528fa1a10da5,machine learning,TRUE
+9b4d528fa1a10da5,data visualization,TRUE
+9b4d528fa1a10da5,data pipelines,TRUE
+03c41ee5089d1693,python,TRUE
+03c41ee5089d1693,machine learning,TRUE
+03c41ee5089d1693,deep learning,TRUE
+03c41ee5089d1693,data pipelines,TRUE
+03c41ee5089d1693,tensorflow,TRUE
+03c41ee5089d1693,pytorch,TRUE
+03c41ee5089d1693,nlp,TRUE
+7b5be77ccff08dc3,python,TRUE
+7b5be77ccff08dc3,machine learning,TRUE
+7b5be77ccff08dc3,aws,TRUE
+7b5be77ccff08dc3,azure,TRUE
+7b5be77ccff08dc3,google cloud,TRUE
+7b5be77ccff08dc3,llm,TRUE
+31b797a310aac1a0,python,TRUE
+31b797a310aac1a0,statistics,TRUE
+2ee1ceaf0553d4de,python,TRUE
+2ee1ceaf0553d4de,sql,TRUE
+2ee1ceaf0553d4de,etl,TRUE
+2ee1ceaf0553d4de,data pipelines,TRUE
+2ee1ceaf0553d4de,aws,TRUE
+2ee1ceaf0553d4de,docker,TRUE
+2ee1ceaf0553d4de,kubernetes,TRUE
+2ee1ceaf0553d4de,git,TRUE
+2ee1ceaf0553d4de,airflow,TRUE
+bed1be8fa74c298c,machine learning,TRUE
+bed1be8fa74c298c,aws,TRUE
+bed1be8fa74c298c,azure,TRUE
+bed1be8fa74c298c,google cloud,TRUE
+b657ada4d734e64e,python,TRUE
+b657ada4d734e64e,machine learning,TRUE
+b657ada4d734e64e,aws,TRUE
+b657ada4d734e64e,azure,TRUE
+b657ada4d734e64e,google cloud,TRUE
+08efbab51c900d88,python,TRUE
+08efbab51c900d88,data visualization,TRUE
+08efbab51c900d88,nlp,TRUE
+08efbab51c900d88,llm,TRUE
+3c596a3a9098395f,machine learning,TRUE
+3c596a3a9098395f,llm,TRUE
+c347db9b516873bf,python,TRUE
+d9e21d29389f9333,python,TRUE
+d9e21d29389f9333,machine learning,TRUE
+d9e21d29389f9333,deep learning,TRUE
+d9e21d29389f9333,statistics,TRUE
+d9e21d29389f9333,spark,TRUE
+d9e21d29389f9333,pytorch,TRUE
+d9e21d29389f9333,scikit learn,TRUE
+d9e21d29389f9333,llm,TRUE
+d9e21d29389f9333,airflow,TRUE
+fafde8f7ffbd4329,python,TRUE
+fafde8f7ffbd4329,pytorch,TRUE
+fafde8f7ffbd4329,llm,TRUE
+fafde8f7ffbd4329,kubernetes,TRUE
+618abc7e0f4ae3e8,python,TRUE
+618abc7e0f4ae3e8,sql,TRUE
+618abc7e0f4ae3e8,aws,TRUE
+8a66c9636d6e8803,python,TRUE
+8a66c9636d6e8803,sql,TRUE
+8a66c9636d6e8803,aws,TRUE
+b855f0a35416aa70,python,TRUE
+b855f0a35416aa70,sql,TRUE
+b855f0a35416aa70,statistics,TRUE
+069703904d4ce57a,data pipelines,TRUE
+069703904d4ce57a,spark,TRUE
+069703904d4ce57a,pytorch,TRUE
+069703904d4ce57a,scikit learn,TRUE
+069703904d4ce57a,llm,TRUE
+069703904d4ce57a,dbt,TRUE
+2bd840c84d6a5a9f,python,TRUE
+2bd840c84d6a5a9f,sql,TRUE
+2bd840c84d6a5a9f,r,TRUE
+2bd840c84d6a5a9f,llm,TRUE
+2bd840c84d6a5a9f,generative ai,TRUE
+41b0748741753fc8,python,TRUE
+41b0748741753fc8,sql,TRUE
+41b0748741753fc8,r,TRUE
+41b0748741753fc8,excel,TRUE
+41b0748741753fc8,tableau,TRUE
+41b0748741753fc8,power bi,TRUE
+41b0748741753fc8,looker,TRUE
+7e067ae9e97c887a,python,TRUE
+7e067ae9e97c887a,r,TRUE
+7e067ae9e97c887a,excel,TRUE
+7e067ae9e97c887a,machine learning,TRUE
+7e067ae9e97c887a,statistics,TRUE
+8870abdbdb104f54,excel,TRUE
+8870abdbdb104f54,statistics,TRUE
+88b8bf0b266f18bf,python,TRUE
+88b8bf0b266f18bf,sql,TRUE
+88b8bf0b266f18bf,r,TRUE
+88b8bf0b266f18bf,tableau,TRUE
+88b8bf0b266f18bf,power bi,TRUE
+88b8bf0b266f18bf,data visualization,TRUE
+8ee74f4db21babe8,python,TRUE
+8ee74f4db21babe8,sql,TRUE
+8ee74f4db21babe8,r,TRUE
+8ee74f4db21babe8,machine learning,TRUE
+8ee74f4db21babe8,statistics,TRUE
+8ee74f4db21babe8,airflow,TRUE
+95b218bbded19aa0,machine learning,TRUE
+95b218bbded19aa0,llm,TRUE
+95b218bbded19aa0,generative ai,TRUE
+a11116db67894d23,data pipelines,TRUE
+a11116db67894d23,spark,TRUE
+a11116db67894d23,pytorch,TRUE
+a11116db67894d23,scikit learn,TRUE
+a11116db67894d23,llm,TRUE
+a11116db67894d23,dbt,TRUE
+af04143e2b473c41,statistics,TRUE
+af04143e2b473c41,azure,TRUE
+af04143e2b473c41,llm,TRUE
+af04143e2b473c41,generative ai,TRUE
+b1dd65d825304bd0,sql,TRUE
+b1dd65d825304bd0,excel,TRUE
+b1dd65d825304bd0,tableau,TRUE
+b1dd65d825304bd0,power bi,TRUE
+bdca7adaa28ad506,python,TRUE
+bdca7adaa28ad506,sql,TRUE
+bdca7adaa28ad506,r,TRUE
+bdca7adaa28ad506,statistics,TRUE
+bdca7adaa28ad506,data visualization,TRUE
+c1a0ff4aa6e69942,python,TRUE
+c1a0ff4aa6e69942,sql,TRUE
+c1a0ff4aa6e69942,aws,TRUE
+c1a0ff4aa6e69942,azure,TRUE
+c1a0ff4aa6e69942,google cloud,TRUE
+ce8ff7d84b67596d,sql,TRUE
+ce8ff7d84b67596d,tableau,TRUE
+ce8ff7d84b67596d,power bi,TRUE
+cf4b58acaddfe62c,python,TRUE
+cf4b58acaddfe62c,machine learning,TRUE
+cf4b58acaddfe62c,data pipelines,TRUE
+dc3c3898f182e383,r,TRUE
+dc3c3898f182e383,machine learning,TRUE
+51faa3e0ed365a95,sql,TRUE
+41326bfdb98d545d,python,TRUE
+41326bfdb98d545d,sql,TRUE
+41326bfdb98d545d,data pipelines,TRUE
+41326bfdb98d545d,aws,TRUE
+41326bfdb98d545d,google cloud,TRUE
+41326bfdb98d545d,snowflake,TRUE
+41326bfdb98d545d,docker,TRUE
+41326bfdb98d545d,kubernetes,TRUE
+41326bfdb98d545d,airflow,TRUE
+41326bfdb98d545d,dbt,TRUE
+a4c826b0f1f94652,python,TRUE
+a4c826b0f1f94652,sql,TRUE
+a4c826b0f1f94652,machine learning,TRUE
+a4c826b0f1f94652,statistics,TRUE
+a4c826b0f1f94652,snowflake,TRUE
+1fbbc86d055cb00f,python,TRUE
+1fbbc86d055cb00f,sql,TRUE
+1fbbc86d055cb00f,machine learning,TRUE
+1fbbc86d055cb00f,statistics,TRUE
+1fbbc86d055cb00f,snowflake,TRUE
+1fbbc86d055cb00f,scikit learn,TRUE
+1fbbc86d055cb00f,nlp,TRUE
+1fbbc86d055cb00f,docker,TRUE
+1fbbc86d055cb00f,airflow,TRUE
+1fbbc86d055cb00f,dbt,TRUE
+fd196ecc84bcb506,python,TRUE
+fd196ecc84bcb506,excel,TRUE
+b69d0eefffb2061f,python,TRUE
+b69d0eefffb2061f,sql,TRUE
+b69d0eefffb2061f,machine learning,TRUE
+1969e54cb76ff282,python,TRUE
+1969e54cb76ff282,snowflake,TRUE
+1969e54cb76ff282,llm,TRUE
+1969e54cb76ff282,dbt,TRUE
+ec09bd397bb2e4bd,python,TRUE
+ec09bd397bb2e4bd,sql,TRUE
+ec09bd397bb2e4bd,tableau,TRUE
+ec09bd397bb2e4bd,looker,TRUE
+ec09bd397bb2e4bd,statistics,TRUE
+ec09bd397bb2e4bd,data pipelines,TRUE
+ec09bd397bb2e4bd,databricks,TRUE
+ec09bd397bb2e4bd,git,TRUE
+4aca3f1b9f851c66,python,TRUE
+4aca3f1b9f851c66,sql,TRUE
+4aca3f1b9f851c66,machine learning,TRUE
+4aca3f1b9f851c66,statistics,TRUE
+4aca3f1b9f851c66,spark,TRUE
+4aca3f1b9f851c66,databricks,TRUE
+4aca3f1b9f851c66,tensorflow,TRUE
+4aca3f1b9f851c66,pytorch,TRUE
+4aca3f1b9f851c66,scikit learn,TRUE
+4aca3f1b9f851c66,git,TRUE
+4aca3f1b9f851c66,airflow,TRUE
+05dca00806c528ac,python,TRUE
+05dca00806c528ac,sql,TRUE
+05dca00806c528ac,spark,TRUE
+05dca00806c528ac,aws,TRUE
+05dca00806c528ac,dbt,TRUE
+066a1df7daac45b9,python,TRUE
+066a1df7daac45b9,sql,TRUE
+02d6d7c9b9cd038f,machine learning,TRUE
+ece9c9c38b8dfa06,python,TRUE
+ece9c9c38b8dfa06,machine learning,TRUE
+ece9c9c38b8dfa06,tensorflow,TRUE
+ece9c9c38b8dfa06,pytorch,TRUE
+ece9c9c38b8dfa06,nlp,TRUE
+ece9c9c38b8dfa06,llm,TRUE
+ece9c9c38b8dfa06,generative ai,TRUE
+fe9f42a9c622892f,python,TRUE
+fe9f42a9c622892f,machine learning,TRUE
+fe9f42a9c622892f,statistics,TRUE
+cf84057002ae5fd7,python,TRUE
+cf84057002ae5fd7,sql,TRUE
+cf84057002ae5fd7,machine learning,TRUE
+cf84057002ae5fd7,statistics,TRUE
+cf84057002ae5fd7,databricks,TRUE
+cf84057002ae5fd7,aws,TRUE
+cf84057002ae5fd7,nlp,TRUE
+cf84057002ae5fd7,llm,TRUE
+cf84057002ae5fd7,generative ai,TRUE
+cf84057002ae5fd7,dbt,TRUE
+065bd621f2dcc779,python,TRUE
+065bd621f2dcc779,sql,TRUE
+065bd621f2dcc779,machine learning,TRUE
+065bd621f2dcc779,statistics,TRUE
+065bd621f2dcc779,etl,TRUE
+065bd621f2dcc779,llm,TRUE
+065bd621f2dcc779,dbt,TRUE
+777bd13e4ef6ebd8,python,TRUE
+777bd13e4ef6ebd8,sql,TRUE
+777bd13e4ef6ebd8,etl,TRUE
+777bd13e4ef6ebd8,data pipelines,TRUE
+777bd13e4ef6ebd8,aws,TRUE
+777bd13e4ef6ebd8,snowflake,TRUE
+777bd13e4ef6ebd8,dbt,TRUE
+478f34bf314b8964,python,TRUE
+478f34bf314b8964,sql,TRUE
+478f34bf314b8964,data pipelines,TRUE
+478f34bf314b8964,databricks,TRUE
+478f34bf314b8964,snowflake,TRUE
+478f34bf314b8964,dbt,TRUE
+2c9fbe83a2430796,python,TRUE
+2c9fbe83a2430796,sql,TRUE
+2c9fbe83a2430796,statistics,TRUE
+2c9fbe83a2430796,etl,TRUE
+2c9fbe83a2430796,data pipelines,TRUE
+2c9fbe83a2430796,spark,TRUE
+2c9fbe83a2430796,databricks,TRUE
+2c9fbe83a2430796,aws,TRUE
+2c9fbe83a2430796,azure,TRUE
+2c9fbe83a2430796,google cloud,TRUE
+2c9fbe83a2430796,git,TRUE
+2c9fbe83a2430796,airflow,TRUE
+96f6e6e05f9fac1e,python,TRUE
+96f6e6e05f9fac1e,sql,TRUE
+96f6e6e05f9fac1e,excel,TRUE
+96f6e6e05f9fac1e,etl,TRUE
+97658b3717f14112,sql,TRUE
+97658b3717f14112,excel,TRUE
+97658b3717f14112,tableau,TRUE
+97658b3717f14112,statistics,TRUE
+97658b3717f14112,etl,TRUE
+43f69aa616ce6288,python,TRUE
+43f69aa616ce6288,sql,TRUE
+43f69aa616ce6288,git,TRUE
+cbf2b502db1a5815,sql,TRUE
+cbf2b502db1a5815,machine learning,TRUE
+cbf2b502db1a5815,aws,TRUE
+cbf2b502db1a5815,azure,TRUE
+cbf2b502db1a5815,google cloud,TRUE
+cbf2b502db1a5815,kubernetes,TRUE
+6c7285d89d7b85f0,python,TRUE
+6c7285d89d7b85f0,sql,TRUE
+6c7285d89d7b85f0,tableau,TRUE
+6c7285d89d7b85f0,data pipelines,TRUE
+6c7285d89d7b85f0,azure,TRUE
+6c7285d89d7b85f0,llm,TRUE
+6c7285d89d7b85f0,git,TRUE
+6c7285d89d7b85f0,dbt,TRUE
+23893aa816984acf,python,TRUE
+23893aa816984acf,sql,TRUE
+23893aa816984acf,machine learning,TRUE
+23893aa816984acf,statistics,TRUE
+23893aa816984acf,data visualization,TRUE
+23893aa816984acf,databricks,TRUE
+23893aa816984acf,azure,TRUE
+23893aa816984acf,snowflake,TRUE
+7b35b95531589e2d,python,TRUE
+7b35b95531589e2d,machine learning,TRUE
+7b35b95531589e2d,etl,TRUE
+7b35b95531589e2d,tensorflow,TRUE
+7b35b95531589e2d,pytorch,TRUE
+7b35b95531589e2d,scikit learn,TRUE
+7b35b95531589e2d,llm,TRUE
+7b35b95531589e2d,docker,TRUE
+7b35b95531589e2d,kubernetes,TRUE
+7522b8656706ebab,python,TRUE
+7522b8656706ebab,sql,TRUE
+7522b8656706ebab,data pipelines,TRUE
+7522b8656706ebab,dbt,TRUE
+053446e63e265657,python,TRUE
+053446e63e265657,machine learning,TRUE
+c6ed0fe0505ce87f,python,TRUE
+c6ed0fe0505ce87f,sql,TRUE
+c6ed0fe0505ce87f,machine learning,TRUE
+c6ed0fe0505ce87f,statistics,TRUE
+c6ed0fe0505ce87f,data pipelines,TRUE
+c6ed0fe0505ce87f,aws,TRUE
+c6ed0fe0505ce87f,scikit learn,TRUE
+c6ed0fe0505ce87f,llm,TRUE
+c6ed0fe0505ce87f,generative ai,TRUE
+c6ed0fe0505ce87f,dbt,TRUE
+9178a1abec5e0b4e,python,TRUE
+9178a1abec5e0b4e,sql,TRUE
+9178a1abec5e0b4e,machine learning,TRUE
+9178a1abec5e0b4e,statistics,TRUE
+9178a1abec5e0b4e,data pipelines,TRUE
+9178a1abec5e0b4e,aws,TRUE
+9178a1abec5e0b4e,scikit learn,TRUE
+9178a1abec5e0b4e,llm,TRUE
+9178a1abec5e0b4e,generative ai,TRUE
+9178a1abec5e0b4e,dbt,TRUE
+5c5c644e96ffa3ee,python,TRUE
+5c5c644e96ffa3ee,sql,TRUE
+5c5c644e96ffa3ee,etl,TRUE
+5c5c644e96ffa3ee,data pipelines,TRUE
+5c5c644e96ffa3ee,dbt,TRUE
+3a791793a640643b,excel,TRUE
+f60debcf07bb8000,python,TRUE
+f60debcf07bb8000,sql,TRUE
+f60debcf07bb8000,machine learning,TRUE
+f60debcf07bb8000,statistics,TRUE
+f60debcf07bb8000,snowflake,TRUE
+f60debcf07bb8000,scikit learn,TRUE
+f60debcf07bb8000,llm,TRUE
+90f3406b535a2924,sql,TRUE
+90f3406b535a2924,data pipelines,TRUE
+90f3406b535a2924,dbt,TRUE
+02d0c44b97b2c5fd,python,TRUE
+02d0c44b97b2c5fd,sql,TRUE
+02d0c44b97b2c5fd,spark,TRUE
+02d0c44b97b2c5fd,databricks,TRUE
+21a64c0cd4091b84,sql,TRUE
+21a64c0cd4091b84,snowflake,TRUE
+54cbc72f69f80766,python,TRUE
+54cbc72f69f80766,sql,TRUE
+54cbc72f69f80766,data visualization,TRUE
+54cbc72f69f80766,databricks,TRUE
+54cbc72f69f80766,azure,TRUE
+54cbc72f69f80766,git,TRUE
+81a2b04c05ea0b2a,python,TRUE
+81a2b04c05ea0b2a,machine learning,TRUE
+81a2b04c05ea0b2a,statistics,TRUE
+81a2b04c05ea0b2a,snowflake,TRUE
+e6dd15d38469d0f8,python,TRUE
+e6dd15d38469d0f8,azure,TRUE
+e6dd15d38469d0f8,llm,TRUE
+e82a43b1068dfa63,python,TRUE
+e82a43b1068dfa63,sql,TRUE
+e82a43b1068dfa63,r,TRUE
+e82a43b1068dfa63,power bi,TRUE
+e82a43b1068dfa63,looker,TRUE
+e82a43b1068dfa63,statistics,TRUE
+e82a43b1068dfa63,aws,TRUE
+e82a43b1068dfa63,azure,TRUE
+e82a43b1068dfa63,google cloud,TRUE
+f3141ef50828db1c,excel,TRUE
