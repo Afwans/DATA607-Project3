@@ -1,0 +1,1225 @@
+---
+title: "DATA 607 Project 3: Dataset 1 Documentation"
+subtitle: "Data Science Skills Demand and Salary Analysis"
+author: "DATA 607 Project 3 Team"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE
+)
+
+library(readr)
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(knitr)
+```
+
+# 1. Project Overview
+
+## Research Question
+
+**Which data science skills are most in demand, and how do those skills relate to advertised salaries?**
+
+The purpose of Dataset 1 is to identify technical skills frequently mentioned in data science-related job postings and investigate their relationship with advertised annual salaries.
+
+We used R to clean the original dataset, classify relevant occupations, extract technical skills, analyze salary ranges, compare job categories, and validate the results.
+
+## Dataset Summary
+
+| Measure | Result |
+|---|---:|
+| Original job postings | 9,173 |
+| Original columns | 27 |
+| Potentially relevant postings | 892 |
+| Initially included postings | 232 |
+| Exclusions after initial validation | 3 |
+| Additional exclusions after review | 3 |
+| Revised skill-analysis sample | 226 |
+| Revised USD salary sample | 178 |
+| Technical skills tracked | 30 |
+| Median advertised salary midpoint | $165,000 |
+| Unresolved candidate postings | 627 |
+
+Our revised analysis includes 226 selected postings for skill demand and 178 eligible USD postings for salary analysis.
+
+These results are descriptive and provisional. They should not be interpreted as representative estimates of the entire data science labor market.
+
+# 2. Project Organization
+
+The project uses a sequence of R scripts:
+
+- `01_explore_jobs.R`
+- `02_clean_jobs.R`
+- `03_validate_jobs.R`
+- `04_refine_jobs.R`
+- `05_review_classification.R`
+- `06_finalize_job_classification.R`
+- `07_improve_job_classification.R`
+- `08_validate_classification.R`
+- `09_analyze_skills.R`
+- `10_analyze_skill_salaries.R`
+- `11_analyze_job_categories.R`
+- `12_validate_results.R`
+- `12B_review_exceptions.R`
+- `12C_apply_review_decisions.R`
+- `13_normalize_dataset.R` (relational database export)
+
+The original dataset, intermediate CSV files, validation files, and charts are stored in the `Data/` folder.
+
+The original analysis outputs are preserved separately from the revised results.
+
+# 3. Step 01: Explore Original Job Postings
+
+**Script:** `01_explore_jobs.R`
+
+## Objective
+
+Understand the structure, contents, and quality of the original job-postings dataset.
+
+## Input
+
+`Data/job_postings_with_salaries.csv`
+
+## Methods
+
+We examined:
+
+- Total rows and columns
+- Column names and data types
+- Missing values
+- Job titles and descriptions
+- Minimum and maximum advertised salaries
+- Salary currencies
+
+## Results
+
+The original dataset contained 9,173 postings and 27 columns.
+
+A total of 9,155 records had complete, valid annual salary values.
+
+| Currency | Records |
+|---|---:|
+| USD | 7,796 |
+| EUR | 527 |
+| CAD | 499 |
+| GBP | 254 |
+| AUD | 57 |
+| PLN | 26 |
+| NZD | 10 |
+| CHF | 4 |
+
+We decided not to combine salaries from different currencies without conversion.
+
+# 4. Step 02: Clean Job Postings
+
+**Script:** `02_clean_jobs.R`
+
+## Objective
+
+Clean the original dataset and identify potentially relevant data science jobs.
+
+## Methods
+
+We standardized text, checked identifiers, examined salary information, and created indicators for valid and eligible salaries.
+
+USD salary ranges were flagged as potential outliers when the minimum salary was below $30,000 or the maximum salary exceeded $400,000.
+
+A total of 203 records were flagged by this rule.
+
+We also searched titles, departments, and descriptions for data science-related terminology.
+
+## Results
+
+The screening process identified 892 potentially relevant postings.
+
+## Outputs
+
+- `job_postings_cleaned.csv`
+- `job_postings_data_science.csv`
+- `job_postings_review.csv`
+- `job_titles_summary.csv`
+
+The preliminary `skill_count` variable created during cleaning was not used as the final technical-skill measure.
+
+# 5. Step 03: Initial Manual Validation
+
+**Script:** `03_validate_jobs.R`
+
+## Objective
+
+Evaluate whether the initial screening rules correctly identified relevant occupations.
+
+## Methods
+
+We generated a sample of 30 postings and prepared a review template containing titles, descriptions, and classification fields.
+
+The purpose was to identify false positives, such as general software engineering positions mentioning Python without primarily involving data science.
+
+## Outputs
+
+- `job_review_sample.csv`
+- `job_manual_review.csv`
+
+The initial review template was not fully completed, so this step was primarily review preparation.
+
+# 6. Step 04: Refine Job Classification
+
+**Script:** `04_refine_jobs.R`
+
+## Objective
+
+Separate clearly relevant, uncertain, and unrelated postings.
+
+## Results
+
+| Classification | Jobs |
+|---|---:|
+| Likely Relevant | 301 |
+| Needs Review | 557 |
+| Likely Unrelated | 34 |
+| Total | 892 |
+
+The classifications were generated using job titles and contextual rules.
+
+These were preliminary rule-based labels.
+
+## Outputs
+
+- `job_postings_refined_all.csv`
+- `job_postings_relevant.csv`
+- `job_postings_uncertain.csv`
+
+# 7. Step 05: Review Classification Errors
+
+**Script:** `05_review_classification.R`
+
+## Objective
+
+Investigate potential false positives and false negatives.
+
+## Methods
+
+We created diagnostic queues for jobs that might have been classified incorrectly.
+
+## Results
+
+- 80 possible false positives
+- 557 uncertain potential false negatives
+
+## Outputs
+
+- `possible_false_positives.csv`
+- `possible_false_negatives.csv`
+
+These files helped identify weaknesses in broad keyword matching.
+
+# 8. Step 06: Finalize Initial Classification
+
+**Script:** `06_finalize_job_classification.R`
+
+## Objective
+
+Apply stricter occupation-based classification rules.
+
+## Methods
+
+We developed patterns for:
+
+- Data Science
+- Data Analytics
+- Data Engineering
+- AI and Machine Learning
+- Business Intelligence
+- Statistics
+- Database Management
+
+## Results
+
+| Classification | Jobs |
+|---|---:|
+| Include | 213 |
+| Review | 646 |
+| Exclude | 33 |
+| Total | 892 |
+
+Among the 213 provisionally included jobs, 164 had eligible USD salary information.
+
+## Outputs
+
+- `jobs_classified_all.csv`
+- `jobs_include_provisional.csv`
+- `jobs_manual_review_queue.csv`
+
+# 9. Step 07: Improve Classification
+
+**Script:** `07_improve_job_classification.R`
+
+## Objective
+
+Identify relevant specialized occupations missed by the earlier classification rules.
+
+## Methods
+
+We expanded patterns to include roles such as:
+
+- MLOps Engineer
+- LLM Engineer
+- Generative AI Engineer
+- Data Platform Engineer
+- Data Infrastructure Engineer
+- Analytics Director
+- Biostatistics-related positions
+
+## Results
+
+| Classification | Jobs |
+|---|---:|
+| Include | 232 |
+| Review | 627 |
+| Exclude | 33 |
+| Total | 892 |
+
+### Distribution of Provisionally Included Jobs
+
+| Category | Jobs |
+|---|---:|
+| AI/ML | 63 |
+| Data Engineering | 55 |
+| Data Analytics | 49 |
+| Data Science | 41 |
+| Statistics | 10 |
+| Database | 8 |
+| Business Intelligence | 6 |
+| Total | 232 |
+
+## Outputs
+
+- `jobs_classified_updated.csv`
+- `jobs_include_updated.csv`
+- `jobs_review_remaining.csv`
+
+# 10. Step 08: Validate Included Jobs
+
+**Script:** `08_validate_classification.R`
+
+## Objective
+
+Evaluate the relevance of the updated inclusion rules.
+
+## Methods
+
+We prepared a validation sample containing 19 newly included jobs and 30 randomly selected previously included jobs.
+
+## Results
+
+| Decision | Jobs |
+|---|---:|
+| Relevant | 46 |
+| Not Relevant | 3 |
+| Total | 49 |
+
+The three excluded postings were:
+
+1. Artificial Intelligence & Machine Learning, AVP
+2. Manager, Product Owner - AI/ML & Market Insights
+3. Data Annotation Specialist - Computer Vision
+
+The observed relevant proportion was:
+
+```{r initial-validation-rate}
+46 / 49 * 100
+```
+
+Approximately 93.9% of the reviewed sample was classified as relevant.
+
+However, this was not a fully random validation sample. The percentage should not be interpreted as the overall accuracy of the classifier.
+
+## Outputs
+
+- `jobs_validation_sample.csv`
+- `jobs_validation_reviewed.csv`
+
+# 11. Step 09: Initial Technical Skill Analysis
+
+**Script:** `09_analyze_skills.R`
+
+## Objective
+
+Determine which technical skills appeared most frequently in selected postings.
+
+## Methods
+
+We began with 232 provisionally included jobs and excluded the three postings identified during initial validation.
+
+This produced an initial analysis sample of 229 jobs.
+
+We defined 30 regular-expression skill indicators and searched job descriptions for technical skill mentions.
+
+Each job was counted at most once per skill.
+
+The initial analysis produced 1,142 job-skill matches.
+
+## Initial Results
+
+| Skill | Jobs | Percentage |
+|---|---:|---:|
+| Python | 163 | 71.2% |
+| SQL | 133 | 58.1% |
+| Machine Learning | 74 | 32.3% |
+| LLM | 60 | 26.2% |
+| Statistics | 55 | 24.0% |
+| Data Pipelines | 54 | 23.6% |
+| dbt | 51 | 22.3% |
+| AWS | 47 | 20.5% |
+| Snowflake | 38 | 16.6% |
+| Databricks | 33 | 14.4% |
+
+These are historical results from the 229-job sample. The revised findings appear in Step 12C.
+
+## Technical Correction
+
+During development, `pivot_longer()` initially produced an error because a numeric `skill_count` column was included with logical skill indicators.
+
+We corrected this by excluding the numeric column before reshaping.
+
+## Outputs
+
+- `jobs_skills_analyzed.csv`
+- `job_skills_long.csv`
+- `skill_demand_summary.csv`
+- `top_15_skills.png`
+
+# 12. Step 10: Initial Skill and Salary Analysis
+
+**Script:** `10_analyze_skill_salaries.R`
+
+## Objective
+
+Investigate the relationship between technical skill mentions and advertised annual salaries.
+
+## Methods
+
+We selected postings with eligible USD salary information and valid annual minimum and maximum salary values.
+
+The initial salary sample contained 180 postings.
+
+For each posting, the advertised salary midpoint was calculated as:
+
+\[
+\text{Salary Midpoint} =
+\frac{\text{Minimum Salary}+\text{Maximum Salary}}{2}
+\]
+
+## Initial Results
+
+The overall median advertised annual salary midpoint was $165,000.
+
+| Skill | Salary Jobs | Median Salary |
+|---|---:|---:|
+| Generative AI | 15 | $196,500 |
+| PyTorch | 23 | $195,050 |
+| Deep Learning | 13 | $193,300 |
+| LLM | 51 | $190,900 |
+| Kubernetes | 15 | $185,000 |
+| Machine Learning | 59 | $182,200 |
+| Data Pipelines | 42 | $182,025 |
+
+We also compared median salaries for postings mentioning each skill against postings not mentioning that skill.
+
+These comparisons were unadjusted descriptive associations, not causal salary premiums.
+
+## Outputs
+
+- `jobs_salary_analysis.csv`
+- `skill_salary_summary.csv`
+- `skill_salary_comparison.csv`
+- `skill_salary_chart.png`
+
+# 13. Step 11: Initial Job Category Analysis
+
+**Script:** `11_analyze_job_categories.R`
+
+## Objective
+
+Examine salary differences across job categories and investigate whether occupation type influences skill-salary relationships.
+
+## Initial Results
+
+| Category | Jobs | Median Salary |
+|---|---:|---:|
+| AI/ML | 51 | $190,000 |
+| Data Science | 28 | $188,250 |
+| Statistics | 10 | $179,500 |
+| Data Engineering | 40 | $170,000 |
+| Database | 7 | $152,500 |
+| Data Analytics | 40 | $118,750 |
+| Business Intelligence | 4 | $114,213 |
+
+Within the Data Analytics category, postings mentioning SQL had a median salary midpoint of $125,000, compared with $112,500 for postings not mentioning SQL.
+
+This illustrates why overall salary comparisons can differ from within-category comparisons.
+
+## Outputs
+
+- `job_category_salary_summary.csv`
+- `category_skill_salary_summary.csv`
+- `job_category_salary_chart.png`
+
+# 14. Step 12: Validate Analysis Results
+
+**Script:** `12_validate_results.R`
+
+## Objective
+
+Check the quality and consistency of the skill and salary datasets.
+
+## Validation Results
+
+| Check | Result |
+|---|---:|
+| Initial skill-analysis jobs | 229 |
+| Initial salary-analysis jobs | 180 |
+| Duplicate job IDs | 0 |
+| Repeated title/company rows | 8 |
+| Jobs with zero detected tracked skills | 9 |
+| Missing logical skill indicators | 0 |
+| Invalid salary ranges | 0 |
+| Salary midpoint mismatches | 0 |
+| Non-USD records in salary sample | 0 |
+
+The repeated title/company records represented four pairs of postings.
+
+These were retained because they appeared to represent distinct advertised openings, including location-specific postings.
+
+## Salary Distribution
+
+The initial salary-analysis sample had:
+
+| Statistic | Value |
+|---|---:|
+| Minimum | $39,000 |
+| First Quartile | $122,500 |
+| Median | $165,000 |
+| Mean | $166,753 |
+| Third Quartile | $201,150 |
+| Maximum | $338,000 |
+
+The seniority field was predominantly classified as Unknown, limiting our ability to make reliable seniority-adjusted comparisons.
+
+# 15. Step 12B: Review Classification Exceptions
+
+**Script:** `12B_review_exceptions.R`
+
+## Objective
+
+Review the nine jobs with no detected tracked skills and determine whether they belong in the selected occupational sample.
+
+## Review Decisions
+
+| Job | Final Decision |
+|---|---|
+| Senior Quantitative Researcher | Include |
+| Applied AI Engineer, GTM | Exclude |
+| Informatics Analyst | Include |
+| Manager, Marketing Analytics | Include |
+| Data Analytics Manager | Include |
+| Data Scientist - Sensor Technician | Exclude |
+| Lead Engineer, Testing and Qualification | Exclude |
+| Senior Staff Data Scientist | Include |
+| Business Information Data Architect | Include |
+
+Six postings were retained and three were excluded.
+
+The three excluded jobs primarily involved go-to-market operations, sensor systems, or engineering testing outside our selected occupational scope.
+
+The retained jobs involved relevant research, analytics, informatics, or data architecture responsibilities.
+
+## Important Observation
+
+Having zero matches among our tracked skills does not necessarily mean a posting is unrelated to data science.
+
+It can also indicate that the job description uses terminology not captured by our regular-expression dictionary.
+
+## Review Output
+
+`validation_manual_review_sheet_completed.csv`
+
+# 16. Step 12C: Apply Reviewed Decisions
+
+**Script:** `12C_apply_review_decisions.R`
+
+## Objective
+
+Apply the three additional exclusions and recompute the analysis using a revised sample.
+
+## Revised Sample
+
+| Measure | Original | Revised |
+|---|---:|---:|
+| Skill-analysis jobs | 229 | 226 |
+| Salary-analysis jobs | 180 | 178 |
+| Median salary midpoint | $165,000 | $165,000 |
+
+The additional exclusions did not change the overall median salary midpoint.
+
+The original files were preserved, and revised datasets were created separately.
+
+## 16.1 Revised Skill Demand
+
+The following code reads the revised skill-demand results.
+
+```{r revised-skill-demand}
+skill_demand_revised <- read_csv(
+  "Data/skill_demand_revised.csv",
+  show_col_types = FALSE
+)
+
+skill_demand_revised %>%
+  slice_head(n = 15) %>%
+  mutate(
+    skill = str_replace_all(skill, "_", " ")
+  ) %>%
+  kable(
+    caption = "Top 15 Technical Skills - Revised Sample"
+  )
+```
+
+### Revised Skill Demand Findings
+
+| Skill | Jobs | Percentage |
+|---|---:|---:|
+| Python | 163 | 72.1% |
+| SQL | 133 | 58.8% |
+| Machine Learning | 74 | 32.7% |
+| LLM | 60 | 26.5% |
+| Statistics | 55 | 24.3% |
+| Data Pipelines | 54 | 23.9% |
+| dbt | 51 | 22.6% |
+| AWS | 47 | 20.8% |
+| Snowflake | 38 | 16.8% |
+| Databricks | 33 | 14.6% |
+
+Python and SQL remained the two most frequently mentioned skills.
+
+The skill counts were unchanged because the three excluded postings contained no detected tracked skills.
+
+The percentages increased slightly because the denominator decreased from 229 to 226.
+
+### Revised Skill Demand Chart
+
+```{r revised-skill-chart, fig.width=10, fig.height=7}
+skill_demand_revised %>%
+  slice_max(
+    job_count,
+    n = 15,
+    with_ties = FALSE
+  ) %>%
+  mutate(
+    skill = str_replace_all(skill, "_", " ")
+  ) %>%
+  ggplot(
+    aes(
+      x = reorder(skill, job_count),
+      y = job_count
+    )
+  ) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Top 15 Technical Skills - Revised Sample",
+    x = "Technical Skill",
+    y = "Number of Job Postings"
+  ) +
+  theme_minimal()
+```
+
+## 16.2 Revised Salary Analysis
+
+The revised salary sample contains 178 eligible USD postings.
+
+```{r revised-salary-summary}
+salary_summary_revised <- read_csv(
+  "Data/salary_summary_revised.csv",
+  show_col_types = FALSE
+)
+
+salary_summary_revised %>%
+  mutate(
+    across(
+      c(
+        mean_salary,
+        median_salary,
+        min_salary,
+        max_salary
+      ),
+      ~ dollar(.x)
+    )
+  ) %>%
+  kable(
+    caption = "Revised Overall Salary Summary"
+  )
+```
+
+The median advertised annual salary midpoint remained $165,000.
+
+### Revised Salary by Skill
+
+```{r revised-skill-salary-table}
+skill_salary_revised <- read_csv(
+  "Data/skill_salary_revised.csv",
+  show_col_types = FALSE
+)
+
+skill_salary_revised %>%
+  filter(job_count >= 10) %>%
+  arrange(desc(median_salary)) %>%
+  mutate(
+    skill = str_replace_all(skill, "_", " "),
+    median_salary = dollar(median_salary),
+    mean_salary = dollar(mean_salary)
+  ) %>%
+  kable(
+    caption = "Revised Median Advertised Salary by Skill"
+  )
+```
+
+### Selected Revised Results
+
+| Skill | Jobs | Median Salary |
+|---|---:|---:|
+| Generative AI | 15 | $196,500 |
+| PyTorch | 23 | $195,050 |
+| Deep Learning | 13 | $193,300 |
+| LLM | 51 | $190,900 |
+| Kubernetes | 15 | $185,000 |
+| Machine Learning | 59 | $182,200 |
+| Data Pipelines | 42 | $182,025 |
+| Python | 131 | $165,000 |
+| SQL | 105 | $152,500 |
+| Tableau | 26 | $123,750 |
+| Power BI | 20 | $112,170 |
+| Excel | 19 | $107,016 |
+
+These findings suggest that specialized AI-related skills appeared in postings with relatively high advertised salary midpoints.
+
+However, they do not establish that possessing these skills causes higher salaries.
+
+### Revised Skill Salary Chart
+
+```{r revised-skill-salary-chart, fig.width=10, fig.height=7}
+skill_salary_revised %>%
+  filter(job_count >= 10) %>%
+  slice_max(
+    median_salary,
+    n = 15,
+    with_ties = FALSE
+  ) %>%
+  mutate(
+    skill = str_replace_all(skill, "_", " ")
+  ) %>%
+  ggplot(
+    aes(
+      x = reorder(skill, median_salary),
+      y = median_salary
+    )
+  ) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  scale_y_continuous(
+    labels = label_dollar()
+  ) +
+  labs(
+    title = "Median Salary by Technical Skill",
+    subtitle = "Revised sample - Skills with at least 10 salary postings",
+    x = "Technical Skill",
+    y = "Median Annual Salary Midpoint (USD)"
+  ) +
+  theme_minimal()
+```
+
+## 16.3 Revised Salary by Job Category
+
+```{r revised-category-salary-table}
+category_salary_revised <- read_csv(
+  "Data/category_salary_revised.csv",
+  show_col_types = FALSE
+)
+
+category_salary_revised %>%
+  mutate(
+    median_salary = dollar(median_salary),
+    mean_salary = dollar(mean_salary)
+  ) %>%
+  kable(
+    caption = "Revised Salary by Job Category"
+  )
+```
+
+### Revised Category Results
+
+| Category | Jobs | Median Salary |
+|---|---:|---:|
+| Data Science | 27 | $196,500 |
+| AI/ML | 50 | $191,250 |
+| Statistics | 10 | $179,500 |
+| Data Engineering | 40 | $170,000 |
+| Database | 7 | $152,500 |
+| Data Analytics | 40 | $118,750 |
+| Business Intelligence | 4 | $114,213 |
+
+Data Science had the highest median advertised salary midpoint in the revised sample, followed by AI/ML.
+
+These comparisons are sensitive to job composition and sample size.
+
+### Revised Category Salary Chart
+
+```{r revised-category-salary-chart, fig.width=10, fig.height=6}
+category_salary_revised %>%
+  ggplot(
+    aes(
+      x = reorder(
+        job_category_updated,
+        median_salary
+      ),
+      y = median_salary
+    )
+  ) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  scale_y_continuous(
+    labels = label_dollar()
+  ) +
+  labs(
+    title = "Median Advertised Salary by Job Category",
+    subtitle = "Revised Salary Sample",
+    x = "Job Category",
+    y = "Median Annual Salary Midpoint (USD)"
+  ) +
+  theme_minimal()
+```
+
+## 16.4 Revised Data Quality Checks
+
+```{r revised-validation-checks}
+jobs_revised <- read_csv(
+  "Data/jobs_skills_revised.csv",
+  show_col_types = FALSE
+)
+
+salary_revised <- read_csv(
+  "Data/jobs_salary_revised.csv",
+  show_col_types = FALSE
+)
+
+comparison <- read_csv(
+  "Data/validation_original_vs_revised.csv",
+  show_col_types = FALSE
+)
+
+stopifnot(
+  nrow(jobs_revised) == 226,
+  nrow(salary_revised) == 178,
+  anyDuplicated(jobs_revised$job_id) == 0,
+  anyDuplicated(salary_revised$job_id) == 0
+)
+
+comparison %>%
+  kable(
+    caption = "Original vs Revised Analysis"
+  )
+```
+
+## 16.5 Validation Conclusion
+
+The additional review improved the occupational relevance of our selected sample.
+
+Removing three unrelated postings did not change the overall median salary midpoint or the ranking of the most frequently mentioned technical skills.
+
+The results remained stable under this limited exclusion sensitivity check.
+
+However, this does not establish that the full classification process or skill extraction dictionary is accurate.
+
+# 17. Research Findings
+
+## Finding 1: Python and SQL Are Most Frequently Mentioned
+
+Python appeared in 163 of 226 selected postings, representing 72.1%.
+
+SQL appeared in 133 postings, representing 58.8%.
+
+These were the two most frequently detected technical skills in the revised sample.
+
+## Finding 2: Specialized AI Skills Appear in Higher-Salary Postings
+
+Generative AI, PyTorch, Deep Learning, and LLMs appeared in postings with relatively high median advertised salary midpoints.
+
+For example:
+
+- Generative AI: $196,500
+- PyTorch: $195,050
+- Deep Learning: $193,300
+- LLM: $190,900
+
+These are descriptive associations within the selected sample.
+
+## Finding 3: Job Category Matters
+
+Data Science and AI/ML postings had higher median salary midpoints than Data Analytics and Business Intelligence postings.
+
+This suggests that occupational composition is an important consideration when interpreting skill-salary relationships.
+
+## Finding 4: Overall Skill Comparisons Can Be Misleading
+
+The initial analysis found a negative overall salary difference for SQL mentions.
+
+However, within the Data Analytics category, SQL-mentioning postings had a higher median salary midpoint.
+
+This demonstrates that relationships observed across all jobs may differ from relationships observed within particular occupations.
+
+## Finding 5: Machine Learning Salary Associations Vary Within Job Categories
+
+Comparing salary-eligible postings within the same job category reveals that a machine learning mention does not consistently correspond to a higher advertised salary midpoint. The following results were verified using `jobs_skills_revised.csv` and the 178 eligible USD salary records.
+
+| Job Category | Jobs Without ML | Median Without ML | Jobs With ML | Median With ML |
+|---|---:|---:|---:|---:|
+| AI/ML | 21 | $183,550 | 29 | $192,500 |
+| Data Analytics | 34 | $117,750 | 6 | $154,910 |
+| Data Engineering | 35 | $170,000 | 5 | $168,500 |
+| Data Science | 11 | $208,000 | 16 | $166,960 |
+| Database | 6 | $151,460 | 1 | $182,500 |
+| Statistics | 8 | $179,400 | 2 | $207,500 |
+
+Business Intelligence had four salary-eligible postings, none of which mentioned machine learning, so no within-category comparison was possible. Differences in medians are descriptive, not causal effects; the groups are small in several categories and may differ in other characteristics.
+
+## Finding 6: Validation Did Not Substantially Change the Main Findings
+
+After removing three unrelated postings:
+
+- The skill-analysis sample decreased from 229 to 226.
+- The salary sample decreased from 180 to 178.
+- The overall median salary midpoint remained $165,000.
+- Python and SQL remained the most frequently mentioned technical skills.
+
+These results support the stability of the main descriptive findings under this limited review.
+
+# 18. Study Limitations
+
+## 18.1 Selection Bias
+
+The revised analysis includes 226 selected postings from the original 9,173.
+
+There are still 627 unresolved candidate postings.
+
+Therefore, the selected sample should not be considered representative of all data science-related job postings.
+
+## 18.2 Limited Classification Validation
+
+The initial review sample contained 49 jobs, but it was not fully random.
+
+An additional nine zero-skill postings were reviewed.
+
+These checks improved the analysis but did not provide a comprehensive estimate of classification accuracy.
+
+## 18.3 Technical Skill Detection
+
+The skill extraction process uses regular expressions.
+
+It identifies mentions of skills but does not always distinguish between:
+
+- Required qualifications
+- Preferred qualifications
+- Responsibilities
+- Other contextual references
+
+Some skills may be missed because job descriptions use different terminology.
+
+## 18.4 Stored Skill Count Consistency
+
+The revised dataset contains 30 individual Boolean `skill_*` indicators, plus a separate numeric `skill_count` field. A validation of the revised dataset found that the stored `skill_count` differs from the sum of the 30 Boolean indicators in 187 of 226 postings. For reproducible skill-demand analysis, this report treats the 30 individual indicators as the source of truth and excludes `skill_count` when counting or reshaping skill mentions. Across the revised sample, those indicators yield 1,142 job-skill matches and six jobs with zero detected tracked skills. The source CSV is left unchanged.
+
+## 18.5 Salary Eligibility
+
+Only 178 of the 226 selected postings were included in the revised USD salary analysis.
+
+Jobs without eligible USD salary information were excluded from salary comparisons.
+
+This may introduce selection bias.
+
+## 18.6 Salary Midpoints Are Not Actual Earnings
+
+The analysis uses the midpoint of advertised salary ranges.
+
+These values are not necessarily the salaries paid to hired employees.
+
+They also do not account for bonuses, equity, or other compensation.
+
+## 18.7 Small Sample Sizes
+
+Some skills and job categories have relatively few salary observations.
+
+For example, the Business Intelligence category contains only four eligible salary postings.
+
+Results for small groups should be interpreted cautiously.
+
+## 18.8 Other Factors Affect Salary
+
+Salary differences may depend on:
+
+- Job seniority
+- Geographic location
+- Employer
+- Industry
+- Experience requirements
+- Responsibilities
+- Company size
+
+The analysis does not fully control for these variables.
+
+Of the 178 salary-eligible postings, 171 (96.1%) had seniority labeled `Unknown`, six were labeled `senior`, and one was labeled `mid`. Within Data Science, 26 of 27 salary-eligible postings had unknown seniority. This prevents reliable seniority-adjusted comparisons.
+
+## 18.9 Correlation Does Not Imply Causation
+
+The results do not prove that learning a particular skill causes an increase in salary.
+
+They describe associations between skill mentions and advertised salary midpoints.
+
+# 19. Conclusion
+
+Dataset 1 provides preliminary evidence about which technical skills are frequently mentioned in selected data science-related job postings and how those mentions relate to advertised salaries.
+
+Python and SQL were the most frequently mentioned technical skills.
+
+Specialized AI-related skills, including Generative AI, PyTorch, Deep Learning, and LLMs, appeared in postings with relatively high median advertised salary midpoints.
+
+The analysis also showed meaningful differences between job categories.
+
+Data Science and AI/ML postings had higher median salary midpoints than Data Analytics and Business Intelligence postings in the revised sample.
+
+Additional validation removed three unrelated postings and reduced the analysis sample to 226 jobs, including 178 eligible USD salary postings.
+
+The overall median advertised salary midpoint remained $165,000.
+
+The main descriptive findings were stable under this limited validation exercise.
+
+However, the results remain provisional because many candidate postings have not been reviewed and the skill extraction process has not been comprehensively validated.
+
+Further validation and adjustment for job characteristics would strengthen the study.
+
+# 20. PostgreSQL Relational Database Implementation
+
+## 20.1 Objective and Tools
+
+After completing the revised R analysis, we organized Dataset 1 into a normalized relational database using PostgreSQL 18 and pgAdmin 4. The database is named `data607_project3`, and the tables are in the `public` schema. The R script `13_normalize_dataset.R` produced the normalized exports in `Data/Normalized/`.
+
+This phase focuses exclusively on Dataset 1. It provides a reproducible relational structure and independent SQL summaries to compare with the revised R findings.
+
+## 20.2 Relational Schema
+
+| Table | Primary key | Purpose | Imported rows |
+|---|---|---|---:|
+| `company` | `company_id` | One record per company | 210 |
+| `job_posting` | `job_id` | Selected jobs and occupational attributes | 226 |
+| `salary` | `job_id` | Salary fields and eligibility flags, one per job | 226 |
+| `skill` | `skill_id` | Dictionary of tracked technical skills | 30 |
+| `job_skill` | (`job_id`, `skill_id`) | Many-to-many relationship between jobs and skills | 1,142 |
+
+Foreign-key relationships are `job_posting.company_id` → `company.company_id`, `salary.job_id` → `job_posting.job_id`, `job_skill.job_id` → `job_posting.job_id`, and `job_skill.skill_id` → `skill.skill_id`. The `job_skill` composite key prevents duplicate job-skill pairs. These five tables contain 1,834 records in total, counting records across tables rather than unique jobs.
+
+The exact `CREATE TABLE` statements, data types, primary keys, and foreign-key constraints are stored in `SQL guide/Dataset1_Create_Tables.sql`; the combined script is `SQL guide/Dataset1_All_Queries.sql`.
+
+## 20.3 Data Export and Import
+
+The R normalization script exported `COMPANY.csv`, `JOB_POSTING.csv`, `SALARY.csv`, `SKILL.csv`, and `JOB_SKILL.csv` into `Data/Normalized/`, together with `Dataset1_Normalized_Database.xlsx`. The CSV files were imported into PostgreSQL using pgAdmin's Import/Export Data feature.
+
+Import order matters because of the foreign keys: `company` first, then `job_posting`, then `salary` and `skill`, and finally `job_skill`. During salary import, missing values encoded as `NA` were interpreted as SQL `NULL` by setting pgAdmin's **NULL String** option to `NA`. This avoids attempting to store the literal text `NA` in numeric salary fields. The database's imported salary eligibility flags were retained rather than recomputed during import.
+
+## 20.4 PostgreSQL Verification
+
+The database was checked with record-count, key-uniqueness, relationship, join, and salary-eligibility queries. All five imported record counts matched the normalized R exports:
+
+| Table | Expected | Observed |
+|---|---:|---:|
+| `company` | 210 | 210 |
+| `job_posting` | 226 | 226 |
+| `salary` | 226 | 226 |
+| `skill` | 30 | 30 |
+| `job_skill` | 1,142 | 1,142 |
+
+The final SQL quality check returned **226 jobs**, **178 eligible USD salary records**, **zero eligible records with missing salary midpoints**, **zero duplicate job-skill pairs**, and **six jobs without matches among the 30 tracked skills**. A five-table join also returned job titles, company names, categories, salary midpoints, and concatenated skills. The six zero-skill postings were expected after the manual review; lack of a dictionary match is not itself evidence that a posting is unrelated.
+
+## 20.5 SQL Skill Demand and Salary Results
+
+SQL analysis reproduced the revised skill-demand rankings. The most frequent skill mentions were Python (**163 jobs; 72.12%**), SQL (**133; 58.85%**), Machine Learning (**74; 32.74%**), and LLM (**60; 26.55%**). A job could mention more than one skill, so these percentages do not sum to 100%.
+
+Among eligible USD salary postings, the highest observed skill-associated median annual salary midpoints included Generative AI (**$196,500; n = 15**), PyTorch (**$195,050; n = 23**), Deep Learning (**$193,300; n = 13**), and LLM (**$190,900; n = 51**). Python's corresponding median was **$165,000 (n = 131)** and SQL's was **$152,500 (n = 105)**. These are medians of advertised range midpoints for postings mentioning a skill, not compensation premiums attributable to that skill.
+
+The SQL category comparison found median annual salary midpoints of **$196,500** for Data Science (27 eligible salary records), **$191,250** for AI/ML (50), **$170,000** for Data Engineering (40), **$118,750** for Data Analytics (40), and **$114,213.25** for Business Intelligence (4). Statistics and Database had medians of $179,500 (10) and $152,500 (7), respectively.
+
+## 20.6 AI-Related Skill Mentions by Category
+
+For an additional SQL analysis, a posting was classified as requesting an AI-related skill when at least one of the following six tracked terms was detected: **Machine Learning, LLM, Generative AI, Deep Learning, PyTorch, or TensorFlow**. This composite AI indicator is distinct from the single *Machine Learning* indicator used in Finding 5 above.
+
+| Job category | Jobs with ≥1 AI skill | Total jobs | Percentage |
+|---|---:|---:|---:|
+| AI/ML | 55 | 59 | 93.22% |
+| Data Science | 26 | 39 | 66.67% |
+| Data Engineering | 16 | 55 | 29.09% |
+| Data Analytics | 11 | 49 | 22.45% |
+| Statistics | 2 | 10 | 20.00% |
+| Database | 1 | 8 | 12.50% |
+| Business Intelligence | 0 | 6 | 0.00% |
+
+AI-related skill mentions were most concentrated in AI/ML and Data Science, the two categories with the highest observed median salary midpoints. However, this does not establish a causal relationship.
+
+## 20.7 Within-Category AI Skill Salary Comparisons
+
+To examine job-category composition, SQL compared salary-eligible postings mentioning at least one of the six AI skills with those mentioning none. Each job was counted once using an `EXISTS` test, even when it mentioned several AI skills.
+
+| Job category | AI-skill jobs | AI-skill median | No-AI jobs | No-AI median |
+|---|---:|---:|---:|---:|
+| AI/ML | 47 | $192,500 | 3 | $172,500 |
+| Data Analytics | 11 | $152,320 | 29 | $117,500 |
+| Data Engineering | 13 | $170,000 | 27 | $170,000 |
+| Data Science | 18 | $179,250 | 9 | $217,400 |
+| Database | 1 | $182,500 | 6 | $151,460 |
+| Statistics | 2 | $207,500 | 8 | $179,400 |
+
+Business Intelligence had four eligible salary records and no postings with any of the six tracked AI skills, so a within-category comparison was not possible.
+
+The relationship was **mixed**: AI-skill postings had higher medians in Data Analytics and AI/ML, identical medians in Data Engineering, and a lower median in Data Science. Several groups were extremely small (for example, three no-AI AI/ML jobs and one AI-skill Database job). The differences should therefore be treated as exploratory descriptive comparisons, not causal effects or reliable estimates of skill premiums.
+
+## 20.8 SQL Scripts and Reproducibility
+
+The saved SQL scripts are:
+
+- `SQL guide/Dataset1_Create_Tables.sql` — create the five tables and their constraints.
+- `SQL guide/Dataset1_Analysis.sql` — verification, demand, salary, category, and AI-skill analyses.
+- `SQL guide/Dataset1_All_Queries.sql` — combined reference script.
+
+The scripts document SQL logic; the CSV imports are performed separately through pgAdmin. For a new, empty database, create the tables, import CSVs in dependency order with `NA` as the NULL string, and then run the analysis and verification queries. On an already populated database, avoid importing the same records again. Results reflect the revised 226-job sample, not all 9,173 source postings or the broader labor market.
+
+# 21. Interactive R Shiny Dashboard (Current Development Version)
+
+## 21.1 Purpose and Scope
+
+An interactive **Data Science Job Market Insights** dashboard was developed for Dataset 1 to make the descriptive results easier to explore and present. The dashboard is implemented in R Shiny, uses `bslib` for its interface and `ggplot2` with `plotly` for interactive visualizations, and queries the normalized PostgreSQL database. It supplements, rather than replaces, the reproducible R and SQL analyses described above.
+
+The working application is saved as `Dashboard/app.R` in the RStudio project. A separate `Dashboard/01_test_connection.R` script was used to confirm that R can connect to the local PostgreSQL database and retrieve the expected table counts.
+
+## 21.2 Architecture and Data Flow
+
+The local dashboard follows this workflow:
+
+1. The original postings are cleaned, classified, and validated in R.
+2. `13_normalize_dataset.R` creates the five relational CSV exports.
+3. The exports are imported into the PostgreSQL database `data607_project3` using pgAdmin.
+4. The Shiny application connects through `DBI` and `RPostgres` and runs SQL queries against the five normalized tables.
+5. `bslib` renders the summary cards and filter, while `ggplot2` and `plotly` render the charts.
+
+The database connection uses `localhost` and port `5432` in the **local development environment**. The PostgreSQL password is requested interactively using `rstudioapi::askForPassword()` rather than being embedded in the source code. Passwords should not be committed to version control or included in submitted documentation.
+
+## 21.3 Current Dashboard Features
+
+| Feature | Current behavior | Source |
+|---|---|---|
+| Job postings card | Displays 226 selected postings | `job_posting` |
+| Eligible salaries card | Displays 178 USD-eligible salary records with nonmissing midpoints | `salary` |
+| Tracked skills card | Displays 30 technical skills | `skill` |
+| Median annual salary card | Displays the overall median advertised salary midpoint ($165,000) | `salary` |
+| Top 10 in-demand skills chart | Interactive horizontal bar chart of skill mentions | `skill`, `job_skill`, `job_posting` |
+| Salary by job category chart | Interactive horizontal bar chart of category-level median annual salary midpoints | `job_posting`, `salary` |
+| Job category dropdown | Updates the Top 10 skills chart for the selected category | Parameterized PostgreSQL query |
+
+The dashboard initially displays the overall sample. In the current version, selecting a job category **changes the skill-demand chart only**; the summary cards and category salary chart continue to show overall results. This distinction is important when interpreting filtered views. The chart counts are descriptive, and salary values are advertised USD range midpoints rather than observed earnings.
+
+## 21.4 Local Testing and Current Status
+
+The PostgreSQL connection test succeeded, and the Shiny application launched successfully in RStudio. During development, PostgreSQL `COUNT(*)` values returned to R as `integer64` triggered a formatting error in `scales::comma()`. Converting those counts to standard R numeric values resolved the issue. This conversion is safe for the small counts in the selected Dataset 1 sample.
+
+The job-category filter has been added to the current `app.R`. Group review and any requested dashboard changes are pending. The application has **not yet been published online**, and a public dashboard URL is therefore not available.
+
+## 21.5 Planned Online Publication
+
+After the group approves the final dashboard, the team plans to publish it online so classmates and the instructor can view it without running RStudio. A possible hosting service is `shinyapps.io`, subject to the team's final choice and deployment testing.
+
+Because the current application connects to PostgreSQL at `localhost`, it cannot use that same connection unchanged from a hosted server. Two possible deployment architectures are under consideration:
+
+- **Prepared data snapshot:** Export the required analysis tables or aggregates and bundle them with the hosted Shiny application. This is simpler for a static class-project dataset, but the hosted application would no longer query PostgreSQL live.
+- **Hosted PostgreSQL:** Use a securely hosted PostgreSQL instance and configure the deployed application with protected connection credentials. This retains live SQL integration but requires additional infrastructure and security configuration.
+
+No hosting approach has been finalized. Once published, the final URL, hosting architecture, access instructions, and any changes to the data refresh process should be recorded here.
+
+## 21.6 Dashboard Limitations and Future Improvements
+
+The dashboard inherits the study's selection, classification, skill-detection, and salary limitations. It should not be interpreted as a representative labor-market survey or a causal estimate of skill-related pay differences.
+
+Potential changes for group discussion include making all summary cards responsive to the job-category filter, adding skill and salary filters, adding an interactive demand-versus-salary comparison, providing downloadable filtered tables, and expanding the AI-related skill analysis. These are **proposed enhancements**, not implemented features of the current version.
+
+## 21.7 Running the Local Dashboard
+
+1. Start the local PostgreSQL service and confirm that `data607_project3` contains the normalized tables.
+2. Open the RStudio project and ensure the packages `shiny`, `bslib`, `DBI`, `RPostgres`, `dplyr`, `ggplot2`, `plotly`, `scales`, and `rstudioapi` are installed.
+3. Open `Dashboard/app.R` and select **Run App**, or run `shiny::runApp("Dashboard")` from the project root.
+4. Enter the PostgreSQL password when prompted.
+5. Check the four summary cards and two charts; select a category to test the skill-demand filter.
+
+This dashboard section records the **working development version**. It should be revised after group feedback and again after successful online deployment.
+
+# 22. Next Steps
+
+Before finalizing Project 3, our team should consider:
+
+1. Reviewing additional unresolved job postings.
+2. Evaluating the technical skill dictionary.
+3. Investigating job location and experience requirements.
+4. Extending the within-category salary comparisons to additional skills and larger samples.
+5. Discussing how to incorporate Dataset 2.
+
+Dataset 2 analysis is currently on hold pending team discussion.
+
+# 23. Reproducibility
+
+To reproduce the revised Dataset 1 analysis:
+
+1. Place the original job-postings CSV in the `Data/` folder.
+2. Run scripts 01 through 11 in order.
+3. Run `12_validate_results.R`.
+4. Run `12B_review_exceptions.R`.
+5. Complete the manual review decisions.
+6. Place `validation_manual_review_sheet_completed.csv` in `Data/`.
+7. Run `12C_apply_review_decisions.R`.
+8. Open this R Markdown document.
+9. Run `13_normalize_dataset.R` to create the five normalized CSV exports.
+10. Create the PostgreSQL tables using `SQL guide/Dataset1_Create_Tables.sql`.
+11. Import the CSVs in foreign-key dependency order, treating `NA` as SQL `NULL`.
+12. Run the verification and analysis queries in `SQL guide/Dataset1_Analysis.sql`.
+13. Confirm the local dashboard works using `shiny::runApp("Dashboard")` (requires the local PostgreSQL service).
+14. Select **Knit to HTML**.
+
+The final report uses these revised outputs:
+
+- `jobs_skills_revised.csv`
+- `jobs_salary_revised.csv`
+- `skill_demand_revised.csv`
+- `skill_salary_revised.csv`
+- `salary_summary_revised.csv`
+- `category_salary_revised.csv`
+- `validation_original_vs_revised.csv`
+
+The historical results from Steps 09–11 are retained for transparency.
+
+This document describes the current Dataset 1 workflow, validation decisions, normalized PostgreSQL implementation, preliminary research findings, and locally tested Shiny dashboard. Online publication and group-requested dashboard revisions remain pending.

@@ -1,0 +1,57 @@
+digraph Dataset1ER {
+  graph [layout=dot, rankdir=LR, bgcolor="#F7F9FC", pad="0.35", nodesep="0.85", ranksep="1.15", splines=polyline, outputorder=edgesfirst, fontname="Arial", label=<<FONT FACE="Arial" POINT-SIZE="22" COLOR="#18243B"><B>DATASET 1  |  RELATIONAL DATA MODEL</B></FONT><BR/><FONT FACE="Arial" POINT-SIZE="11" COLOR="#64748B">Job postings, advertised salaries, companies, and extracted skills</FONT>>, labelloc=t, labeljust=l];
+  node [shape=plain, fontname="Arial"];
+  edge [color="#73839B", penwidth=1.7, arrowsize=0.7, fontname="Arial", fontsize=10, fontcolor="#46556D"];
+
+  COMPANY [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#D6DEEA" BGCOLOR="white">
+    <TR><TD BGCOLOR="#1D466F" COLSPAN="2" ALIGN="LEFT"><FONT COLOR="white" POINT-SIZE="15"><B>COMPANY</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#0E7490"><B>PK</B></FONT></TD><TD ALIGN="LEFT"><B>company_id</B></TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">company_name</TD></TR>
+  </TABLE>>];
+
+  JOB_POSTING [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7" COLOR="#D6DEEA" BGCOLOR="white">
+    <TR><TD BGCOLOR="#1D466F" COLSPAN="2" ALIGN="LEFT"><FONT COLOR="white" POINT-SIZE="15"><B>JOB_POSTING</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#0E7490"><B>PK</B></FONT></TD><TD ALIGN="LEFT"><B>job_id</B></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#A05A19"><B>FK</B></FONT></TD><TD ALIGN="LEFT">company_id</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">title</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">department</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">seniority</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">employment_type</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">workplace_type</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">city / region / country_code</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">posted_at</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">description</TD></TR>
+  </TABLE>>];
+
+  SALARY [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7" COLOR="#D6DEEA" BGCOLOR="white">
+    <TR><TD BGCOLOR="#167B81" COLSPAN="2" ALIGN="LEFT"><FONT COLOR="white" POINT-SIZE="15"><B>SALARY</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#0E7490"><B>PK</B></FONT><FONT COLOR="#A05A19"><B>/FK</B></FONT></TD><TD ALIGN="LEFT"><B>job_id</B></TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">salary_min / salary_max</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">salary_currency / salary_period</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">salary_min_annual</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">salary_max_annual</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">salary_valid</TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">salary_usd_eligible</TD></TR>
+  </TABLE>>];
+
+  JOB_SKILL [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="9" COLOR="#D6DEEA" BGCOLOR="white">
+    <TR><TD BGCOLOR="#7C3D88" COLSPAN="2" ALIGN="LEFT"><FONT COLOR="white" POINT-SIZE="15"><B>JOB_SKILL</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#0E7490"><B>PK</B></FONT><FONT COLOR="#A05A19"><B>/FK</B></FONT></TD><TD ALIGN="LEFT"><B>job_id</B></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#0E7490"><B>PK</B></FONT><FONT COLOR="#A05A19"><B>/FK</B></FONT></TD><TD ALIGN="LEFT"><B>skill_id</B></TD></TR>
+  </TABLE>>];
+
+  SKILL [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="9" COLOR="#D6DEEA" BGCOLOR="white">
+    <TR><TD BGCOLOR="#7C3D88" COLSPAN="2" ALIGN="LEFT"><FONT COLOR="white" POINT-SIZE="15"><B>SKILL</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#0E7490"><B>PK</B></FONT></TD><TD ALIGN="LEFT"><B>skill_id</B></TD></TR>
+    <TR><TD ALIGN="LEFT"> </TD><TD ALIGN="LEFT">skill_name</TD></TR>
+  </TABLE>>];
+
+  {rank=same; COMPANY; SALARY;}
+  {rank=same; JOB_POSTING;}
+  {rank=same; JOB_SKILL;}
+  {rank=same; SKILL;}
+  COMPANY -> JOB_POSTING [taillabel="1", headlabel="0..N", label="publishes", minlen=2];
+  JOB_POSTING -> SALARY [dir=none, taillabel="1", headlabel="1", label="has salary record", constraint=false];
+  JOB_POSTING -> JOB_SKILL [taillabel="1", headlabel="0..N", label="has extracted skills", minlen=2];
+  SKILL -> JOB_SKILL [dir=back, taillabel="0..N", headlabel="1", label="matched in", minlen=2];
+}
