@@ -1,0 +1,199 @@
+---
+title: "Dataset 1: Entity–Relationship Diagram"
+subtitle: "DATA 607 — Project 3 | Redesigned ER Model"
+author: "Mohd Afwan Shaikh"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+---
+
+# Purpose
+
+This document describes a **proposed normalized relational database design** for Dataset 1 of Project 3. The research question is:
+
+> Which data science skills are most in demand, and how do those skills relate to salaries?
+
+The original files are CSV datasets, **not** five existing relational tables. The ER diagram illustrates how the available information could be organized into related tables to support analysis of jobs, employers, advertised salaries, and skills.
+
+# Source data and scope
+
+- `Data/job_postings_cleaned.csv`: 9,173 cleaned job postings, with 31 columns.
+- `Data/jobs_skills_revised.csv`: 226 analyzed job postings, with 79 columns, including 30 individual `skill_` TRUE/FALSE indicators and a separate `skill_count` field.
+
+Skill extraction was performed on a subset of postings. Consequently, a job posting can exist in the proposed database without a matching `JOB_SKILL` record. The `SKILL` and `JOB_SKILL` entities are **derived** from the wide skill indicator columns; they are not existing CSV tables.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r load-data}
+jobs <- read.csv("Data/job_postings_cleaned.csv")
+skills <- read.csv("Data/jobs_skills_revised.csv")
+
+# The 'skill_count' column is a summary, not a skill flag.
+skill_cols <- setdiff(
+  grep("^skill_", names(skills), value = TRUE),
+  "skill_count"
+)
+```
+
+# Data validation
+
+The following checks support the proposed keys and the many-to-many job–skill relationship.
+
+```{r validation}
+validation <- data.frame(
+  Check = c(
+    "Cleaned job postings",
+    "Unique job IDs in cleaned data",
+    "Missing job IDs in cleaned data",
+    "Analyzed postings",
+    "Unique job IDs in analyzed data",
+    "Analyzed job IDs not found in cleaned data",
+    "Individual skill indicators",
+    "Missing values in skill indicators",
+    "Job–skill matches (TRUE flags)",
+    "Analyzed jobs with no detected skill",
+    "Jobs with inconsistent stored skill_count"
+  ),
+  Result = c(
+    nrow(jobs),
+    length(unique(jobs$job_id)),
+    sum(is.na(jobs$job_id) | trimws(jobs$job_id) == ""),
+    nrow(skills),
+    length(unique(skills$job_id)),
+    sum(!skills$job_id %in% jobs$job_id),
+    length(skill_cols),
+    sum(is.na(skills[skill_cols])),
+    sum(as.matrix(skills[skill_cols]) == TRUE, na.rm = TRUE),
+    sum(rowSums(skills[skill_cols]) == 0),
+    sum(rowSums(skills[skill_cols]) != skills$skill_count)
+  )
+)
+knitr::kable(validation, caption = "Dataset 1 validation checks")
+```
+
+In the validated analysis, the 30 skill indicators produced **1,142 job–skill matches**, **6 analyzed jobs with no detected skills**, and **187 jobs whose stored `skill_count` differs from the number of TRUE flags**. The cause of the discrepancies has not been established. For the proposed junction table, the individual skill flags are used rather than `skill_count`; the source files are not modified.
+
+# Proposed entities
+
+| Entity | Primary key | Selected attributes | Purpose |
+|:--|:--|:--|:--|
+| `COMPANY` | `company_id` | `company_name` (from source `company`) | Identifies the employer. |
+| `JOB_POSTING` | `job_id` | `company_id` (FK), `title`, `department`, `seniority`, `employment_type`, `workplace_type`, `city`, `region`, `country_code`, `posted_at`, `description` | Stores job-level details. |
+| `SALARY` | `job_id` (also FK) | `salary_min`, `salary_max`, `salary_currency`, `salary_period`, `salary_min_annual`, `salary_max_annual`, `salary_valid`, `salary_usd_eligible` | Stores advertised compensation and quality flags. |
+| `SKILL` | `skill_id` (proposed/generated) | `skill_name` | Stores the 30 distinct tracked skills. |
+| `JOB_SKILL` | (`job_id`, `skill_id`) | Both columns are also FKs | Records each detected job–skill association. |
+
+**Key design decisions:**
+
+- `COMPANY` → `JOB_POSTING`: one company can publish many jobs; each job references one company.
+- `JOB_POSTING` → `SALARY`: modeled as one-to-one for this dataset, using `job_id` as the salary table's PK and FK. This is a **design choice**, not evidence of a separate salary table in the CSV. Salary validity should still be assessed using the provided flags.
+- `JOB_POSTING` → `JOB_SKILL`: a job can have zero or many detected skills.
+- `SKILL` → `JOB_SKILL`: a skill can appear in zero or many jobs.
+- `JOB_SKILL` uses the composite key (`job_id`, `skill_id`) to prevent duplicate associations. `skill_id` would need to be generated when normalizing the source.
+
+# Diagram design and visual conventions
+
+The **updated ER diagram** replaces the original plain blue record boxes with a more readable Graphviz design. The diagram has a descriptive title, a light background, and HTML-like entity tables with separate colored headers and key labels:
+
+- **Dark blue:** `COMPANY` and `JOB_POSTING` (employers and job information).
+- **Teal:** `SALARY` (advertised compensation).
+- **Purple:** `SKILL` and `JOB_SKILL` (skill catalog and junction table).
+- **PK:** primary key; **FK:** foreign key; **PK/FK:** a column serving both roles.
+- **1, 0..N:** relationship multiplicities; a posting can have zero detected skills because only 226 postings underwent skill extraction.
+
+The connections are **labeled Graphviz relationships, not formal crow's-foot endpoints**. The diagram is a conceptual logical design; labels and arrows should be interpreted alongside the cardinality descriptions above.
+
+```{r diagram-image, echo=FALSE, out.width='100%', fig.cap='Redesigned Dataset 1 ER diagram'}
+image_path <- "ER_Diagram/Dataset1_ER_Diagram.png"
+if (file.exists(image_path)) {
+  knitr::include_graphics(image_path)
+} else {
+  cat("PNG preview not found; generate it using the R script described below.")
+}
+```
+
+# Render the ER diagram
+
+The existing project includes the Graphviz source at `ER_Diagram/Dataset1_ER_Diagram.dot`. Rendering directly from that file keeps this report synchronized with the saved diagram.
+
+```{r er-diagram, results='asis'}
+if (!requireNamespace("DiagrammeR", quietly = TRUE)) {
+  stop("Install DiagrammeR with install.packages('DiagrammeR')")
+}
+
+source_file <- "ER_Diagram/Dataset1_ER_Diagram.dot"
+if (!file.exists(source_file)) {
+  stop("Diagram source not found: ", source_file,
+       ". Knit from the project root folder.")
+}
+
+er_diagram <- DiagrammeR::grViz(
+  paste(readLines(source_file, warn = FALSE), collapse = "\n")
+)
+er_diagram
+```
+
+The rendered diagram uses the **updated styling** defined in the current `.dot` file: color-coded headers, separate key labels, and explicit multiplicity labels. It uses Graphviz arrows and text labels, rather than formal crow's-foot symbols.
+
+# How the junction table is derived
+
+Each `skill_` column (except `skill_count`) represents one tracked skill. A `TRUE` value becomes one row in `JOB_SKILL`; a `FALSE` value produces no row. The following code constructs a **preview** of the normalized associations without overwriting any files.
+
+```{r job-skill-preview}
+# Base R transformation: one row per TRUE skill flag.
+match_positions <- which(as.matrix(skills[skill_cols]), arr.ind = TRUE)
+
+job_skill_preview <- data.frame(
+  job_id = skills$job_id[match_positions[, "row"]],
+  skill_name = sub("^skill_", "", skill_cols[match_positions[, "col"]]),
+  stringsAsFactors = FALSE
+)
+
+stopifnot(nrow(job_skill_preview) == 1142)
+head(job_skill_preview, 10)
+```
+
+For an actual relational implementation, a separate `SKILL` lookup table would assign a stable `skill_id` to each `skill_name`, and `JOB_SKILL` would store that ID rather than the name. The 1,142 associations reflect **detected skill mentions**, not a verified list of employer requirements.
+
+# Reproducing and exporting the diagram
+
+The following code recreates the **redesigned** diagram from its `.dot` source and optionally exports a high-resolution PNG. The saved `Dataset1_ER_Diagram.R` script performs the same steps. The original HTML export may still display the older design until it is regenerated; use the updated PNG or re-render from the current `.dot` source.
+
+```{r export-instructions, eval=FALSE}
+library(DiagrammeR)
+
+er_diagram <- grViz(
+  paste(readLines("ER_Diagram/Dataset1_ER_Diagram.dot"), collapse = "\n")
+)
+
+# Optional PNG export; install DiagrammeRsvg and rsvg if needed.
+svg_code <- DiagrammeRsvg::export_svg(er_diagram)
+rsvg::rsvg_png(
+  charToRaw(svg_code),
+  file = "ER_Diagram/Dataset1_ER_Diagram.png",
+  width = 2400
+)
+```
+
+# Limitations
+
+1. The ER diagram is a **conceptual normalized design**, not a physical database schema deployed in SQL Server or another DBMS.
+2. Skill indicators cover **226 analyzed postings**, not all 9,173 cleaned postings.
+3. The `skill_count` discrepancies require separate investigation; this design relies on the 30 individual skill flags.
+4. Salary fields describe advertised ranges and require validity and currency eligibility checks before comparing salaries.
+5. Job categories and review classifications are present in the revised analysis file but are not modeled as separate entities in this compact ER diagram.
+
+# Project files
+
+- `ER_Diagram/Dataset1_ER_Diagram.dot` — redesigned Graphviz source (entity colors, labels, layout, and edges).
+- `ER_Diagram/Dataset1_ER_Diagram.R` — script to recreate the redesigned diagram and export PNG when optional packages are installed.
+- `ER_Diagram/Dataset1_ER_Diagram.html` — previously generated HTML; may show the older design until regenerated.
+- `ER_Diagram/Dataset1_ER_Diagram.png` — redesigned high-resolution image for the report or README.
+- `ER_Diagram/Dataset1_ER_Diagram_Documentation.Rmd` — this documentation, after copying it into the project.
+
+**Knit instructions:** Open this `.Rmd` in RStudio with `DATA607-Project3-Upload` as the working project, then select **Knit → Knit to HTML**. The required CSV files and `.dot` file must be present at the relative paths shown above.
