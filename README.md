@@ -20,6 +20,56 @@ This project uses job-posting data to investigate skill demand and advertised co
 
 The 226 postings analyzed for skills are a subset of the 9,173 cleaned postings. Salary summaries should not be interpreted as representing all postings.
 
+
+## Interactive Data Science Job Market Dashboard
+
+**Live Dashboard:** https://mohdafwan.shinyapps.io/data607-project3/
+
+This dashboard was developed for DATA 607 Project 3 to explore the following research question:
+
+**Which data science skills are most in demand, and how do those skills relate to advertised salaries?**
+
+### Dashboard Features
+
+- **Job Market Overview:** Displays total job postings, jobs with eligible USD salaries, number of skills tracked, and median advertised annual salary.
+- **Top Data Science Skills:** Visualizes the ten most frequently requested skills.
+- **Job Category Filter:** Allows users to explore skill demand across different data science job categories.
+- **Salary Comparison:** Compares median advertised annual salaries across job categories.
+- **Interactive Visualizations:** Provides interactive charts with hover information.
+
+### Technology Stack
+
+- **R:** Data cleaning, transformation, analysis, and visualization
+- **PostgreSQL:** Relational database containing five normalized tables
+- **SQL:** Data retrieval and analysis
+- **R Shiny:** Interactive dashboard development
+- **ggplot2 and Plotly:** Data visualization
+- **shinyapps.io:** Online dashboard hosting
+- **GitHub:** Version control and project collaboration
+
+### Dashboard Data
+
+The project database contains 226 selected job postings, 210 companies, 30 tracked skills, and 1,142 job-skill relationships.
+
+The local dashboard connects directly to PostgreSQL. The published dashboard uses summarized CSV files generated from the database, allowing visitors to explore the results without needing database credentials.
+
+Salary comparisons use eligible annual USD advertised salary midpoints. The findings describe the selected dataset and should not be interpreted as representative of the entire data science job market.
+
+### Running the Dashboard Locally
+
+The PostgreSQL-connected dashboard is located in `Dashboard/app.R`.
+
+The standalone version used for online deployment is located in `Dashboard_Online/app.R`.
+
+To run the standalone dashboard in RStudio:
+
+```r
+shiny::runApp("Dashboard_Online")
+```
+
+**Published Dashboard:** https://mohdafwan.shinyapps.io/data607-project3/
+
+
 ## Selected findings
 
 Among the **226 postings** analyzed for skills:
