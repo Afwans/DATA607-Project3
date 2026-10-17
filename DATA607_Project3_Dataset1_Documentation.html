@@ -11,7 +11,7 @@
 
 <meta name="author" content="DATA 607 Project 3 Team" />
 
-<meta name="date" content="2026-10-16" />
+<meta name="date" content="2026-10-17" />
 
 <title>DATA 607 Project 3: Dataset 1 Documentation</title>
 
@@ -1501,7 +1501,7 @@ border-radius: 0px;
 Documentation</h1>
 <h3 class="subtitle">Data Science Skills Demand and Salary Analysis</h3>
 <h4 class="author">DATA 607 Project 3 Team</h4>
-<h4 class="date">2026-10-16</h4>
+<h4 class="date">2026-10-17</h4>
 
 </div>
 
@@ -1603,9 +1603,11 @@ Organization</h1>
 <li><code>12_validate_results.R</code></li>
 <li><code>12B_review_exceptions.R</code></li>
 <li><code>12C_apply_review_decisions.R</code></li>
+<li><code>13_normalize_dataset.R</code> (relational database
+export)</li>
 </ul>
 <p>The original dataset, intermediate CSV files, validation files, and
-charts are stored in the <code>data/</code> folder.</p>
+charts are stored in the <code>Data/</code> folder.</p>
 <p>The original analysis outputs are preserved separately from the
 revised results.</p>
 </div>
@@ -1620,7 +1622,7 @@ job-postings dataset.</p>
 </div>
 <div id="input" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Input</h2>
-<p><code>data/job_postings_with_salaries.csv</code></p>
+<p><code>Data/job_postings_with_salaries.csv</code></p>
 </div>
 <div id="methods" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Methods</h2>
@@ -2549,7 +2551,7 @@ separately.</p>
 Demand</h2>
 <p>The following code reads the revised skill-demand results.</p>
 <pre class="r"><code>skill_demand_revised &lt;- read_csv(
-  &quot;data/skill_demand_revised.csv&quot;,
+  &quot;Data/skill_demand_revised.csv&quot;,
   show_col_types = FALSE
 )
 
@@ -2752,7 +2754,7 @@ Demand Chart</h3>
 Analysis</h2>
 <p>The revised salary sample contains 178 eligible USD postings.</p>
 <pre class="r"><code>salary_summary_revised &lt;- read_csv(
-  &quot;data/salary_summary_revised.csv&quot;,
+  &quot;Data/salary_summary_revised.csv&quot;,
   show_col_types = FALSE
 )
 
@@ -2797,7 +2799,7 @@ salary_summary_revised %&gt;%
 <h3><span class="header-section-number">16.4.1</span> Revised Salary by
 Skill</h3>
 <pre class="r"><code>skill_salary_revised &lt;- read_csv(
-  &quot;data/skill_salary_revised.csv&quot;,
+  &quot;Data/skill_salary_revised.csv&quot;,
   show_col_types = FALSE
 )
 
@@ -3117,7 +3119,7 @@ Salary Chart</h3>
 <h2><span class="header-section-number">16.5</span> 16.3 Revised Salary
 by Job Category</h2>
 <pre class="r"><code>category_salary_revised &lt;- read_csv(
-  &quot;data/category_salary_revised.csv&quot;,
+  &quot;Data/category_salary_revised.csv&quot;,
   show_col_types = FALSE
 )
 
@@ -3270,17 +3272,17 @@ Salary Chart</h3>
 <h2><span class="header-section-number">16.6</span> 16.4 Revised Data
 Quality Checks</h2>
 <pre class="r"><code>jobs_revised &lt;- read_csv(
-  &quot;data/jobs_skills_revised.csv&quot;,
+  &quot;Data/jobs_skills_revised.csv&quot;,
   show_col_types = FALSE
 )
 
 salary_revised &lt;- read_csv(
-  &quot;data/jobs_salary_revised.csv&quot;,
+  &quot;Data/jobs_salary_revised.csv&quot;,
   show_col_types = FALSE
 )
 
 comparison &lt;- read_csv(
-  &quot;data/validation_original_vs_revised.csv&quot;,
+  &quot;Data/validation_original_vs_revised.csv&quot;,
   show_col_types = FALSE
 )
 
@@ -3381,8 +3383,84 @@ had a higher median salary midpoint.</p>
 <p>This demonstrates that relationships observed across all jobs may
 differ from relationships observed within particular occupations.</p>
 </div>
-<div id="finding-5-validation-did-not-substantially-change-the-main-findings" class="section level2" number="17.5">
-<h2><span class="header-section-number">17.5</span> Finding 5:
+<div id="finding-5-machine-learning-salary-associations-vary-within-job-categories" class="section level2" number="17.5">
+<h2><span class="header-section-number">17.5</span> Finding 5: Machine
+Learning Salary Associations Vary Within Job Categories</h2>
+<p>Comparing salary-eligible postings within the same job category
+reveals that a machine learning mention does not consistently correspond
+to a higher advertised salary midpoint. The following results were
+verified using <code>jobs_skills_revised.csv</code> and the 178 eligible
+USD salary records.</p>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="21%" />
+<col width="21%" />
+<col width="21%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Job Category</th>
+<th align="right">Jobs Without ML</th>
+<th align="right">Median Without ML</th>
+<th align="right">Jobs With ML</th>
+<th align="right">Median With ML</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AI/ML</td>
+<td align="right">21</td>
+<td align="right">$183,550</td>
+<td align="right">29</td>
+<td align="right">$192,500</td>
+</tr>
+<tr class="even">
+<td>Data Analytics</td>
+<td align="right">34</td>
+<td align="right">$117,750</td>
+<td align="right">6</td>
+<td align="right">$154,910</td>
+</tr>
+<tr class="odd">
+<td>Data Engineering</td>
+<td align="right">35</td>
+<td align="right">$170,000</td>
+<td align="right">5</td>
+<td align="right">$168,500</td>
+</tr>
+<tr class="even">
+<td>Data Science</td>
+<td align="right">11</td>
+<td align="right">$208,000</td>
+<td align="right">16</td>
+<td align="right">$166,960</td>
+</tr>
+<tr class="odd">
+<td>Database</td>
+<td align="right">6</td>
+<td align="right">$151,460</td>
+<td align="right">1</td>
+<td align="right">$182,500</td>
+</tr>
+<tr class="even">
+<td>Statistics</td>
+<td align="right">8</td>
+<td align="right">$179,400</td>
+<td align="right">2</td>
+<td align="right">$207,500</td>
+</tr>
+</tbody>
+</table>
+<p>Business Intelligence had four salary-eligible postings, none of
+which mentioned machine learning, so no within-category comparison was
+possible. Differences in medians are descriptive, not causal effects;
+the groups are small in several categories and may differ in other
+characteristics.</p>
+</div>
+<div id="finding-6-validation-did-not-substantially-change-the-main-findings" class="section level2" number="17.6">
+<h2><span class="header-section-number">17.6</span> Finding 6:
 Validation Did Not Substantially Change the Main Findings</h2>
 <p>After removing three unrelated postings:</p>
 <ul>
@@ -3432,8 +3510,22 @@ between:</p>
 <p>Some skills may be missed because job descriptions use different
 terminology.</p>
 </div>
-<div id="salary-eligibility" class="section level2" number="18.4">
-<h2><span class="header-section-number">18.4</span> 18.4 Salary
+<div id="stored-skill-count-consistency" class="section level2" number="18.4">
+<h2><span class="header-section-number">18.4</span> 18.4 Stored Skill
+Count Consistency</h2>
+<p>The revised dataset contains 30 individual Boolean
+<code>skill_*</code> indicators, plus a separate numeric
+<code>skill_count</code> field. A validation of the revised dataset
+found that the stored <code>skill_count</code> differs from the sum of
+the 30 Boolean indicators in 187 of 226 postings. For reproducible
+skill-demand analysis, this report treats the 30 individual indicators
+as the source of truth and excludes <code>skill_count</code> when
+counting or reshaping skill mentions. Across the revised sample, those
+indicators yield 1,142 job-skill matches and six jobs with zero detected
+tracked skills. The source CSV is left unchanged.</p>
+</div>
+<div id="salary-eligibility" class="section level2" number="18.5">
+<h2><span class="header-section-number">18.5</span> 18.5 Salary
 Eligibility</h2>
 <p>Only 178 of the 226 selected postings were included in the revised
 USD salary analysis.</p>
@@ -3441,8 +3533,8 @@ USD salary analysis.</p>
 salary comparisons.</p>
 <p>This may introduce selection bias.</p>
 </div>
-<div id="salary-midpoints-are-not-actual-earnings" class="section level2" number="18.5">
-<h2><span class="header-section-number">18.5</span> 18.5 Salary
+<div id="salary-midpoints-are-not-actual-earnings" class="section level2" number="18.6">
+<h2><span class="header-section-number">18.6</span> 18.6 Salary
 Midpoints Are Not Actual Earnings</h2>
 <p>The analysis uses the midpoint of advertised salary ranges.</p>
 <p>These values are not necessarily the salaries paid to hired
@@ -3450,8 +3542,8 @@ employees.</p>
 <p>They also do not account for bonuses, equity, or other
 compensation.</p>
 </div>
-<div id="small-sample-sizes" class="section level2" number="18.6">
-<h2><span class="header-section-number">18.6</span> 18.6 Small Sample
+<div id="small-sample-sizes" class="section level2" number="18.7">
+<h2><span class="header-section-number">18.7</span> 18.7 Small Sample
 Sizes</h2>
 <p>Some skills and job categories have relatively few salary
 observations.</p>
@@ -3459,8 +3551,8 @@ observations.</p>
 eligible salary postings.</p>
 <p>Results for small groups should be interpreted cautiously.</p>
 </div>
-<div id="other-factors-affect-salary" class="section level2" number="18.7">
-<h2><span class="header-section-number">18.7</span> 18.7 Other Factors
+<div id="other-factors-affect-salary" class="section level2" number="18.8">
+<h2><span class="header-section-number">18.8</span> 18.8 Other Factors
 Affect Salary</h2>
 <p>Salary differences may depend on:</p>
 <ul>
@@ -3473,10 +3565,14 @@ Affect Salary</h2>
 <li>Company size</li>
 </ul>
 <p>The analysis does not fully control for these variables.</p>
-<p>The available seniority classification was also mostly Unknown.</p>
+<p>Of the 178 salary-eligible postings, 171 (96.1%) had seniority
+labeled <code>Unknown</code>, six were labeled <code>senior</code>, and
+one was labeled <code>mid</code>. Within Data Science, 26 of 27
+salary-eligible postings had unknown seniority. This prevents reliable
+seniority-adjusted comparisons.</p>
 </div>
-<div id="correlation-does-not-imply-causation" class="section level2" number="18.8">
-<h2><span class="header-section-number">18.8</span> 18.8 Correlation
+<div id="correlation-does-not-imply-causation" class="section level2" number="18.9">
+<h2><span class="header-section-number">18.9</span> 18.9 Correlation
 Does Not Imply Causation</h2>
 <p>The results do not prove that learning a particular skill causes an
 increase in salary.</p>
@@ -3511,33 +3607,576 @@ been comprehensively validated.</p>
 <p>Further validation and adjustment for job characteristics would
 strengthen the study.</p>
 </div>
-<div id="next-steps" class="section level1" number="20">
-<h1><span class="header-section-number">20</span> 20. Next Steps</h1>
+<div id="postgresql-relational-database-implementation" class="section level1" number="20">
+<h1><span class="header-section-number">20</span> 20. PostgreSQL
+Relational Database Implementation</h1>
+<div id="objective-and-tools" class="section level2" number="20.1">
+<h2><span class="header-section-number">20.1</span> 20.1 Objective and
+Tools</h2>
+<p>After completing the revised R analysis, we organized Dataset 1 into
+a normalized relational database using PostgreSQL 18 and pgAdmin 4. The
+database is named <code>data607_project3</code>, and the tables are in
+the <code>public</code> schema. The R script
+<code>13_normalize_dataset.R</code> produced the normalized exports in
+<code>Data/Normalized/</code>.</p>
+<p>This phase focuses exclusively on Dataset 1. It provides a
+reproducible relational structure and independent SQL summaries to
+compare with the revised R findings.</p>
+</div>
+<div id="relational-schema" class="section level2" number="20.2">
+<h2><span class="header-section-number">20.2</span> 20.2 Relational
+Schema</h2>
+<table>
+<colgroup>
+<col width="23%" />
+<col width="23%" />
+<col width="23%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Table</th>
+<th>Primary key</th>
+<th>Purpose</th>
+<th align="right">Imported rows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>company</code></td>
+<td><code>company_id</code></td>
+<td>One record per company</td>
+<td align="right">210</td>
+</tr>
+<tr class="even">
+<td><code>job_posting</code></td>
+<td><code>job_id</code></td>
+<td>Selected jobs and occupational attributes</td>
+<td align="right">226</td>
+</tr>
+<tr class="odd">
+<td><code>salary</code></td>
+<td><code>job_id</code></td>
+<td>Salary fields and eligibility flags, one per job</td>
+<td align="right">226</td>
+</tr>
+<tr class="even">
+<td><code>skill</code></td>
+<td><code>skill_id</code></td>
+<td>Dictionary of tracked technical skills</td>
+<td align="right">30</td>
+</tr>
+<tr class="odd">
+<td><code>job_skill</code></td>
+<td>(<code>job_id</code>, <code>skill_id</code>)</td>
+<td>Many-to-many relationship between jobs and skills</td>
+<td align="right">1,142</td>
+</tr>
+</tbody>
+</table>
+<p>Foreign-key relationships are <code>job_posting.company_id</code> →
+<code>company.company_id</code>, <code>salary.job_id</code> →
+<code>job_posting.job_id</code>, <code>job_skill.job_id</code> →
+<code>job_posting.job_id</code>, and <code>job_skill.skill_id</code> →
+<code>skill.skill_id</code>. The <code>job_skill</code> composite key
+prevents duplicate job-skill pairs. These five tables contain 1,834
+records in total, counting records across tables rather than unique
+jobs.</p>
+<p>The exact <code>CREATE TABLE</code> statements, data types, primary
+keys, and foreign-key constraints are stored in
+<code>SQL guide/Dataset1_Create_Tables.sql</code>; the combined script
+is <code>SQL guide/Dataset1_All_Queries.sql</code>.</p>
+</div>
+<div id="data-export-and-import" class="section level2" number="20.3">
+<h2><span class="header-section-number">20.3</span> 20.3 Data Export and
+Import</h2>
+<p>The R normalization script exported <code>COMPANY.csv</code>,
+<code>JOB_POSTING.csv</code>, <code>SALARY.csv</code>,
+<code>SKILL.csv</code>, and <code>JOB_SKILL.csv</code> into
+<code>Data/Normalized/</code>, together with
+<code>Dataset1_Normalized_Database.xlsx</code>. The CSV files were
+imported into PostgreSQL using pgAdmin’s Import/Export Data feature.</p>
+<p>Import order matters because of the foreign keys:
+<code>company</code> first, then <code>job_posting</code>, then
+<code>salary</code> and <code>skill</code>, and finally
+<code>job_skill</code>. During salary import, missing values encoded as
+<code>NA</code> were interpreted as SQL <code>NULL</code> by setting
+pgAdmin’s <strong>NULL String</strong> option to <code>NA</code>. This
+avoids attempting to store the literal text <code>NA</code> in numeric
+salary fields. The database’s imported salary eligibility flags were
+retained rather than recomputed during import.</p>
+</div>
+<div id="postgresql-verification" class="section level2" number="20.4">
+<h2><span class="header-section-number">20.4</span> 20.4 PostgreSQL
+Verification</h2>
+<p>The database was checked with record-count, key-uniqueness,
+relationship, join, and salary-eligibility queries. All five imported
+record counts matched the normalized R exports:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Table</th>
+<th align="right">Expected</th>
+<th align="right">Observed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>company</code></td>
+<td align="right">210</td>
+<td align="right">210</td>
+</tr>
+<tr class="even">
+<td><code>job_posting</code></td>
+<td align="right">226</td>
+<td align="right">226</td>
+</tr>
+<tr class="odd">
+<td><code>salary</code></td>
+<td align="right">226</td>
+<td align="right">226</td>
+</tr>
+<tr class="even">
+<td><code>skill</code></td>
+<td align="right">30</td>
+<td align="right">30</td>
+</tr>
+<tr class="odd">
+<td><code>job_skill</code></td>
+<td align="right">1,142</td>
+<td align="right">1,142</td>
+</tr>
+</tbody>
+</table>
+<p>The final SQL quality check returned <strong>226 jobs</strong>,
+<strong>178 eligible USD salary records</strong>, <strong>zero eligible
+records with missing salary midpoints</strong>, <strong>zero duplicate
+job-skill pairs</strong>, and <strong>six jobs without matches among the
+30 tracked skills</strong>. A five-table join also returned job titles,
+company names, categories, salary midpoints, and concatenated skills.
+The six zero-skill postings were expected after the manual review; lack
+of a dictionary match is not itself evidence that a posting is
+unrelated.</p>
+</div>
+<div id="sql-skill-demand-and-salary-results" class="section level2" number="20.5">
+<h2><span class="header-section-number">20.5</span> 20.5 SQL Skill
+Demand and Salary Results</h2>
+<p>SQL analysis reproduced the revised skill-demand rankings. The most
+frequent skill mentions were Python (<strong>163 jobs; 72.12%</strong>),
+SQL (<strong>133; 58.85%</strong>), Machine Learning (<strong>74;
+32.74%</strong>), and LLM (<strong>60; 26.55%</strong>). A job could
+mention more than one skill, so these percentages do not sum to
+100%.</p>
+<p>Among eligible USD salary postings, the highest observed
+skill-associated median annual salary midpoints included Generative AI
+(<strong>$196,500; n = 15</strong>), PyTorch (<strong>$195,050; n =
+23</strong>), Deep Learning (<strong>$193,300; n = 13</strong>), and LLM
+(<strong>$190,900; n = 51</strong>). Python’s corresponding median was
+<strong>$165,000 (n = 131)</strong> and SQL’s was <strong>$152,500 (n =
+105)</strong>. These are medians of advertised range midpoints for
+postings mentioning a skill, not compensation premiums attributable to
+that skill.</p>
+<p>The SQL category comparison found median annual salary midpoints of
+<strong>$196,500</strong> for Data Science (27 eligible salary records),
+<strong>$191,250</strong> for AI/ML (50), <strong>$170,000</strong> for
+Data Engineering (40), <strong>$118,750</strong> for Data Analytics
+(40), and <strong>$114,213.25</strong> for Business Intelligence (4).
+Statistics and Database had medians of $179,500 (10) and $152,500 (7),
+respectively.</p>
+</div>
+<div id="ai-related-skill-mentions-by-category" class="section level2" number="20.6">
+<h2><span class="header-section-number">20.6</span> 20.6 AI-Related
+Skill Mentions by Category</h2>
+<p>For an additional SQL analysis, a posting was classified as
+requesting an AI-related skill when at least one of the following six
+tracked terms was detected: <strong>Machine Learning, LLM, Generative
+AI, Deep Learning, PyTorch, or TensorFlow</strong>. This composite AI
+indicator is distinct from the single <em>Machine Learning</em>
+indicator used in Finding 5 above.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Job category</th>
+<th align="right">Jobs with ≥1 AI skill</th>
+<th align="right">Total jobs</th>
+<th align="right">Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AI/ML</td>
+<td align="right">55</td>
+<td align="right">59</td>
+<td align="right">93.22%</td>
+</tr>
+<tr class="even">
+<td>Data Science</td>
+<td align="right">26</td>
+<td align="right">39</td>
+<td align="right">66.67%</td>
+</tr>
+<tr class="odd">
+<td>Data Engineering</td>
+<td align="right">16</td>
+<td align="right">55</td>
+<td align="right">29.09%</td>
+</tr>
+<tr class="even">
+<td>Data Analytics</td>
+<td align="right">11</td>
+<td align="right">49</td>
+<td align="right">22.45%</td>
+</tr>
+<tr class="odd">
+<td>Statistics</td>
+<td align="right">2</td>
+<td align="right">10</td>
+<td align="right">20.00%</td>
+</tr>
+<tr class="even">
+<td>Database</td>
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">12.50%</td>
+</tr>
+<tr class="odd">
+<td>Business Intelligence</td>
+<td align="right">0</td>
+<td align="right">6</td>
+<td align="right">0.00%</td>
+</tr>
+</tbody>
+</table>
+<p>AI-related skill mentions were most concentrated in AI/ML and Data
+Science, the two categories with the highest observed median salary
+midpoints. However, this does not establish a causal relationship.</p>
+</div>
+<div id="within-category-ai-skill-salary-comparisons" class="section level2" number="20.7">
+<h2><span class="header-section-number">20.7</span> 20.7 Within-Category
+AI Skill Salary Comparisons</h2>
+<p>To examine job-category composition, SQL compared salary-eligible
+postings mentioning at least one of the six AI skills with those
+mentioning none. Each job was counted once using an <code>EXISTS</code>
+test, even when it mentioned several AI skills.</p>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="21%" />
+<col width="21%" />
+<col width="21%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Job category</th>
+<th align="right">AI-skill jobs</th>
+<th align="right">AI-skill median</th>
+<th align="right">No-AI jobs</th>
+<th align="right">No-AI median</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AI/ML</td>
+<td align="right">47</td>
+<td align="right">$192,500</td>
+<td align="right">3</td>
+<td align="right">$172,500</td>
+</tr>
+<tr class="even">
+<td>Data Analytics</td>
+<td align="right">11</td>
+<td align="right">$152,320</td>
+<td align="right">29</td>
+<td align="right">$117,500</td>
+</tr>
+<tr class="odd">
+<td>Data Engineering</td>
+<td align="right">13</td>
+<td align="right">$170,000</td>
+<td align="right">27</td>
+<td align="right">$170,000</td>
+</tr>
+<tr class="even">
+<td>Data Science</td>
+<td align="right">18</td>
+<td align="right">$179,250</td>
+<td align="right">9</td>
+<td align="right">$217,400</td>
+</tr>
+<tr class="odd">
+<td>Database</td>
+<td align="right">1</td>
+<td align="right">$182,500</td>
+<td align="right">6</td>
+<td align="right">$151,460</td>
+</tr>
+<tr class="even">
+<td>Statistics</td>
+<td align="right">2</td>
+<td align="right">$207,500</td>
+<td align="right">8</td>
+<td align="right">$179,400</td>
+</tr>
+</tbody>
+</table>
+<p>Business Intelligence had four eligible salary records and no
+postings with any of the six tracked AI skills, so a within-category
+comparison was not possible.</p>
+<p>The relationship was <strong>mixed</strong>: AI-skill postings had
+higher medians in Data Analytics and AI/ML, identical medians in Data
+Engineering, and a lower median in Data Science. Several groups were
+extremely small (for example, three no-AI AI/ML jobs and one AI-skill
+Database job). The differences should therefore be treated as
+exploratory descriptive comparisons, not causal effects or reliable
+estimates of skill premiums.</p>
+</div>
+<div id="sql-scripts-and-reproducibility" class="section level2" number="20.8">
+<h2><span class="header-section-number">20.8</span> 20.8 SQL Scripts and
+Reproducibility</h2>
+<p>The saved SQL scripts are:</p>
+<ul>
+<li><code>SQL guide/Dataset1_Create_Tables.sql</code> — create the five
+tables and their constraints.</li>
+<li><code>SQL guide/Dataset1_Analysis.sql</code> — verification, demand,
+salary, category, and AI-skill analyses.</li>
+<li><code>SQL guide/Dataset1_All_Queries.sql</code> — combined reference
+script.</li>
+</ul>
+<p>The scripts document SQL logic; the CSV imports are performed
+separately through pgAdmin. For a new, empty database, create the
+tables, import CSVs in dependency order with <code>NA</code> as the NULL
+string, and then run the analysis and verification queries. On an
+already populated database, avoid importing the same records again.
+Results reflect the revised 226-job sample, not all 9,173 source
+postings or the broader labor market.</p>
+</div>
+</div>
+<div id="interactive-r-shiny-dashboard-current-development-version" class="section level1" number="21">
+<h1><span class="header-section-number">21</span> 21. Interactive R
+Shiny Dashboard (Current Development Version)</h1>
+<div id="purpose-and-scope" class="section level2" number="21.1">
+<h2><span class="header-section-number">21.1</span> 21.1 Purpose and
+Scope</h2>
+<p>An interactive <strong>Data Science Job Market Insights</strong>
+dashboard was developed for Dataset 1 to make the descriptive results
+easier to explore and present. The dashboard is implemented in R Shiny,
+uses <code>bslib</code> for its interface and <code>ggplot2</code> with
+<code>plotly</code> for interactive visualizations, and queries the
+normalized PostgreSQL database. It supplements, rather than replaces,
+the reproducible R and SQL analyses described above.</p>
+<p>The working application is saved as <code>Dashboard/app.R</code> in
+the RStudio project. A separate
+<code>Dashboard/01_test_connection.R</code> script was used to confirm
+that R can connect to the local PostgreSQL database and retrieve the
+expected table counts.</p>
+</div>
+<div id="architecture-and-data-flow" class="section level2" number="21.2">
+<h2><span class="header-section-number">21.2</span> 21.2 Architecture
+and Data Flow</h2>
+<p>The local dashboard follows this workflow:</p>
+<ol style="list-style-type: decimal">
+<li>The original postings are cleaned, classified, and validated in
+R.</li>
+<li><code>13_normalize_dataset.R</code> creates the five relational CSV
+exports.</li>
+<li>The exports are imported into the PostgreSQL database
+<code>data607_project3</code> using pgAdmin.</li>
+<li>The Shiny application connects through <code>DBI</code> and
+<code>RPostgres</code> and runs SQL queries against the five normalized
+tables.</li>
+<li><code>bslib</code> renders the summary cards and filter, while
+<code>ggplot2</code> and <code>plotly</code> render the charts.</li>
+</ol>
+<p>The database connection uses <code>localhost</code> and port
+<code>5432</code> in the <strong>local development environment</strong>.
+The PostgreSQL password is requested interactively using
+<code>rstudioapi::askForPassword()</code> rather than being embedded in
+the source code. Passwords should not be committed to version control or
+included in submitted documentation.</p>
+</div>
+<div id="current-dashboard-features" class="section level2" number="21.3">
+<h2><span class="header-section-number">21.3</span> 21.3 Current
+Dashboard Features</h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Current behavior</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Job postings card</td>
+<td>Displays 226 selected postings</td>
+<td><code>job_posting</code></td>
+</tr>
+<tr class="even">
+<td>Eligible salaries card</td>
+<td>Displays 178 USD-eligible salary records with nonmissing
+midpoints</td>
+<td><code>salary</code></td>
+</tr>
+<tr class="odd">
+<td>Tracked skills card</td>
+<td>Displays 30 technical skills</td>
+<td><code>skill</code></td>
+</tr>
+<tr class="even">
+<td>Median annual salary card</td>
+<td>Displays the overall median advertised salary midpoint
+($165,000)</td>
+<td><code>salary</code></td>
+</tr>
+<tr class="odd">
+<td>Top 10 in-demand skills chart</td>
+<td>Interactive horizontal bar chart of skill mentions</td>
+<td><code>skill</code>, <code>job_skill</code>,
+<code>job_posting</code></td>
+</tr>
+<tr class="even">
+<td>Salary by job category chart</td>
+<td>Interactive horizontal bar chart of category-level median annual
+salary midpoints</td>
+<td><code>job_posting</code>, <code>salary</code></td>
+</tr>
+<tr class="odd">
+<td>Job category dropdown</td>
+<td>Updates the Top 10 skills chart for the selected category</td>
+<td>Parameterized PostgreSQL query</td>
+</tr>
+</tbody>
+</table>
+<p>The dashboard initially displays the overall sample. In the current
+version, selecting a job category <strong>changes the skill-demand chart
+only</strong>; the summary cards and category salary chart continue to
+show overall results. This distinction is important when interpreting
+filtered views. The chart counts are descriptive, and salary values are
+advertised USD range midpoints rather than observed earnings.</p>
+</div>
+<div id="local-testing-and-current-status" class="section level2" number="21.4">
+<h2><span class="header-section-number">21.4</span> 21.4 Local Testing
+and Current Status</h2>
+<p>The PostgreSQL connection test succeeded, and the Shiny application
+launched successfully in RStudio. During development, PostgreSQL
+<code>COUNT(*)</code> values returned to R as <code>integer64</code>
+triggered a formatting error in <code>scales::comma()</code>. Converting
+those counts to standard R numeric values resolved the issue. This
+conversion is safe for the small counts in the selected Dataset 1
+sample.</p>
+<p>The job-category filter has been added to the current
+<code>app.R</code>. Group review and any requested dashboard changes are
+pending. The application has <strong>not yet been published
+online</strong>, and a public dashboard URL is therefore not
+available.</p>
+</div>
+<div id="planned-online-publication" class="section level2" number="21.5">
+<h2><span class="header-section-number">21.5</span> 21.5 Planned Online
+Publication</h2>
+<p>After the group approves the final dashboard, the team plans to
+publish it online so classmates and the instructor can view it without
+running RStudio. A possible hosting service is
+<code>shinyapps.io</code>, subject to the team’s final choice and
+deployment testing.</p>
+<p>Because the current application connects to PostgreSQL at
+<code>localhost</code>, it cannot use that same connection unchanged
+from a hosted server. Two possible deployment architectures are under
+consideration:</p>
+<ul>
+<li><strong>Prepared data snapshot:</strong> Export the required
+analysis tables or aggregates and bundle them with the hosted Shiny
+application. This is simpler for a static class-project dataset, but the
+hosted application would no longer query PostgreSQL live.</li>
+<li><strong>Hosted PostgreSQL:</strong> Use a securely hosted PostgreSQL
+instance and configure the deployed application with protected
+connection credentials. This retains live SQL integration but requires
+additional infrastructure and security configuration.</li>
+</ul>
+<p>No hosting approach has been finalized. Once published, the final
+URL, hosting architecture, access instructions, and any changes to the
+data refresh process should be recorded here.</p>
+</div>
+<div id="dashboard-limitations-and-future-improvements" class="section level2" number="21.6">
+<h2><span class="header-section-number">21.6</span> 21.6 Dashboard
+Limitations and Future Improvements</h2>
+<p>The dashboard inherits the study’s selection, classification,
+skill-detection, and salary limitations. It should not be interpreted as
+a representative labor-market survey or a causal estimate of
+skill-related pay differences.</p>
+<p>Potential changes for group discussion include making all summary
+cards responsive to the job-category filter, adding skill and salary
+filters, adding an interactive demand-versus-salary comparison,
+providing downloadable filtered tables, and expanding the AI-related
+skill analysis. These are <strong>proposed enhancements</strong>, not
+implemented features of the current version.</p>
+</div>
+<div id="running-the-local-dashboard" class="section level2" number="21.7">
+<h2><span class="header-section-number">21.7</span> 21.7 Running the
+Local Dashboard</h2>
+<ol style="list-style-type: decimal">
+<li>Start the local PostgreSQL service and confirm that
+<code>data607_project3</code> contains the normalized tables.</li>
+<li>Open the RStudio project and ensure the packages <code>shiny</code>,
+<code>bslib</code>, <code>DBI</code>, <code>RPostgres</code>,
+<code>dplyr</code>, <code>ggplot2</code>, <code>plotly</code>,
+<code>scales</code>, and <code>rstudioapi</code> are installed.</li>
+<li>Open <code>Dashboard/app.R</code> and select <strong>Run
+App</strong>, or run <code>shiny::runApp(&quot;Dashboard&quot;)</code> from the
+project root.</li>
+<li>Enter the PostgreSQL password when prompted.</li>
+<li>Check the four summary cards and two charts; select a category to
+test the skill-demand filter.</li>
+</ol>
+<p>This dashboard section records the <strong>working development
+version</strong>. It should be revised after group feedback and again
+after successful online deployment.</p>
+</div>
+</div>
+<div id="next-steps" class="section level1" number="22">
+<h1><span class="header-section-number">22</span> 22. Next Steps</h1>
 <p>Before finalizing Project 3, our team should consider:</p>
 <ol style="list-style-type: decimal">
 <li>Reviewing additional unresolved job postings.</li>
 <li>Evaluating the technical skill dictionary.</li>
 <li>Investigating job location and experience requirements.</li>
-<li>Comparing salary differences within job categories.</li>
+<li>Extending the within-category salary comparisons to additional
+skills and larger samples.</li>
 <li>Discussing how to incorporate Dataset 2.</li>
 </ol>
 <p>Dataset 2 analysis is currently on hold pending team discussion.</p>
 </div>
-<div id="reproducibility" class="section level1" number="21">
-<h1><span class="header-section-number">21</span> 21.
+<div id="reproducibility" class="section level1" number="23">
+<h1><span class="header-section-number">23</span> 23.
 Reproducibility</h1>
 <p>To reproduce the revised Dataset 1 analysis:</p>
 <ol style="list-style-type: decimal">
-<li>Place the original job-postings CSV in the <code>data/</code>
+<li>Place the original job-postings CSV in the <code>Data/</code>
 folder.</li>
 <li>Run scripts 01 through 11 in order.</li>
 <li>Run <code>12_validate_results.R</code>.</li>
 <li>Run <code>12B_review_exceptions.R</code>.</li>
 <li>Complete the manual review decisions.</li>
 <li>Place <code>validation_manual_review_sheet_completed.csv</code> in
-<code>data/</code>.</li>
+<code>Data/</code>.</li>
 <li>Run <code>12C_apply_review_decisions.R</code>.</li>
 <li>Open this R Markdown document.</li>
+<li>Run <code>13_normalize_dataset.R</code> to create the five
+normalized CSV exports.</li>
+<li>Create the PostgreSQL tables using
+<code>SQL guide/Dataset1_Create_Tables.sql</code>.</li>
+<li>Import the CSVs in foreign-key dependency order, treating
+<code>NA</code> as SQL <code>NULL</code>.</li>
+<li>Run the verification and analysis queries in
+<code>SQL guide/Dataset1_Analysis.sql</code>.</li>
+<li>Confirm the local dashboard works using
+<code>shiny::runApp(&quot;Dashboard&quot;)</code> (requires the local PostgreSQL
+service).</li>
 <li>Select <strong>Knit to HTML</strong>.</li>
 </ol>
 <p>The final report uses these revised outputs:</p>
@@ -3553,7 +4192,9 @@ folder.</li>
 <p>The historical results from Steps 09–11 are retained for
 transparency.</p>
 <p>This document describes the current Dataset 1 workflow, validation
-decisions, and preliminary research findings.</p>
+decisions, normalized PostgreSQL implementation, preliminary research
+findings, and locally tested Shiny dashboard. Online publication and
+group-requested dashboard revisions remain pending.</p>
 </div>
 
 
