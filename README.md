@@ -1,355 +1,93 @@
-# CS355 Project 3
-This is a full-featured Quiz Web App built using HTML, CSS, and JavaScript, with a Node.js + Express backend that serves questions from a JSON file. The app supports a clean UI, interactive gameplay, and advanced features like dark mode, progress tracking, review mode, and more.
+# DATA 607 — Project 3: Data Science Skills and Salaries
 
-Github repo Link: https://github.com/Afwans/CS355-project-3-
+## Research question
 
-Website link: https://quiz-app-rrfw.onrender.com
+**Which data science skills are most in demand, and how do those skills relate to salaries?**
 
+This project uses job-posting data to investigate skill demand and advertised compensation for data-related roles. The analysis is performed in R, with a proposed normalized relational model documenting how companies, postings, salaries, and skills relate.
 
-------------------------------------------------------------------------------------------------------------------------------------------
+## Dataset 1 overview
 
+| Measure | Result |
+| --- | ---: |
+| Cleaned job postings | 9,173 |
+| Postings included in the revised skill analysis | 226 |
+| Individual skills tracked | 30 |
+| Detected job–skill associations | 1,142 |
+| Jobs with no detected tracked skill | 6 |
+| Jobs eligible for the USD salary analysis | 178 |
+| Median advertised annual salary midpoint (eligible jobs) | $165,000 |
 
-🚀 Features
+The 226 postings analyzed for skills are a subset of the 9,173 cleaned postings. Salary summaries should not be interpreted as representing all postings.
 
+## Selected findings
 
-🎮 Gameplay & Quiz Mechanics
+Among the **226 postings** analyzed for skills:
 
-✅ Start screen with question count selector
+| Skill | Job postings | Share |
+| --- | ---: | ---: |
+| Python | 163 | 72.1% |
+| SQL | 133 | 58.8% |
+| Machine learning | 74 | 32.7% |
+| Large language models (LLMs) | 60 | 26.5% |
 
-✅ Fetches randomized questions from the server
+Skill indicators were extracted from job descriptions using keyword/regular-expression rules. A skill being mentioned in a posting is not proof of proficiency requirements or causal effects on salary. The salary analysis is descriptive rather than causal.
 
-✅ Multiple choice questions with randomized answer order
+## Entity–relationship (ER) diagram
 
-✅ Practice Mode and Timed Mode support
+![Proposed normalized Dataset 1 ER diagram](ER_Diagram/Dataset1_ER_Diagram.png)
 
-✅ Timer per question (10 seconds) with timeout popup
+The diagram is a **proposed relational design**, not a claim that these five tables currently exist as physical database tables.
 
-✅ Progress tracker (text + animated progress bar)
+| Entity | Purpose | Key |
+| --- | --- | --- |
+| `COMPANY` | Identifies organizations advertising roles | `company_id` (PK) |
+| `JOB_POSTING` | Describes each job and links it to a company | `job_id` (PK), `company_id` (FK) |
+| `SALARY` | Holds compensation attributes for a posting | `job_id` (PK and FK) |
+| `SKILL` | Catalog of the 30 tracked skills | `skill_id` (proposed PK) |
+| `JOB_SKILL` | Connects jobs to detected skills | (`job_id`, `skill_id`) composite PK and FKs |
 
-✅ Review mode (shows your answers vs. correct ones)
+A company can advertise multiple jobs. Each posting has a corresponding salary record in the proposed model. Job postings and skills have a many-to-many relationship, implemented through `JOB_SKILL`; a posting may have no detected skills among the 30 tracked indicators.
 
-✅ End-of-quiz score display with feedback message
+The original `jobs_skills_revised.csv` stores the 30 skill indicators as TRUE/FALSE columns. The `JOB_SKILL` entity represents a normalized transformation of these columns. The stored `skill_count` field differs from the sum of the individual indicators for **187 of 226** postings; the ER model therefore uses the individual skill flags to define the **1,142** detected associations. The reason for the discrepancy has not been established.
 
-✅ Final animated message based on score
+See [ER diagram documentation](Dataset1_ER_Diagram_Documentation.Rmd) for further detail. The diagram source and reproducible R script are in [`ER_Diagram/`](ER_Diagram/).
 
-✅ Replay functionality (restart quiz easily)
+## Project files
 
+- `Data/` — project data and derived analysis outputs.
+- `01_explore_jobs.R` through `12_validate_results.R`, including the `12B` and `12C` review scripts — data exploration, cleaning, classification, validation, skill extraction, and salary analysis.
+- `DATA607_Project3_Dataset1_Documentation.Rmd` — Dataset 1 analysis documentation.
+- `Dataset1_ER_Diagram_Documentation.Rmd` — ER diagram documentation.
+- `ER_Diagram/Dataset1_ER_Diagram.png` — ER diagram image.
+- `ER_Diagram/Dataset1_ER_Diagram.dot` — editable Graphviz source.
+- `ER_Diagram/Dataset1_ER_Diagram.R` — R script to render the diagram.
+- `ER_Diagram/Dataset1_ER_Diagram.html` — HTML version of the diagram.
 
+## Reproducing the ER diagram
 
-🧑‍💻 User System & Personalization
+Open the project in RStudio and run the following from the **repository root**:
 
-✅ Full user authentication with signup, login, logout
+```r
+# Install once if needed:
+install.packages(c("DiagrammeR", "DiagrammeRsvg", "rsvg"))
 
-✅ Account handling with session-based security
+source("ER_Diagram/Dataset1_ER_Diagram.R")
+```
 
-✅ User storage and maintenance via backend/database
+The script uses the `.dot` file in the `ER_Diagram/` folder. Consult the script for its exact output behavior and package requirements.
 
-✅ Customizable user profiles with profile picture
+To render the ER documentation in RStudio, open `Dataset1_ER_Diagram_Documentation.Rmd` and knit to HTML, using the project root as the working directory if necessary.
 
-✅ Editable bio, username, email, and password
+## Limitations
 
-✅ Greeting message upon login
+- The job-posting dataset is not necessarily representative of the entire data science labor market.
+- The skill analysis uses 226 selected postings, not the entire cleaned dataset.
+- Keyword-based extraction may miss skills or identify mentions that are not actual requirements.
+- Salary ranges, currencies, and validity flags require filtering before meaningful comparisons.
+- Relationships between skill mentions and salary are associations, not evidence that a skill causes higher pay.
+- The ER diagram is a proposed normalized structure derived from flat CSV data.
 
-✅ Avatar selector with image preview and update
+## Repository
 
-✅ Seamless profile update experience
-
-✅ Profile game history tracking and display
-
-
-
-📊 Leaderboard & Scoring
-
-✅ Real-time leaderboard showcasing top-performing users
-
-✅ Game score + time-per-question tracking
-
-✅ Daily scores stored in MongoDB (if Daily Quiz added)
-
-
-
-🌙 UI Enhancements
-
-✅ Dark mode toggle
-
-✅ Sound mode toggle
-
-✅ Sound effects for correct, wrong, and timeout
-
-✅ Emoji rain animations for right/wrong answers
-
-✅ Mobile-friendly and responsive layout
-
-✅ Timer visually styled and placed under progress bar
-
-
-
-🎯 Advanced Features
-
-✅ Daily Quiz Challenge (in progress / planned)
-
-✅ Practice vs Timed mode distinction
-
-✅ Final popup and timeout popup messages
-
-✅ Layout built with modular EJS partials
-
-✅ Environment-based secret handling via .env
-
-
-------------------------------------------------------------------------------------------------------------------------------------------
-
-
-🧠 Technologies Used
-
-
-🖥️ Frontend
-
-HTML – for structure and layout
-
-CSS – custom styles including dark mode and animations
-
-JavaScript – for quiz logic, user interaction, sound effects, and timers
-
-EJS (Embedded JavaScript) – dynamic templates rendered on the server
-
-
-🧰 Backend
-
-Node.js – runtime for executing server-side logic
-
-Express.js – lightweight web framework for routing and middleware
-
-Express-session – handles user login sessions securely
-
-
-🗃️ Data & Persistence
-
-MongoDB with Mongoose – stores users, games, avatars, scores, and profiles
-
-Static JSON file (originally) – for basic question storage (if used in early version)
-
-Open Trivia DB (optional upgrade) – API for dynamic quiz content
-
-dotenv – loads environment variables from .env for security
-
-------------------------------------------------------------------------------------------------------------------------------------------
-
- 
-Project Structure
-
-quiz-app/
-
-│
-
-├── bin/
-
-│   └── www                   
-
-│
-
-├── controllers/              
-
-│   ├── authController.js
-
-│   ├── leaderboardController.js
-
-│   ├── profileController.js
-
-│   ├── quizController.js
-
-│   └── settingsController.js
-
-│
-
-├── routes/                  
-
-│   ├── auth.js
-
-│   ├── index.js
-
-│   ├── leaderboard.js
-
-│   ├── profile.js
-
-│   ├── quiz.js
-
-│   └── settings.js
-
-│
-
-├── models/                  
-
-│   ├── Avatar.js
-
-│   ├── Game.js
-
-│   └── User.js
-
-│
-
-├── views/                    
-
-│   ├── auth/                
-
-│   │   ├── signin.ejs
-
-│   │   └── signup.ejs
-
-│   │
-
-│   ├── main/                 
-
-│   │   ├── index.ejs
-
-│   │   ├── leaderboard.ejs
-
-│   │   ├── profile.ejs
-
-│   │   ├── quiz.ejs
-
-│   │   ├── results.ejs
-
-│   │   └── settings.ejs
-
-│   │
-
-│   ├── partials/             
-
-│   │   ├── header.ejs
-
-│   │   └── popup.ejs
-
-│   │
-
-│   └── error.ejs            
-
-│
-
-├── public/                 
-│   ├── JavaScript/          
-
-│   │   ├── darkmode.js
-
-│   │   ├── navbar.js
-
-│   │   ├── profileSettings.js
-
-│   │   └── script.js
-
-│   │
-
-│   ├── Stylesheets/        
-
-│   │   ├── auth.css
-
-│   │   ├── popup.css
-
-│   │   ├── quiz.css
-
-│   │   ├── profile.css
-
-│   │   ├── setting.css
-
-│   │   ├── bass.css
-
-│   │   └── darkmode.css
-
-│   │
-
-│   ├── Stylesheets2/        
-
-│   │   ├── homepage.css
-
-│   │   ├── style.css
-
-│   │   └── settings.css
-
-│   │
-
-│   ├── sound/             
-
-│   └── Images/             
-
-│
-
-├── .env                     
-
-├── app.js                   
-
-├── package.json             
-
-└── README.md               
-
-
-------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-📦 Setup Instructions
-
-
-1. Clone the repo:
-
-   git clone https://github.com/Afwans/quiz-app.git
-
-   cd quiz-app
-
-3. Install dependencies:
-
-   npm install
-
-
-4. Create .env file:
-
-Then add the following inside:
-
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/quiz-app
-
-PORT=3000
-
-
-5. Start the server:
-
-   npm start / node app.js
-
-6. Access the app:
-
-   Visit http://localhost:3000 in your browser
-   
-7. To access the App online, please use this link
-
-   Visit [quiz-app-rrfw.onrender.com]
-
-   
-🧑 Authors
-1. Mohd Afwan Shaikh [https://www.linkedin.com/in/mohdafwan/] [https://afwans.github.io/]
-2. Nageen Saira [https://www.linkedin.com/in/nageensaira/] [https://nageen123-saira.github.io/port/]
-3. Arjun Chhabra [https://www.linkedin.com/in/arjun-chhabra-22150b247/] [https://github.com/Jun1604] 
-4. Sadia Sharmin [https://www.linkedin.com/in/sadiasharmin16/] [https://ssharmin28.github.io/]
-
-
-Contribution to the project 
-
-| Name  | Contribution | Worked on 
-| ----- | ----- | ----- |
-| Mohd Afwan Shaikh  | Backend + Core Features | Project Architecture & Planning, Backend API Setup (Node.js + Express), User storage and maintenance (via backend/database), Account Handling and Security, Real-time leaderboard showcasing top-performing users, Game history tracking and display, Final Message based on Scores, Greeting Message, Deployment & Error Handling, Assistance in all modules for debugging & integration, and more |
-| Arjun Chhabra | Frontend Developer - Core UI | Start screen with question count selector, Multiple choice questions UI, Shuffled answer order, Timer per question (10 seconds), End-of-quiz score display, Review mode (show your answers vs. correct), Replay functionality, Practice mode, Real-time leaderboard showcasing top-performing users, integration, User storage and maintenance, and more |
-| Nageen Saira | UI interaction & User Management | Designed and built Welcome Page, Sign In, and Sign Up pages with proper form validation and user flow, Implemented Sound Toggle Button with audio logic for correct and incorrect answers, Added animated Happy/Sad Emojis on answer feedback, Created Popup Messages for quiz timeout and end-of-quiz results (celebration, emoji, and alerts), Integrated interactive elements into the UI to enhance user engagement and accessibility|
-| Sadia Sharmin | Advanced Features & UI Enhancements | Customizable user profiles, Dark mode toggle, Sound mode toggle, Frontend Sound Integration Logic, Navbar/Settings enhancements, UI Responsiveness across all pages, CSS Styling for the entire project (consistency & theme), integration,  Progress tracker (text + bar),  Final Message based on Scores, Profile Page Styling, Settings Page UI and logic, integration, and more|
-
-Notes:
-* All teammates contributed to testing, feedback, and final tweaks.
-
-* Regular team discussions were held for feature planning and integration.
-
-* Teamwork and communication were essential for project success.
-
-
-
-📄 License
-
-This project is strictly limited to use by Mohd Afwan Shaikh, Arjun Chhabra, Sadia Sharmin, and Nageen Saira. Unauthorized usage, distribution, or modification by others is strictly prohibited and may lead to legal action.
-If found in use outside of the authorized team, it can result in a lawsuit.
-
-
+[Afwans/DATA607-Project3](https://github.com/Afwans/DATA607-Project3) — working branch: `Afwans-patch-1`.
