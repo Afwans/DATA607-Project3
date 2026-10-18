@@ -103,65 +103,32 @@ Students who are unable or unwilling to work in groups may choose to make Projec
 
 ## Outline
 
-**Collaboration tools:**
+Collaboration tools - zoom (communication) - slack (communication) - github (code sharing)
 
-  - zoom (communication) 
-  - slack (communication) 
-  - github (code sharing)
+Data Set selected: Job Postings https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries CVs?
 
-**Data Set selected **- Job Postings: https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries 
+We did explore other databases. For instance, there were other sources for CVs (such as https://www.kaggle.com/datasets/suriyaganesh/resume-dataset-structured/data and https://www.kaggle.com/datasets/saugataroyarghya/resume-dataset) but although CVs could be a good proxy, they reflect what people offer, not what employers are looking for. We also explored descriptions about courses and programs on data science (such as https://www.mastersindatascience.org/learning/data-scientist-skills/hard-skills/ and https: //ischool.syracuse.edu/data-science-skills/). However, they reflect what these institutions teach, which is a reasonable proxy. However, the selected dataset is the best option amon gthese alternatives as it clearly show what companies expect their workers to do and which sills they are expected to have. Additionally we looked at the U.S. Bureau of Labor Statistics which has data on emplpoyment trends, job openings and turnover, and employment projections. These data are available for various years and by sector. However, unlike the selected data set, htey do not mention skills, just the types of jobs.
 
-**Database Entity-Relationship Diagram: **
+Database: - Logical model for normalized database - Entity-Relationship diagram
 
-![](https://github.com/Afwans/DATA607-Project3/blob/main/ER_Diagram/Dataset1_ER_Diagram.png?raw=true)
+Possible Analysis - look at job market - retrospective - how have events effected job market/resumes - Microeconomics trends - geographic variation - what is a valuable skill (by frequency mentioned or salary)
 
+ROLES:
 
-**Possible Analyses:**
-
-  - look at job market 
-  - retrospective (longitudinal)
-  - how have events effected job market/resumes 
-  - \^\^ Microeconomics trends 
-  - geographic variation 
-  - what is a valuable skill (by frequency mentioned or salary)
-
-**Roles:**
-
-Create database (Afwan)
-
-  - Extract skill information from description as discussed
-  - pick N keywords and filter for those results 
-  
-EDA (all)
-
-  - Initial data tidying
-  - Exploratory data analysis, and structuring for R 
-  - Address data quality issues such as missing values and outliers 
-  
-Analysis and Modeling (all)
-
-  - Complete a subset of analysis topics, to be coordinated via slack
-  - Duplication is okay, compare results
-  
-Editor (Jocelyn)
-
-  - Write up intro and discussion
-  - Mash together everyone's analysis into final code base
-  
-Presentation (all)
-
+Data Acquisition (Afwan) - Extract skill information from description - pick N keywords and filter for those results - Database Design Data Preparation and Exploration (Group) - Initial data tidying, Exploratory data analysis, and structuring for R - Perform all data tidying, transformations, and exploratory data analysis in R - Address data quality issues such as missing values and outliers Editor (Jocelyn) - Mash together everyone's analysis into final code base - Everyone to make smaller edits on github Presentation (TBD)
 
 ## Anticipated Challenges
 
--   Extracting skills from job descriptions - inconsistent?
--   Logistics - schedule coordination
+- dating of CVs - using proxy of last job
+- Extracting skills from job descriptions - inconsistent?
+- schedule coordination
 
 ## Submission Requirements
 
--   Post all code and data (SQL, R, Quarto) in a GitHub repository
+- Post all code and data (SQL, R, Quarto) in a GitHub repository
 
--   Submit the GitHub link
+- Submit the GitHub link
 
--   RPubs publication
+- RPubs publication
 
--   Please submit your presentation collateral (e.g. slide deck) before the beginning our our meetup on Wednesday. Only one submission per group is required. In your submission link, please include the names of all participating group members.
+- Please submit your presentation collateral (e.g. slide deck) before the beginning our our meetup on Wednesday. Only one submission per group is required. In your submission link, please include the names of all participating group members.
