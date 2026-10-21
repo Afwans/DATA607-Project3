@@ -71,6 +71,42 @@ jobs_clean <- jobs_clean %>%
     )
   )
 
+# ------------------------------------------------------------
+# STEP 3A: VALIDATE JOB POSTING DATES
+# ------------------------------------------------------------
+
+# Confirm the posting date column is a date-time
+cat("\n--- POSTING DATE VALIDATION ---\n")
+print(class(jobs_clean$posted_at))
+
+# Check posting date completeness and range
+date_validation <- jobs_clean %>%
+  summarise(
+    total_jobs = n(),
+    valid_posting_dates = sum(!is.na(posted_at)),
+    missing_posting_dates = sum(is.na(posted_at)),
+    earliest_posted_date = as.Date(min(posted_at, na.rm = TRUE)),
+    latest_posted_date = as.Date(max(posted_at, na.rm = TRUE))
+  )
+
+print(date_validation)
+
+# Check that cleaning did not change posting timestamps
+date_changes <- jobs_clean %>%
+  select(job_id, posted_at) %>%
+  inner_join(
+    jobs_raw %>% select(job_id, posted_at),
+    by = "job_id",
+    suffix = c("_clean", "_raw")
+  ) %>%
+  filter(
+    posted_at_clean != posted_at_raw
+  )
+
+cat(
+  "Posting timestamps changed during cleaning:",
+  nrow(date_changes), "\n"
+)
 
 # ------------------------------------------------------------
 # STEP 4: VALIDATE SALARY INFORMATION

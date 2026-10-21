@@ -16,6 +16,40 @@ jobs <- read_csv(
   show_col_types = FALSE
 )
 
+cat("\n--- SAVED CLASSIFICATION COUNTS ---\n")
+
+jobs %>%
+  count(classification, sort = TRUE) %>%
+  print()
+
+# ---------------------------------------------------
+# STEP 1A: VALIDATE POSTING DATES
+# ---------------------------------------------------
+
+cat("\n--- POSTING DATE VALIDATION ---\n")
+
+stopifnot("posted_at" %in% names(jobs))
+
+jobs %>%
+  summarise(
+    total_jobs = n(),
+    valid_dates = sum(!is.na(posted_at)),
+    missing_dates = sum(is.na(posted_at)),
+    
+    earliest_date = if (all(is.na(posted_at))) {
+      as.Date(NA)
+    } else {
+      as.Date(min(posted_at, na.rm = TRUE))
+    },
+    
+    latest_date = if (all(is.na(posted_at))) {
+      as.Date(NA)
+    } else {
+      as.Date(max(posted_at, na.rm = TRUE))
+    }
+  ) %>%
+  print()
+
 # STEP 2: Define additional job title patterns
 
 extra_patterns <- list(
@@ -127,6 +161,26 @@ jobs_updated <- jobs %>%
     )
   )
 
+
+# ---------------------------------------------------
+# STEP 4A: VALIDATE UPDATED CLASSIFICATIONS
+# ---------------------------------------------------
+
+stopifnot(
+  nrow(jobs_updated) == nrow(jobs)
+)
+
+stopifnot(
+  n_distinct(jobs_updated$job_id) == nrow(jobs_updated)
+)
+
+stopifnot(
+  identical(jobs_updated$posted_at, jobs$posted_at)
+)
+
+cat("\nClassification and posting date validation passed.\n")
+
+
 # STEP 5: Display results
 
 cat("\nUpdated classification counts:\n")
@@ -142,23 +196,41 @@ jobs_updated %>%
   count(job_category_updated, sort = TRUE) %>%
   print()
 
-# STEP 6: Export results
+# STEP 6: Export results without overwriting existing CSVs
 
-write_csv(
-  jobs_updated,
-  "data/jobs_classified_updated.csv"
-)
+updated_path <- "data/jobs_classified_updated.csv"
 
-write_csv(
-  jobs_updated %>%
-    filter(classification_updated == "Include"),
-  "data/jobs_include_updated.csv"
-)
+if (!file.exists(updated_path)) {
+  write_csv(jobs_updated, updated_path)
+  cat("New updated classification CSV created.\n")
+} else {
+  cat("Existing updated classification CSV preserved.\n")
+}
 
-write_csv(
-  jobs_updated %>%
-    filter(classification_updated == "Review"),
-  "data/jobs_review_remaining.csv"
-)
+included_path <- "data/jobs_include_updated.csv"
 
-cat("\nFiles saved successfully.\n")
+if (!file.exists(included_path)) {
+  write_csv(
+    jobs_updated %>%
+      filter(classification_updated == "Include"),
+    included_path
+  )
+  cat("New included jobs CSV created.\n")
+} else {
+  cat("Existing included jobs CSV preserved.\n")
+}
+
+review_path <- "data/jobs_review_remaining.csv"
+
+if (!file.exists(review_path)) {
+  write_csv(
+    jobs_updated %>%
+      filter(classification_updated == "Review"),
+    review_path
+  )
+  cat("New remaining review CSV created.\n")
+} else {
+  cat("Existing remaining review CSV preserved.\n")
+}
+
+cat("\nScript 07 completed. Existing CSV files were preserved.\n")

@@ -18,6 +18,46 @@ jobs <- read_csv(
   show_col_types = FALSE
 )
 
+# STEP 1A: Validate input data and posting dates
+
+cat("\n--- INPUT DATA VALIDATION ---\n")
+
+required_columns <- c(
+  "job_id",
+  "posted_at",
+  "job_category_updated",
+  "salary_usd_eligible",
+  "salary_min_annual",
+  "salary_max_annual"
+)
+
+stopifnot(all(required_columns %in% names(jobs)))
+
+stopifnot(
+  !anyNA(jobs$job_id),
+  n_distinct(jobs$job_id) == nrow(jobs)
+)
+
+jobs %>%
+  summarise(
+    total_jobs = n(),
+    valid_dates = sum(!is.na(posted_at)),
+    missing_dates = sum(is.na(posted_at)),
+    earliest_date = if (all(is.na(posted_at))) {
+      as.Date(NA)
+    } else {
+      as.Date(min(posted_at, na.rm = TRUE))
+    },
+    latest_date = if (all(is.na(posted_at))) {
+      as.Date(NA)
+    } else {
+      as.Date(max(posted_at, na.rm = TRUE))
+    }
+  ) %>%
+  print()
+
+stopifnot(all(!is.na(jobs$posted_at)))
+
 # STEP 2: Keep eligible USD salary records
 
 salary_jobs <- jobs %>%
@@ -37,6 +77,29 @@ cat(
   nrow(salary_jobs), "\n"
 )
 
+# STEP 2A: Validate salary analysis records
+
+if (nrow(salary_jobs) == 0) {
+  stop("No eligible USD salary records available.")
+}
+
+stopifnot(
+  all(is.finite(salary_jobs$salary_midpoint_annual)),
+  all(salary_jobs$salary_midpoint_annual >= 0),
+  all(!is.na(salary_jobs$posted_at))
+)
+
+cat("\n--- SALARY DATA VALIDATION ---\n")
+
+cat("Total jobs loaded:", nrow(jobs), "\n")
+cat("Salary-eligible jobs:", nrow(salary_jobs), "\n")
+
+cat(
+  "Median annual salary midpoint:",
+  dollar(median(salary_jobs$salary_midpoint_annual)),
+  "\n"
+)
+
 # STEP 3: Identify the 30 technical skill columns
 # Exclude the original numeric skill_count column.
 
@@ -44,6 +107,37 @@ skill_columns <- names(salary_jobs)[
   startsWith(names(salary_jobs), "skill_") &
     names(salary_jobs) != "skill_count"
 ]
+
+# STEP 3A: Validate skill indicators
+
+cat("\n--- SKILL COLUMN VALIDATION ---\n")
+
+cat("Skill columns detected:", length(skill_columns), "\n")
+
+if (length(skill_columns) != 30) {
+  stop(
+    "Expected 30 technical skill columns, but found ",
+    length(skill_columns)
+  )
+}
+
+stopifnot(
+  all(vapply(
+    salary_jobs[skill_columns],
+    is.logical,
+    logical(1)
+  ))
+)
+
+stopifnot(
+  all(vapply(
+    salary_jobs[skill_columns],
+    function(x) !anyNA(x),
+    logical(1)
+  ))
+)
+
+cat("All 30 skill indicators validated.\n")
 
 # STEP 4: Convert skill indicators to long format
 # Keep both TRUE and FALSE for salary comparisons.
@@ -159,28 +253,57 @@ print(p)
 
 # STEP 8: Save results
 
-write_csv(
+# STEP 8: Save results safely
+
+save_csv_if_new <- function(data, path) {
+  
+  if (!file.exists(path)) {
+    
+    write_csv(data, path)
+    
+    cat("Created:", path, "\n")
+    
+  } else {
+    
+    cat("Preserved existing file:", path, "\n")
+    
+  }
+}
+
+save_csv_if_new(
   salary_jobs,
   "data/jobs_salary_analysis.csv"
 )
 
-write_csv(
+save_csv_if_new(
   skill_salary_summary,
   "data/skill_salary_summary.csv"
 )
 
-write_csv(
+save_csv_if_new(
   skill_comparison,
   "data/skill_salary_comparison.csv"
 )
 
-ggsave(
-  "data/skill_salary_chart.png",
-  plot = p,
-  width = 10,
-  height = 7,
-  dpi = 300
-)
+chart_path <- "data/skill_salary_chart.png"
+
+if (!file.exists(chart_path)) {
+  
+  ggsave(
+    filename = chart_path,
+    plot = p,
+    width = 10,
+    height = 7,
+    dpi = 300
+  )
+  
+  cat("Created:", chart_path, "\n")
+  
+} else {
+  
+  cat("Preserved existing chart:", chart_path, "\n")
+  
+}
 
 # STEP 9: Final summary
 
@@ -199,4 +322,5 @@ cat(
   "\n"
 )
 
-cat("\nSalary analysis completed successfully.\n")
+cat("\nScript 10 completed.\n")
+cat("Existing output files were preserved where present.\n")

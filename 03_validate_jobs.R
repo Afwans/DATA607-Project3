@@ -63,11 +63,23 @@ sample_review <- jobs_review %>%
     description
   )
 
-# Export sample for manual review
-write_csv(
-  sample_review,
-  "data/job_review_sample.csv"
-)
+# Protect existing review sample
+sample_path <- "data/job_review_sample.csv"
+
+if (!file.exists(sample_path)) {
+  
+  write_csv(
+    sample_review,
+    sample_path
+  )
+  
+  cat("New review sample exported.\n")
+  
+} else {
+  
+  cat("Existing review sample preserved.\n")
+  
+}
 
 cat("Review sample exported:", nrow(sample_review), "\n")
 
@@ -95,10 +107,24 @@ manual_review <- sample_review %>%
   )
 
 # Export review sheet
-write_csv(
-  manual_review,
-  "data/job_manual_review.csv",
-  na = ""
-)
+# Protect existing manual review decisions
+manual_review_path <- "data/job_manual_review.csv"
 
-cat("Manual review sheet created.\n")
+if (!file.exists(manual_review_path)) {
+  
+  write_csv(
+    manual_review,
+    manual_review_path,
+    na = ""
+  )
+  
+  cat("New manual review sheet created.\n")
+  
+} else {
+  
+  cat("Existing manual review CSV preserved.\n")
+  cat("No manual decisions were overwritten.\n")
+  
+}
+
+cat("Manual review step completed.\n")

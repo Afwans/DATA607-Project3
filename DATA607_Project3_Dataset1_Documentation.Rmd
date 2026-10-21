@@ -1112,72 +1112,122 @@ The saved SQL scripts are:
 
 The scripts document SQL logic; the CSV imports are performed separately through pgAdmin. For a new, empty database, create the tables, import CSVs in dependency order with `NA` as the NULL string, and then run the analysis and verification queries. On an already populated database, avoid importing the same records again. Results reflect the revised 226-job sample, not all 9,173 source postings or the broader labor market.
 
-# 21. Interactive R Shiny Dashboard (Current Development Version)
+# 21. Interactive R Shiny Dashboard (Local and Online)
 
 ## 21.1 Purpose and Scope
 
-An interactive **Data Science Job Market Insights** dashboard was developed for Dataset 1 to make the descriptive results easier to explore and present. The dashboard is implemented in R Shiny, uses `bslib` for its interface and `ggplot2` with `plotly` for interactive visualizations, and queries the normalized PostgreSQL database. It supplements, rather than replaces, the reproducible R and SQL analyses described above.
+We developed an interactive **Data Science Job Market Insights** dashboard for Dataset 1 to present selected job-posting counts, technical skill demand, advertised salaries, and posting dates. The application uses `shiny`, `bslib`, `ggplot2`, and `plotly`. These displays supplement the R and PostgreSQL analyses; they do not establish causal salary relationships or represent the entire job market.
 
-The working application is saved as `Dashboard/app.R` in the RStudio project. A separate `Dashboard/01_test_connection.R` script was used to confirm that R can connect to the local PostgreSQL database and retrieve the expected table counts.
+Two implementations are maintained:
 
-## 21.2 Architecture and Data Flow
+- **Local application:** `Dashboard/app.R` queries the normalized PostgreSQL database `data607_project3` through `DBI` and `RPostgres`.
+- **Online application:** `Dashboard_Online/app.R` reads prepared CSV snapshots from `Dashboard_Online/data/` and is designed for deployment on shinyapps.io. It does not need a connection to the local PostgreSQL server at runtime.
 
-The local dashboard follows this workflow:
+The publicly published application address is <https://mohdafwan.shinyapps.io/data607-project3/>. The URL identifies the existing deployment; whether the *latest date-chart revision* is live must be confirmed by opening the website after redeployment.
 
-1. The original postings are cleaned, classified, and validated in R.
-2. `13_normalize_dataset.R` creates the five relational CSV exports.
-3. The exports are imported into the PostgreSQL database `data607_project3` using pgAdmin.
-4. The Shiny application connects through `DBI` and `RPostgres` and runs SQL queries against the five normalized tables.
-5. `bslib` renders the summary cards and filter, while `ggplot2` and `plotly` render the charts.
+## 21.2 Data Architecture and Workflow
 
-The database connection uses `localhost` and port `5432` in the **local development environment**. The PostgreSQL password is requested interactively using `rstudioapi::askForPassword()` rather than being embedded in the source code. Passwords should not be committed to version control or included in submitted documentation.
+The revised 226-posting dataset is normalized into five related tables: `company`, `job_posting`, `salary`, `skill`, and `job_skill`. The local dashboard queries these tables directly. The online workflow uses the following scripts, run from the `DATA607-Project3` project root:
 
-## 21.3 Current Dashboard Features
+1. `Dashboard_Online/01_export_data.R` exports the five normalized tables from PostgreSQL into `Dashboard_Online/data/` as CSV snapshots. The updated version **does not overwrite files that already exist**.
+2. `Dashboard_Online/02_prepare_dashboard_data.R` reads those exports, checks the expected row counts and posting dates, and prepares `overview.csv`, `skill_demand.csv`, `category_salary.csv`, and `posting_dates.csv`. The updated version preserves existing output files and stops if detected snapshots are inconsistent.
+3. `Dashboard_Online/app.R` loads these prepared summaries and renders the online dashboard.
 
-| Feature | Current behavior | Source |
+**Snapshot safeguard:** Existing CSVs are deliberately preserved, not refreshed automatically. If source data changes, compare and validate the versions before making any deliberate replacements. The export and preparation scripts should be run from the project root because they use paths beginning with `Dashboard_Online/data/`. The online app itself reads paths relative to its app directory, such as `data/posting_dates.csv`.
+
+## 21.3 Dashboard Features and Filter Behavior
+
+| Feature | Display | Data source |
 |---|---|---|
-| Job postings card | Displays 226 selected postings | `job_posting` |
-| Eligible salaries card | Displays 178 USD-eligible salary records with nonmissing midpoints | `salary` |
-| Tracked skills card | Displays 30 technical skills | `skill` |
-| Median annual salary card | Displays the overall median advertised salary midpoint ($165,000) | `salary` |
-| Top 10 in-demand skills chart | Interactive horizontal bar chart of skill mentions | `skill`, `job_skill`, `job_posting` |
-| Salary by job category chart | Interactive horizontal bar chart of category-level median annual salary midpoints | `job_posting`, `salary` |
-| Job category dropdown | Updates the Top 10 skills chart for the selected category | Parameterized PostgreSQL query |
+| Total job postings | 226 selected postings | `job_posting` / `overview.csv` |
+| Eligible salary postings | 178 eligible USD salaries with valid midpoints | `salary` / `overview.csv` |
+| Tracked technical skills | 30 skills | `skill` / `overview.csv` |
+| Median advertised annual salary midpoint | $165,000 | `salary` / `overview.csv` |
+| Top 10 most in-demand skills | Interactive horizontal bars of distinct postings mentioning each skill | PostgreSQL joins / `skill_demand.csv` |
+| Median salary by job category | Interactive category-level median salary chart | PostgreSQL joins / `category_salary.csv` |
+| Daily job postings | Interactive count of postings by posting date | `job_posting.posted_at` / `posting_dates.csv` |
+| Daily job postings by category | Interactive stacked category breakdown by posting date | `job_posting.posted_at` / `posting_dates.csv` |
+| Job category selector | Filters skill demand and both posting-date charts | Local query or online prepared data |
 
-The dashboard initially displays the overall sample. In the current version, selecting a job category **changes the skill-demand chart only**; the summary cards and category salary chart continue to show overall results. This distinction is important when interpreting filtered views. The chart counts are descriptive, and salary values are advertised USD range midpoints rather than observed earnings.
+The summary cards and the salary-by-category chart continue to describe the **overall sample** when a category is selected. The category selector affects the skill-demand chart and both date charts. Counts represent job postings, not unique employers or hires. Salary figures are midpoints of advertised annual USD ranges, not observed employee compensation.
 
-## 21.4 Local Testing and Current Status
+## 21.4 Posting-Date Analysis
 
-The PostgreSQL connection test succeeded, and the Shiny application launched successfully in RStudio. During development, PostgreSQL `COUNT(*)` values returned to R as `integer64` triggered a formatting error in `scales::comma()`. Converting those counts to standard R numeric values resolved the issue. This conversion is safe for the small counts in the selected Dataset 1 sample.
+The `posted_at` field is retained in the normalized `job_posting` table and used to aggregate daily posting counts. PostgreSQL checks established that all **226 postings** have nonmissing dates across **seven distinct dates**, October 5–11, 2026.
 
-The job-category filter has been added to the current `app.R`. Group review and any requested dashboard changes are pending. The application has **not yet been published online**, and a public dashboard URL is therefore not available.
+| Date posted | Job postings |
+|---|---:|
+| 2026-10-05 | 43 |
+| 2026-10-06 | 62 |
+| 2026-10-07 | 50 |
+| 2026-10-08 | 34 |
+| 2026-10-09 | 33 |
+| 2026-10-10 | 3 |
+| 2026-10-11 | 1 |
+| **Total** | **226** |
 
-## 21.5 Planned Online Publication
+The job-category distribution in the same 226-posting sample is: AI/ML (59), Data Engineering (55), Data Analytics (49), Data Science (39), Statistics (10), Database (8), and Business Intelligence (6). These totals provide a cross-check for the category-by-date chart.
 
-After the group approves the final dashboard, the team plans to publish it online so classmates and the instructor can view it without running RStudio. A possible hosting service is `shinyapps.io`, subject to the team's final choice and deployment testing.
+**Interpretation:** October 6 has the largest observed daily count (62). However, these dates describe only a seven-day snapshot of the selected postings. The counts must not be interpreted as long-term hiring trends, seasonality, or changes in overall labor demand.
 
-Because the current application connects to PostgreSQL at `localhost`, it cannot use that same connection unchanged from a hosted server. Two possible deployment architectures are under consideration:
+## 21.5 Local Dashboard and PostgreSQL Connection
 
-- **Prepared data snapshot:** Export the required analysis tables or aggregates and bundle them with the hosted Shiny application. This is simpler for a static class-project dataset, but the hosted application would no longer query PostgreSQL live.
-- **Hosted PostgreSQL:** Use a securely hosted PostgreSQL instance and configure the deployed application with protected connection credentials. This retains live SQL integration but requires additional infrastructure and security configuration.
+The local application uses PostgreSQL 18 on `localhost`, port `5432`, database `data607_project3`, and the `public` schema. The password is requested interactively using `rstudioapi::askForPassword()`; it is not embedded in the R source. `Dashboard/01_test_connection.R` can be used to check connectivity and the five table counts.
 
-No hosting approach has been finalized. Once published, the final URL, hosting architecture, access instructions, and any changes to the data refresh process should be recorded here.
+The local dashboard retrieves overall metrics, skill demand, salary summaries, job categories, and daily category-by-date counts from PostgreSQL. The category-filtered skill query uses a parameterized SQL value. The date charts use posting-date counts already retrieved from the database. The application converts PostgreSQL count fields to ordinary R numeric values before formatting or plotting.
 
-## 21.6 Dashboard Limitations and Future Improvements
+To launch from the project root:
 
-The dashboard inherits the study's selection, classification, skill-detection, and salary limitations. It should not be interpreted as a representative labor-market survey or a causal estimate of skill-related pay differences.
+```{r local-dashboard-command, eval=FALSE}
+shiny::runApp("Dashboard")
+```
 
-Potential changes for group discussion include making all summary cards responsive to the job-category filter, adding skill and salary filters, adding an interactive demand-versus-salary comparison, providing downloadable filtered tables, and expanding the AI-related skill analysis. These are **proposed enhancements**, not implemented features of the current version.
+This command requires a running local PostgreSQL service and the relevant R packages. It should not be used to deploy the local PostgreSQL-dependent application directly to shinyapps.io.
 
-## 21.7 Running the Local Dashboard
+## 21.6 Online Dashboard and Deployment
 
-1. Start the local PostgreSQL service and confirm that `data607_project3` contains the normalized tables.
-2. Open the RStudio project and ensure the packages `shiny`, `bslib`, `DBI`, `RPostgres`, `dplyr`, `ggplot2`, `plotly`, `scales`, and `rstudioapi` are installed.
-3. Open `Dashboard/app.R` and select **Run App**, or run `shiny::runApp("Dashboard")` from the project root.
-4. Enter the PostgreSQL password when prompted.
-5. Check the four summary cards and two charts; select a category to test the skill-demand filter.
+The online dashboard uses prepared CSV data so that viewers do not need PostgreSQL credentials or access to the developer's computer. The required dashboard summaries are `overview.csv`, `skill_demand.csv`, `category_salary.csv`, and `posting_dates.csv` under `Dashboard_Online/data/`. The five exported normalized table CSVs support preparing these summaries.
 
-This dashboard section records the **working development version**. It should be revised after group feedback and again after successful online deployment.
+From the project root, the workflow is:
+
+```{r online-dashboard-commands, eval=FALSE}
+# Export only missing normalized-table CSV files.
+source("Dashboard_Online/01_export_data.R")
+
+# Validate snapshots and create only missing summary CSV files.
+source("Dashboard_Online/02_prepare_dashboard_data.R")
+
+# Confirm the date summary exists before launching or deploying.
+stopifnot(file.exists("Dashboard_Online/data/posting_dates.csv"))
+
+# Test the CSV-based app locally.
+shiny::runApp("Dashboard_Online")
+```
+
+After successful local testing, the existing shinyapps.io application can be updated with:
+
+```{r deploy-dashboard-command, eval=FALSE}
+rsconnect::deployApp(
+  appDir = "Dashboard_Online",
+  appName = "data607-project3",
+  account = "mohdafwan",
+  forceUpdate = TRUE
+)
+```
+
+Deployment requires a configured shinyapps.io account and the `rsconnect` package. Before redeploying, check that the correct `Dashboard_Online/app.R` is present and that `posting_dates.csv` is included. After deployment, open <https://mohdafwan.shinyapps.io/data607-project3/> and verify the four summary cards, the skill and salary charts, the two posting-date charts, and the category selector. The date-chart redeployment is **not independently confirmed in this documentation**.
+
+## 21.7 Validation and Reproducibility Checks
+
+The updated online preparation script checks for duplicate job IDs, matching job and salary IDs, valid job-skill references, parsable nonmissing posting dates, the verified totals of 226 jobs, 30 skills, and 1,142 job-skill links, and the seven daily counts shown in Section 21.4. It also checks existing summary snapshots for inconsistencies before creating new date data. The date-summary counts must total 226.
+
+The online application checks that `posting_dates.csv` has the required fields and that its posting counts agree with `overview.csv`. These checks reduce the risk of mixing incompatible snapshots, but successful execution and browser testing are still necessary to confirm that the dashboard works as expected.
+
+## 21.8 Limitations and Possible Improvements
+
+The dashboard inherits the study's selection bias, limited occupational validation, dictionary-based skill detection, missing salary eligibility for some postings, and small sample sizes in some categories. In addition, the online CSV snapshots are **static** until intentionally regenerated and redeployed. Neither dashboard establishes causal skill-based salary premiums.
+
+Possible future improvements include applying category filters to more summary metrics, adding a skill-versus-salary comparison, providing downloadable filtered tables, and expanding the AI-related analysis. These are proposals, not features verified in the current uploaded applications.
 
 # 22. Next Steps
 
@@ -1208,7 +1258,10 @@ To reproduce the revised Dataset 1 analysis:
 11. Import the CSVs in foreign-key dependency order, treating `NA` as SQL `NULL`.
 12. Run the verification and analysis queries in `SQL guide/Dataset1_Analysis.sql`.
 13. Confirm the local dashboard works using `shiny::runApp("Dashboard")` (requires the local PostgreSQL service).
-14. Select **Knit to HTML**.
+14. Run `Dashboard_Online/01_export_data.R` and `Dashboard_Online/02_prepare_dashboard_data.R` from the project root to create or validate the online CSV snapshots without overwriting existing files.
+15. Confirm `Dashboard_Online/data/posting_dates.csv` exists and test with `shiny::runApp("Dashboard_Online")`.
+16. If appropriate, redeploy the online dashboard using `rsconnect::deployApp()` and verify the public page.
+17. Select **Knit to HTML**.
 
 The final report uses these revised outputs:
 
@@ -1222,4 +1275,4 @@ The final report uses these revised outputs:
 
 The historical results from Steps 09–11 are retained for transparency.
 
-This document describes the current Dataset 1 workflow, validation decisions, normalized PostgreSQL implementation, preliminary research findings, and locally tested Shiny dashboard. Online publication and group-requested dashboard revisions remain pending.
+This document describes the Dataset 1 workflow, validation decisions, normalized PostgreSQL implementation, preliminary research findings, and both local and CSV-based online Shiny dashboards. The existing public application URL is recorded; successful deployment of the newest posting-date charts should be confirmed separately.

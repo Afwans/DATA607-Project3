@@ -190,31 +190,92 @@ jobs_refined %>%
   arrange(relevance_status, desc(responsibility_count)) %>%
   print(n = 50)
 
-# STEP 9: Export all scored jobs
-write_csv(
-  jobs_refined,
-  "data/job_postings_refined_all.csv"
+# ---------------------------------------------------
+# STEP 8A: VALIDATE JOB POSTING DATES
+# ---------------------------------------------------
+
+cat("\n--- POSTING DATE VALIDATION ---\n")
+
+jobs_refined %>%
+  summarise(
+    total_jobs = n(),
+    valid_posting_dates = sum(!is.na(posted_at)),
+    missing_posting_dates = sum(is.na(posted_at)),
+    earliest_date = as.Date(min(posted_at, na.rm = TRUE)),
+    latest_date = as.Date(max(posted_at, na.rm = TRUE))
+  ) %>%
+  print()
+
+cat(
+  "Posting date column preserved:",
+  "posted_at" %in% names(jobs_refined),
+  "\n"
 )
+
+# STEP 9: Export all scored jobs safely
+
+refined_path <- "data/job_postings_refined_all.csv"
+
+if (!file.exists(refined_path)) {
+  
+  write_csv(
+    jobs_refined,
+    refined_path
+  )
+  
+  cat("New refined jobs CSV created.\n")
+  
+} else {
+  
+  cat("Existing refined jobs CSV preserved.\n")
+  
+}
+
 
 # STEP 10: Create provisional relevant subset
 
 jobs_relevant <- jobs_refined %>%
   filter(relevance_status == "Likely Relevant")
 
-write_csv(
-  jobs_relevant,
-  "data/job_postings_relevant.csv"
-)
+relevant_path <- "data/job_postings_relevant.csv"
+
+if (!file.exists(relevant_path)) {
+  
+  write_csv(
+    jobs_relevant,
+    relevant_path
+  )
+  
+  cat("New relevant jobs CSV created.\n")
+  
+} else {
+  
+  cat("Existing relevant jobs CSV preserved.\n")
+  
+}
+
 
 # STEP 11: Export uncertain jobs for review
 
 jobs_uncertain <- jobs_refined %>%
   filter(relevance_status == "Needs Review")
 
-write_csv(
-  jobs_uncertain,
-  "data/job_postings_uncertain.csv"
-)
+uncertain_path <- "data/job_postings_uncertain.csv"
+
+if (!file.exists(uncertain_path)) {
+  
+  write_csv(
+    jobs_uncertain,
+    uncertain_path
+  )
+  
+  cat("New uncertain jobs CSV created.\n")
+  
+} else {
+  
+  cat("Existing uncertain jobs CSV preserved.\n")
+  
+}
 
 cat("\n--- FINAL SUMMARY ---\n")
 cat("Total candidates:", nrow(jobs), "\n")
