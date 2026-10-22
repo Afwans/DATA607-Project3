@@ -1,0 +1,221 @@
+---
+title: "Renan_Project_3_Analysis"
+author: "Renan Charles-Pierre"
+format: html
+editor: visual
+---
+
+## Quarto
+
+```{r load-packages}
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r load-relevant-datasets}
+#| echo: false
+job_posting <- read.csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/Normalized/JOB_POSTING.csv")
+
+skills <- read.csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/Normalized/SKILL.csv")
+
+job_posting_cleaned <- read.csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/job_postings_cleaned.csv")
+
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r combining-data}
+#Joined the job_posting, the job_skill and the skill data sets
+job_skills <- job_posting %>%
+  left_join(job_skill, by = "job_id") %>%
+  left_join(skills, by = "skill_id") %>%
+  select(
+    skill_id,
+    skill_name,
+    job_id,
+    title,
+    job_category_updated
+  )
+
+#Join Check for accuracy
+n_distinct(job_skills$job_id)
+nrow(job_skills)
+n_distinct(job_skills$job_category_updated)
+
+```
+
+```{r summary-table-by-department}
+
+#Removed N/A values
+skill_versatility <- job_skills %>%
+  filter(
+    !is.na(skill_name),
+    !is.na(job_category_updated)
+  ) %>%
+  group_by(skill_name) %>%
+  summarise(
+    #Counts the number of times a particular skill appears in a job posting
+    job_count = n_distinct(job_id),
+    
+    #Counts the number of times a particular skill appears in a job posting category
+    category_count = n_distinct(job_category_updated),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(category_count), desc(job_count))
+
+skill_versatility
+
+```
+
+```{r versatility-heatmap}
+
+#Removes the N/A values
+skill_category <- job_skills %>%
+  filter(
+    !is.na(skill_name),
+    !is.na(job_category_updated)
+  ) %>%
+  group_by(skill_name, job_category_updated) %>%
+  summarise(
+    job_count = n_distinct(job_id),
+    .groups = "drop"
+  )
+
+ggplot(
+  skill_category,
+  aes(
+    x = job_category_updated,
+    y = skill_name,
+    fill = job_count
+  )
+) +
+  geom_tile() +
+  scale_fill_gradient(
+    low = "white",
+    high = "red"
+  ) +
+  labs(
+    title = "Versatility of Data Science Skills",
+    x = "Job Category",
+    y = "Skill",
+    fill = "Number of Jobs"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+
+```
+
+```{r job-versatility-percentages}
+
+#Calculate the total jobs for each category
+category_totals <- job_skills %>%
+  filter(!is.na(job_category_updated)) %>%
+  group_by(job_category_updated) %>%
+  summarise(
+    total_jobs = n_distinct(job_id),
+    .groups = "drop"
+  )
+
+#Calculate the total number of jobs requiring that skill of a given category
+skill_counts <- job_skills %>%
+  filter(
+    !is.na(skill_name),
+    !is.na(job_category_updated)
+  ) %>%
+  group_by(job_category_updated, skill_name) %>%
+  summarise(
+    jobs_requiring_skill = n_distinct(job_id),
+    .groups = "drop"
+  )
+
+# Calculate the percentages job requiring a skill out of the total # of jobs in that category
+
+skill_percentages <- skill_counts %>%
+  left_join(
+    category_totals,
+    by = "job_category_updated"
+  ) %>%
+  mutate(
+    percentage = round(
+      (jobs_requiring_skill / total_jobs) * 100,
+      2
+    )
+  ) %>%
+  arrange(
+    skill_name,
+    desc(percentage)
+  )
+
+head(skill_percentages, n=30)
+
+```
+
+```{r heatmap-percentages}
+#Creating heat map by percentage covered instead of count
+ggplot(
+  skill_percentages,
+  aes(
+    x = job_category_updated,
+    y = skill_name,
+    fill = percentage
+  )
+) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(
+    low = "white",
+    high = "darkgreen",
+    limits = c(0, 100)
+  ) +
+  labs(
+    title = "Percentage of Jobs Requiring Each Skill by Category",
+    x = "Job Category",
+    y = "Skill",
+    fill = "Percentage (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+
+```
+
+```{r ranking-system}
+
+all_skill_percentages <- skill_percentages %>%
+  select(
+    job_category_updated,
+    skill_name,
+    percentage
+  ) %>%
+  #Replaces N/A values with 0.
+  complete(
+    job_category_updated,
+    skill_name,
+    fill = list(percentage = 0)
+  )
+
+all_skill_percentages
+
+skill_rankings <- all_skill_percentages %>%
+  group_by(skill_name) %>%
+  summarise(
+    
+    average_percentage = round(mean(percentage), 2),
+    categories_present = sum(percentage > 0),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(average_percentage))
+
+skill_rankings
+```
