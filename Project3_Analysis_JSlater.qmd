@@ -1,0 +1,500 @@
+---
+title: "Project 3: Which Data Science Skills Are Most Valued?"
+subtitle: "Analysis and findings"
+author: "Mohd Afwan Shaikh, Enrique Delamonica, Jocelyn Slater, Lionel Jr Desroses, and Renan Charles-Pierre"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: hide
+    theme: flatly
+    df_print: paged
+params:
+  # "sqlite" rebuilds the normalized database in memory from the exported
+  # tables in Data/Normalized/ (no credentials needed, used for RPubs).
+  # "postgres" reads the team's PostgreSQL database instead; set the
+  # PGPASSWORD environment variable before knitting.
+  db_backend: "sqlite"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE, message = FALSE, warning = FALSE,
+  fig.width = 9, fig.height = 5.5, dpi = 150,
+  fig.path = "Figures/analysis-"
+)
+
+library(tidyverse)
+library(DBI)
+library(scales)
+library(broom)
+library(knitr)
+library(kableExtra)
+library(ggrepel)
+library(patchwork)
+
+dir.create("Data/Analysis", showWarnings = FALSE, recursive = TRUE)
+
+# Color Palette 
+col_main   <- "#2a78d6"
+col_second <- "#eb6834"
+col_muted  <- "#a3a29c"
+col_neg    <- "#e34948"
+col_mid    <- "#f0efec"
+
+# Set theming for entire document
+theme_set(
+  theme_minimal(base_size = 12) +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major.y = element_line(colour = "#e6e5e0", linewidth = 0.3),
+      panel.grid.major.x = element_line(colour = "#e6e5e0", linewidth = 0.3),
+      plot.title = element_text(face = "bold"),
+      plot.title.position = "plot",
+      plot.subtitle = element_text(colour = "#52514e"),
+      plot.caption = element_text(colour = "#7a7974", hjust = 0),
+      axis.title = element_text(colour = "#52514e"),
+      legend.position = "top",
+      legend.justification = "left"
+    )
+)
+
+# Table formatting
+kbl_style <- function(x, ...) {
+  x %>% kbl(...) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = FALSE)
+}
+
+pct <- function(x, acc = 0.1) percent(x, accuracy = acc)
+usd <- function(x) dollar(round(x, -2))
+```
+
+# Introduction
+
+## Motivation
+
+
+## Data source and why we chose it
+
+We use the Kaggle dataset
+[*Job Postings with Salaries*](https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries)
+
+Job postings pair the skills employers ask for with the pay they offer.
+
+## How the data were collected, cleaned and loaded
+
+The data acquisition and preparation pipeline lives in scripts `01`–`13` and
+is documented step by step in
+`DATA607_Project3_Dataset1_Documentation.Rmd`. Put brief overview here
+
+We then all picked up that normalized data and ran with it
+
+# Loading the relational database
+
+
+```{r load-db}
+normalized_dir <- "Data/Normalized"
+table_order <- c("COMPANY", "JOB_POSTING", "SALARY", "SKILL", "JOB_SKILL")
+
+if (params$db_backend == "postgres") {
+  con <- dbConnect(
+    RPostgres::Postgres(),
+    dbname = "data607_project3", host = "localhost", port = 5432,
+    user = "postgres", password = Sys.getenv("PGPASSWORD")
+  )
+} else {
+  con <- dbConnect(RSQLite::SQLite(), ":memory:")
+  dbExecute(con, "PRAGMA foreign_keys = ON;")
+
+  # Reuse the team's PostgreSQL DDL; SQLite accepts the same column types
+  ddl <- read_file("SQL guide/Dataset1_Create_Tables.sql") %>%
+    str_remove_all("(?m)--.*$") %>%
+    str_replace_all("public\\.", "") %>%
+    str_split(";") %>% unlist() %>% str_trim()
+  walk(ddl[ddl != ""], ~ dbExecute(con, .x))
+
+  # Load parents before children so every foreign key is checked on insert
+  for (tbl in table_order) {
+    df <- read_csv(file.path(normalized_dir, paste0(tbl, ".csv")),
+                   show_col_types = FALSE) %>%
+      mutate(across(where(is.POSIXct), ~ format(.x, "%Y-%m-%d %H:%M:%S")),
+             across(where(is.logical), as.integer))
+    dbAppendTable(con, str_to_lower(tbl), df)
+  }
+}
+
+dbListTables(con)
+```
+
+Long job–skill table:
+
+```{r db-query}
+jobs <- dbGetQuery(con, "
+  SELECT j.job_id, c.company_name, j.title, j.department, j.city, j.region,
+         j.country_code, j.workplace_type, j.employment_type, j.seniority,
+         j.posted_at, j.description, j.job_category_updated AS job_category,
+         s.salary_currency, s.salary_period, s.salary_min_annual,
+         s.salary_max_annual, s.salary_midpoint_annual, s.salary_valid,
+         s.salary_outlier_flag, s.salary_usd_eligible
+  FROM job_posting j
+  JOIN company c ON c.company_id = j.company_id
+  LEFT JOIN salary s ON s.job_id = j.job_id
+") %>%
+  as_tibble() %>%
+  mutate(across(c(salary_valid, salary_outlier_flag, salary_usd_eligible),
+                ~ as.logical(as.integer(.x))),
+         posted_at = as.POSIXct(posted_at, tz = "UTC"))
+
+skills_db <- dbGetQuery(con, "
+  SELECT js.job_id, k.skill_id, k.skill_name
+  FROM job_skill js
+  JOIN skill k ON k.skill_id = js.skill_id
+") %>% as_tibble()
+
+skill_catalog <- dbGetQuery(con, "SELECT * FROM skill ORDER BY skill_id") %>%
+  as_tibble()
+
+dbDisconnect(con)
+
+glimpse(jobs)
+```
+
+Also load the full file made in `02_clean_jobs.R`.
+
+```{r load-all}
+all_jobs <- read_csv("Data/job_postings_cleaned.csv", show_col_types = FALSE) %>%
+  mutate(
+    sample = if_else(job_id %in% jobs$job_id, "Data roles", "All other postings"),
+    salary_midpoint_annual = (salary_min_annual + salary_max_annual) / 2
+  )
+count(all_jobs, sample)
+```
+
+```{r skill-families}
+# Group skills here
+skill_families <- tribble(
+  ~skill_name,          ~family,
+  "Python",             "Programming",
+  "SQL",                "Programming",
+  "R",                  "Programming",
+  "Excel",              "BI & visualization",
+  "Tableau",            "BI & visualization",
+  "Power BI",           "BI & visualization",
+  "Looker",             "BI & visualization",
+  "Data Visualization", "BI & visualization",
+  "Statistics",         "Statistics & ML",
+  "Machine Learning",   "Statistics & ML",
+  "Deep Learning",      "Statistics & ML",
+  "Scikit-learn",       "Statistics & ML",
+  "TensorFlow",         "Statistics & ML",
+  "PyTorch",            "Statistics & ML",
+  "NLP",                "Statistics & ML",
+  "LLM",                "Generative AI",
+  "Generative AI",      "Generative AI",
+  "ETL",                "Data engineering",
+  "Data Pipelines",     "Data engineering",
+  "Spark",              "Data engineering",
+  "Databricks",         "Data engineering",
+  "Snowflake",          "Data engineering",
+  "Airflow",            "Data engineering",
+  "dbt",                "Data engineering",
+  "AWS",                "Cloud & DevOps",
+  "Azure",              "Cloud & DevOps",
+  "Google Cloud",       "Cloud & DevOps",
+  "Docker",             "Cloud & DevOps",
+  "Kubernetes",         "Cloud & DevOps",
+  "Git",                "Cloud & DevOps"
+)
+
+stopifnot(setequal(skill_families$skill_name, skill_catalog$skill_name))
+
+# One row per (job_id, skill) from the database's JOB_SKILL table
+skills <- skills_db %>%
+  left_join(skill_families, by = "skill_name")
+```
+
+```{r salary-quality}
+salary_status <- jobs %>%
+  mutate(status = case_when(
+    is.na(salary_currency)              ~ "No salary advertised",
+    salary_currency != "USD"            ~ "Non-USD currency",
+    !salary_valid %in% TRUE             ~ "Invalid or incomplete range",
+    salary_outlier_flag                 ~ "Outlier flag (< $30K or > $400K)",
+    salary_usd_eligible                 ~ "USD-eligible (used for pay analysis)",
+    TRUE                                ~ "Other"
+  )) %>%
+  count(status, sort = TRUE)
+
+salary_status %>% kbl_style(caption = "Salary status of the 226 data-role postings")
+
+pay <- jobs %>% filter(salary_usd_eligible)
+q   <- quantile(pay$salary_midpoint_annual, c(.25, .75))
+iqr_fence <- c(q[1] - 1.5 * diff(q), q[2] + 1.5 * diff(q))
+pay <- pay %>%
+  mutate(range_ratio = salary_max_annual / salary_min_annual,
+         iqr_outlier = salary_midpoint_annual < iqr_fence[1] |
+                       salary_midpoint_annual > iqr_fence[2])
+```
+
+
+
+# Value Proxy 1: Demand
+
+```{r demand}
+n_jobs <- nrow(jobs)
+
+wilson <- function(x, n, z = 1.96) {
+  p <- x / n
+  centre <- (p + z^2 / (2 * n)) / (1 + z^2 / n)
+  half   <- z * sqrt(p * (1 - p) / n + z^2 / (4 * n^2)) / (1 + z^2 / n)
+  tibble(lo = centre - half, hi = centre + half)
+}
+
+demand <- skills %>%
+  count(skill_name,name = "postings") %>%
+  mutate(share = postings / n_jobs) %>%
+  bind_cols(wilson(.$postings, n_jobs)) %>%
+  arrange(desc(share)) %>%
+  mutate(demand_rank = row_number())
+
+write_csv(demand, "Data/Analysis/skill_demand.csv")
+```
+
+```{r demand-plot, fig.height = 7.5}
+ggplot(demand, aes(share, fct_reorder(skill_name, share))) +
+  geom_col(fill = col_main, width = 0.72) +
+  geom_errorbarh(aes(xmin = lo, xmax = hi), height = 0.3, colour = "#52514e",
+                 linewidth = 0.4) +
+  geom_text(aes(x = hi, label = pct(share, 1)), hjust = -0.25, size = 3.1,
+            colour = "#52514e") +
+  scale_x_continuous(labels = percent, expand = expansion(mult = c(0, 0.08))) +
+  labs(title = "Share of data-role postings that mention each skill",
+       subtitle = paste0(n_jobs, " postings; whiskers are 95% Wilson confidence intervals"),
+       x = "Share of postings", y = NULL)
+```
+
+**Findings:**
+
+* **Python (`r pct(demand$share[demand$skill_name == "Python"])`) and SQL
+  (`r pct(demand$share[demand$skill_name == "SQL"])`)** 
+* The next tier is **Machine Learning, LLMs, Statistics, Data Pipelines, dbt
+  and AWS**, each mentioned in roughly a fifth to a third of postings.
+* **R** is mentioned in only `r pct(demand$share[demand$skill_name == "R"])`
+  of postings...
+
+## Demand by skill family
+
+```{r family}
+family_demand <- skills %>%
+  distinct(job_id, family) %>%
+  count(family, name = "postings") %>%
+  mutate(share = postings / n_jobs) %>%
+  arrange(desc(share))
+
+ggplot(family_demand, aes(share, fct_reorder(family, share))) +
+  geom_col(fill = col_main, width = 0.65) +
+  geom_text(aes(label = pct(share, 1)), hjust = -0.2, size = 3.4, colour = "#52514e") +
+  scale_x_continuous(labels = percent, limits = c(0, 1.05), expand = c(0, 0)) +
+  labs(title = "Share of postings mentioning at least one skill from each family",
+       x = "Share of postings", y = NULL)
+```
+
+## How many skills does a posting ask for?
+
+```{r breadth, fig.height = 4}
+skills_per_job <- jobs %>%
+  select(job_id, job_category) %>%
+  left_join(count(skills, job_id, name = "n_skills"), by = "job_id") %>%
+  mutate(n_skills = coalesce(n_skills, 0L))
+
+ggplot(skills_per_job, aes(n_skills)) +
+  geom_bar(fill = col_main, width = 0.75) +
+  labs(title = "Number of tracked skills mentioned per posting",
+       subtitle = paste0("Median ", median(skills_per_job$n_skills),
+                         "; ", sum(skills_per_job$n_skills == 0),
+                         " postings mention none of the 30 tracked skills"),
+       x = "Skills mentioned", y = "Postings")
+```
+
+A typical posting names about `r median(skills_per_job$n_skills)` of our 30
+skills. Employers usually ask for a **bundle** of skills, not a single tool, so
+Section 5 looks at which skills appear together.
+
+## Demand differs by role
+
+```{r demand-category, fig.height = 7.5}
+cat_n <- count(jobs, job_category, name = "cat_jobs")
+
+top_skills <- demand %>% slice_head(n = 18) %>% pull(skill_name)
+
+by_cat <- skills %>%
+  left_join(select(jobs, job_id, job_category), by = "job_id") %>%
+  count(job_category, skill_name) %>%
+  right_join(expand_grid(job_category = cat_n$job_category, skill_name = top_skills),
+             by = c("job_category", "skill_name")) %>%
+  mutate(n = coalesce(n, 0L)) %>%
+  left_join(cat_n, by = "job_category") %>%
+  mutate(share = n / cat_jobs,
+         cat_label = paste0(str_wrap(job_category, 12), "\n(n = ", cat_jobs, ")"),
+         skill_name = factor(skill_name, levels = rev(top_skills)))
+
+ggplot(by_cat, aes(cat_label, skill_name, fill = share)) +
+  geom_tile(colour = "white", linewidth = 1) +
+  geom_text(aes(label = percent(share, 1),
+                colour = share > 0.55), size = 2.9) +
+  scale_colour_manual(values = c(`TRUE` = "white", `FALSE` = "#2b2b2b"), guide = "none") +
+  scale_fill_gradientn(colours = c("#f4f8fe", "#9ec5f4", "#3987e5", "#1c5cab", "#0d366b"),
+                       labels = percent, limits = c(0, 1)) +
+  scale_x_discrete(position = "top") +
+  labs(title = "Share of postings in each job category that mention each skill",
+       subtitle = "Top 18 skills overall; small categories (n < 15) are noisy",
+       x = NULL, y = NULL, fill = "Share") +
+  theme(panel.grid = element_blank(), axis.text.x = element_text(size = 9),
+        legend.position = "right")
+```
+
+Each role has its own profile:
+
+* **AI/ML** postings are associated with Python, Machine Learning, LLMs and
+  PyTorch. SQL appears in only `r pct(by_cat$share[by_cat$job_category == "AI/ML" & by_cat$skill_name == "SQL"], 1)`
+  of them, far less than in any other category.
+* **Data Analytics** and **Business Intelligence** rely most on SQL plus a BI
+  tool (Tableau, Power BI), with dbt appearing in about a quarter of analytics
+  postings.
+* **Data Engineering** combines SQL and Python with data pipelines, dbt, ETL,
+  Snowflake, Databricks and cloud platforms.
+* **Python and SQL** are the only skills common (≥ 40%) in nearly every
+  category.
+
+
+# Value Proxy 2 — Pay
+
+## Salary by role and seniority
+
+```{r pay-context, fig.height = 4.8}
+pay <- pay %>%
+  mutate(job_category = fct_reorder(job_category, salary_midpoint_annual, median))
+
+g1 <- ggplot(pay, aes(salary_midpoint_annual, job_category)) +
+  geom_boxplot(fill = "#cde2fb", colour = "#184f95", outlier.colour = col_neg,
+               width = 0.6) +
+  scale_x_continuous(labels = label_dollar(scale = 1e-3, suffix = "K")) +
+  labs(x = NULL, y = NULL)
+
+(g1) + plot_annotation(
+  title = "Advertised salary midpoints by job category",
+  theme = theme(plot.title = element_text(face = "bold")))
+```
+
+Data Science and AI/ML postings pay the most, Data Analytics and BI the least
+
+* **Skill premium**: median salary of postings that mention the skill minus the
+  median of postings that do not, with a 95% bootstrap confidence interval.
+
+Small categories are merged for modeling (Business Intelligence → Data
+Analytics; Database → Data Engineering; Statistics → Data Science), and only
+skills mentioned in at least 10 salaried postings are estimated.
+
+```{r premiums}
+set.seed(607)
+
+pay_model <- pay %>%
+  mutate(cat_model = fct_collapse(as.character(job_category),
+                                  "Data Analytics"   = c("Data Analytics", "Business Intelligence"),
+                                  "Data Engineering" = c("Data Engineering", "Database"),
+                                  "Data Science"     = c("Data Science", "Statistics")) %>%
+           fct_relevel("Data Analytics"),
+         log_salary = log(salary_midpoint_annual))
+
+pay_skills <- skills %>% filter(job_id %in% pay_model$job_id)
+eligible <- count(pay_skills, skill_name) %>% filter(n >= 10) %>% pull(skill_name)
+
+boot_median_diff <- function(y, x, reps = 2000) {
+  est <- median(y[x]) - median(y[!x])
+  b <- replicate(reps, {
+    i <- sample(length(y), replace = TRUE)
+    yy <- y[i]; xx <- x[i]
+    median(yy[xx]) - median(yy[!xx])
+  })
+  tibble(raw = est, raw_lo = quantile(b, 0.025, na.rm = TRUE),
+         raw_hi = quantile(b, 0.975, na.rm = TRUE))
+}
+
+premiums <- map_dfr(eligible, function(s) {
+  d <- pay_model %>% mutate(has = job_id %in% pay_skills$job_id[pay_skills$skill_name == s])
+  fit <- lm(log_salary ~ has + cat_model, data = d)
+  co  <- tidy(fit, conf.int = TRUE) %>% filter(term == "hasTRUE")
+  bind_cols(
+    tibble(skill_name = s, n_with = sum(d$has)),
+    boot_median_diff(d$salary_midpoint_annual, d$has),
+    tibble(adj = exp(co$estimate) - 1, adj_lo = exp(co$conf.low) - 1,
+           adj_hi = exp(co$conf.high) - 1, adj_p = co$p.value)
+  )
+}) %>%
+  left_join(select(demand, skill_name,share), by = "skill_name") %>%
+  arrange(desc(adj))
+
+write_csv(premiums, "Data/Analysis/skill_salary_premiums.csv")
+```
+
+```{r premium-plot, fig.height = 7.8, fig.width = 10}
+order_lvls <- premiums$skill_name[order(premiums$adj)]
+
+raw_plot <- ggplot(premiums, aes(raw, factor(skill_name, levels = order_lvls))) +
+  geom_vline(xintercept = 0, colour = "#8a8984") +
+  geom_errorbarh(aes(xmin = raw_lo, xmax = raw_hi), height = 0, colour = "#b9b7b0",
+                 linewidth = 0.8) +
+  geom_point(aes(colour = raw > 0), size = 2.6) +
+  scale_colour_manual(values = c(`TRUE` = col_main, `FALSE` = col_neg), guide = "none") +
+  scale_x_continuous(labels = label_dollar(scale = 1e-3, suffix = "K")) +
+  labs(x = "USD per year", y = NULL)
+
+
+(raw_plot) + plot_annotation(
+  title = "Salary associated with mentioning each skill",
+  subtitle = "Median with − median without",
+  theme = theme(plot.title = element_text(face = "bold")))
+```
+
+**Findings:**
+
+* **Raw gaps are large and mostly reflect the job type.** Machine Learning,
+  LLM and PyTorch postings advertise about \$28K–\$38K more than other
+  postings. Excel, Power BI, Tableau and Data Visualization postings advertise
+  \$50K–\$68K *less*. 
+* SQL shows a *penalty* of \$40K, only because the
+  highest-paying category (AI/ML) rarely lists SQL. 
+* **Excel, Data Visualization and Power BI stay lower** even within the same
+  job category: Excel by `r pct(-premiums$adj[premiums$skill_name == "Excel"], 1)`,
+  Data Visualization by `r pct(-premiums$adj[premiums$skill_name == "Data Visualization"], 1)`
+  and Power BI by `r pct(-premiums$adj[premiums$skill_name == "Power BI"], 1)`.
+  These are the only statistically significant estimates (p < 0.05).
+  Postings that emphasize spreadsheets and visualization tend to be
+  reporting-focused roles, which pay less than the rest of their category.
+* With `r nrow(pay)` salaried postings, most confidence intervals include zero.
+
+## Answer to the research question
+
+There is no single "most valued" skill. The proxies (demand, pay) agree on some skills and disagree on others:
+
+1. **Foundational skills: Python and SQL are the most valued skills by demand and reach**.
+2. **Machine Learning is the best all-round skill. Statistics follows**
+3. **BI and spreadsheet skills are in demand but not well paid.** Tableau,
+   Power BI
+
+# Limitations and future work
+
+* **Representativeness.** The postings come from companies that use specific
+  applicant-tracking systems and are concentrated in the US and in tech.
+* **Small analytical sample.** The data-role analysis rests on 226 postings
+  (`r nrow(pay)` with usable salaries). 
+* **Measurement.** Keyword extraction cannot distinguish required from
+  preferred skills or detect proficiency.
+* **Advertised, not realized, pay.** 
+* **Don't take into account seniority**
+* **No longitudinal analysis** 
+* **No supply and demand comparison.** Did not integrate CV or resume data. 
