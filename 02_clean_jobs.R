@@ -1,165 +1,102 @@
-
-# ============================================================
-# DATA 607 - PROJECT 3
-# Dataset 1: Job Postings with Salaries
-# Script: 02_clean_jobs.R
-#
-# Purpose:
-# 1. Load and clean the original dataset
-# 2. Check salary information
-# 3. Identify Data Science-related jobs
-# 4. Search job titles, departments, and descriptions
-# 5. Export cleaned and filtered datasets
-#
-# The original CSV is never modified.
-# ============================================================
-
-
-# ------------------------------------------------------------
-# STEP 1: LOAD REQUIRED PACKAGES
-# ------------------------------------------------------------
+# DATA 607 - Project 3
+# 02: Clean the full job-postings dataset
 
 library(readr)
 library(dplyr)
 library(stringr)
 
-
-# ------------------------------------------------------------
-# STEP 2: LOAD ORIGINAL DATASET
-# ------------------------------------------------------------
+# -----------------------------------------
+# Step 1: Load original data
+# -----------------------------------------
 
 jobs_raw <- read_csv(
-  "data/job_postings_with_salaries.csv",
+  file.path("Data", "job_postings_with_salaries.csv"),
   show_col_types = FALSE
 )
 
-cat("Original dataset:", nrow(jobs_raw), "rows\n")
-cat("Original columns:", ncol(jobs_raw), "\n")
+dim(jobs_raw)
+names(jobs_raw)
 
-
-# ------------------------------------------------------------
-# STEP 3: CREATE CLEANED DATASET
-# ------------------------------------------------------------
+# -----------------------------------------
+# Step 2: Clean all job postings
+# -----------------------------------------
 
 jobs_clean <- jobs_raw %>%
+  mutate(across(where(is.character), ~ na_if(str_trim(.x), ""))) %>%
   distinct() %>%
   mutate(
-    across(
-      where(is.character),
-      ~ str_trim(.x)
-    )
+    across(any_of(c("seniority", "workplace_type", "employment_type")),
+           ~ coalesce(.x, "Unknown"))
   )
 
-# Convert blank text values to NA
-jobs_clean <- jobs_clean %>%
-  mutate(
-    across(
-      where(is.character),
-      ~ na_if(.x, "")
-    )
-  )
+# Review duplicate job IDs separately; do not silently remove distinct postings.
+duplicate_job_ids <- jobs_clean %>%
+  filter(!is.na(job_id)) %>%
+  add_count(job_id, name = "id_count") %>%
+  filter(id_count > 1) %>%
+  arrange(job_id)
 
-# Standardize selected missing categorical values
-jobs_clean <- jobs_clean %>%
-  mutate(
-    seniority = coalesce(seniority, "Unknown"),
-    workplace_type = coalesce(
-      workplace_type, "Unknown"
-    ),
-    employment_type = coalesce(
-      employment_type, "Unknown"
-    )
-  )
+nrow(jobs_raw)
+nrow(jobs_clean)
+n_distinct(jobs_clean$job_id, na.rm = TRUE)
+nrow(duplicate_job_ids)
 
-# ------------------------------------------------------------
-# STEP 3A: VALIDATE JOB POSTING DATES
-# ------------------------------------------------------------
+# -----------------------------------------
+# Step 3: Validate posting dates
+# -----------------------------------------
 
-# Confirm the posting date column is a date-time
-cat("\n--- POSTING DATE VALIDATION ---\n")
-print(class(jobs_clean$posted_at))
+class(jobs_clean$posted_at)
 
-# Check posting date completeness and range
-date_validation <- jobs_clean %>%
+jobs_clean %>%
   summarise(
     total_jobs = n(),
-    valid_posting_dates = sum(!is.na(posted_at)),
-    missing_posting_dates = sum(is.na(posted_at)),
-    earliest_posted_date = as.Date(min(posted_at, na.rm = TRUE)),
-    latest_posted_date = as.Date(max(posted_at, na.rm = TRUE))
+    jobs_with_dates = sum(!is.na(posted_at)),
+    missing_dates = sum(is.na(posted_at)),
+    earliest_date = if (all(is.na(posted_at))) as.Date(NA) else as.Date(min(posted_at, na.rm = TRUE)),
+    latest_date = if (all(is.na(posted_at))) as.Date(NA) else as.Date(max(posted_at, na.rm = TRUE))
   )
 
-print(date_validation)
-
-# Check that cleaning did not change posting timestamps
-date_changes <- jobs_clean %>%
-  select(job_id, posted_at) %>%
-  inner_join(
-    jobs_raw %>% select(job_id, posted_at),
-    by = "job_id",
-    suffix = c("_clean", "_raw")
-  ) %>%
-  filter(
-    posted_at_clean != posted_at_raw
-  )
-
-cat(
-  "Posting timestamps changed during cleaning:",
-  nrow(date_changes), "\n"
-)
-
-# ------------------------------------------------------------
-# STEP 4: VALIDATE SALARY INFORMATION
-# ------------------------------------------------------------
+# -----------------------------------------
+# Step 4: Validate salary information
+# -----------------------------------------
 
 jobs_clean <- jobs_clean %>%
   mutate(
-    salary_complete =
-      !is.na(salary_min_annual) &
-      !is.na(salary_max_annual),
-    
-    salary_valid =
+    salary_complete = !is.na(salary_min_annual) & !is.na(salary_max_annual),
+    salary_valid = coalesce(
       salary_complete &
-      salary_min_annual >= 0 &
-      salary_max_annual >= salary_min_annual,
-    
-    # Exploratory thresholds, not automatic exclusions
-    salary_outlier_flag =
+        is.finite(salary_min_annual) &
+        is.finite(salary_max_annual) &
+        salary_min_annual >= 0 &
+        salary_max_annual >= salary_min_annual,
+      FALSE
+    ),
+    salary_outlier_flag = coalesce(
       salary_currency == "USD" &
-      (
-        (!is.na(salary_min_annual) &
-           salary_min_annual < 30000) |
-          (!is.na(salary_max_annual) &
-             salary_max_annual > 400000)
-      ),
-    
-    # USD records suitable for initial salary analysis
-    salary_usd_eligible =
-      salary_currency == "USD" &
-      salary_valid &
-      !salary_outlier_flag
+        ((!is.na(salary_min_annual) & salary_min_annual < 30000) |
+           (!is.na(salary_max_annual) & salary_max_annual > 400000)),
+      FALSE
+    ),
+    salary_usd_eligible = coalesce(
+      salary_currency == "USD" & salary_valid & !salary_outlier_flag,
+      FALSE
+    )
   )
-
-cat("\n--- SALARY VALIDATION ---\n")
 
 jobs_clean %>%
   summarise(
     total_jobs = n(),
     complete_salaries = sum(salary_complete),
     valid_salaries = sum(salary_valid),
-    flagged_salaries = sum(
-      salary_outlier_flag, na.rm = TRUE
-    ),
-    usd_eligible = sum(
-      salary_usd_eligible, na.rm = TRUE
-    )
-  ) %>%
-  print()
+    flagged_salaries = sum(salary_outlier_flag),
+    usd_eligible = sum(salary_usd_eligible)
+  )
 
+jobs_clean %>% count(salary_currency, sort = TRUE)
 
-# ------------------------------------------------------------
-# STEP 5: DEFINE DATA-RELATED JOB TITLES
-# ------------------------------------------------------------
+# -----------------------------------------
+# Step 5: Define data-related titles and skills
+# -----------------------------------------
 
 title_keywords <- c(
   
@@ -348,11 +285,10 @@ skill_keywords <- c(
 )
 
 
-# ------------------------------------------------------------
-# STEP 7: CREATE MATCHING FUNCTIONS
-# ------------------------------------------------------------
+# -----------------------------------------
+# Step 6: Match job titles, departments, and descriptions
+# -----------------------------------------
 
-# Match phrases regardless of capitalization
 match_keywords <- function(text, keywords) {
   
   if (is.na(text)) {
@@ -391,187 +327,52 @@ count_skills <- function(text) {
 }
 
 
-# ------------------------------------------------------------
-# STEP 8: MATCH JOB TITLES, DEPARTMENTS, DESCRIPTIONS
-# ------------------------------------------------------------
-
 jobs_scored <- jobs_clean %>%
   mutate(
-    
-    # Relevant job title
-    title_match = vapply(
-      title,
-      match_keywords,
-      logical(1),
-      keywords = title_keywords
-    ),
-    
-    # Relevant department
-    department_match = vapply(
-      department,
-      match_keywords,
-      logical(1),
-      keywords = title_keywords
-    ),
-    
-    # Number of different technical skills
-    skill_count = vapply(
-      description,
-      count_skills,
-      integer(1)
-    ),
-    
-    # Description contains at least 3 skills
+    title_match = vapply(title, match_keywords, logical(1), keywords = title_keywords),
+    department_match = vapply(department, match_keywords, logical(1), keywords = title_keywords),
+    skill_count = vapply(description, count_skills, integer(1)),
     description_match = skill_count >= 3,
-    
-    # Main selection reason
     match_reason = case_when(
-      
-      title_match ~
-        "Relevant Job Title",
-      
-      department_match & skill_count >= 2 ~
-        "Relevant Department and Skills",
-      
-      description_match ~
-        "Multiple Technical Skills",
-      
-      TRUE ~
-        "Not Selected"
-    )
-  )
-
-
-# ------------------------------------------------------------
-# STEP 9: FILTER DATA SCIENCE-RELATED JOBS
-# ------------------------------------------------------------
-
-jobs_data_science <- jobs_scored %>%
-  filter(
-    title_match |
+      title_match ~ "Relevant Job Title",
+      department_match & skill_count >= 2 ~ "Relevant Department and Skills",
+      description_match ~ "Multiple Technical Skills",
+      TRUE ~ "Not Selected"
+    ),
+    data_related_candidate = title_match |
       (department_match & skill_count >= 2) |
       description_match
   )
 
-cat("\n--- JOB FILTERING RESULTS ---\n")
+# -----------------------------------------
+# Step 7: Review data-related candidates
+# -----------------------------------------
 
-cat(
-  "Original cleaned jobs:",
-  nrow(jobs_clean), "\n"
-)
+jobs_data_science <- jobs_scored %>%
+  filter(data_related_candidate)
 
-cat(
-  "Selected data-related jobs:",
-  nrow(jobs_data_science), "\n"
-)
-
-cat(
-  "Percentage selected:",
-  round(
-    100 * nrow(jobs_data_science) /
-      nrow(jobs_clean),
-    2
-  ),
-  "%\n"
-)
-
-jobs_data_science %>%
-  count(match_reason, sort = TRUE) %>%
-  print()
-
-
-# ------------------------------------------------------------
-# STEP 10: REVIEW FILTERED JOB TITLES
-# ------------------------------------------------------------
+jobs_review <- jobs_data_science %>%
+  filter(!title_match, !department_match) %>%
+  arrange(desc(skill_count))
 
 title_summary <- jobs_data_science %>%
   count(title, sort = TRUE)
 
+jobs_scored %>% count(data_related_candidate)
+jobs_data_science %>% count(match_reason, sort = TRUE)
 print(title_summary, n = 50)
 
-
-# ------------------------------------------------------------
-# STEP 11: REVIEW DESCRIPTION-ONLY MATCHES
-# ------------------------------------------------------------
-
-# These jobs need additional review because
-# their titles and departments did not match.
-
-jobs_review <- jobs_data_science %>%
-  filter(
-    !title_match,
-    !department_match
-  ) %>%
-  arrange(desc(skill_count))
-
-cat(
-  "\nJobs requiring description review:",
-  nrow(jobs_review), "\n"
-)
-
 jobs_review %>%
-  select(
-    title,
-    company,
-    skill_count,
-    match_reason
-  ) %>%
+  select(title, company, skill_count, match_reason) %>%
   print(n = 50)
 
+jobs_data_science %>% count(salary_currency, sort = TRUE)
 
-# ------------------------------------------------------------
-# STEP 12: SUMMARIZE SALARY CURRENCIES
-# ------------------------------------------------------------
+# -----------------------------------------
+# Step 8: Export full and focused datasets
+# -----------------------------------------
 
-cat("\n--- CURRENCIES IN FILTERED DATA ---\n")
-
-jobs_data_science %>%
-  count(salary_currency, sort = TRUE) %>%
-  print()
-
-
-# ------------------------------------------------------------
-# STEP 13: EXPORT DATASETS
-# ------------------------------------------------------------
-
-# All cleaned jobs
-write_csv(
-  jobs_clean,
-  "data/job_postings_cleaned.csv"
-)
-
-# All candidate data-related jobs
-write_csv(
-  jobs_data_science,
-  "data/job_postings_data_science.csv"
-)
-
-# Jobs requiring further relevance review
-write_csv(
-  jobs_review,
-  "data/job_postings_review.csv"
-)
-
-# Summary of selected job titles
-write_csv(
-  title_summary,
-  "data/job_titles_summary.csv"
-)
-
-
-# ------------------------------------------------------------
-# STEP 14: FINAL VALIDATION
-# ------------------------------------------------------------
-
-cat("\n=================================\n")
-cat("DATA CLEANING COMPLETED\n")
-cat("=================================\n")
-
-cat("Original jobs:", nrow(jobs_raw), "\n")
-cat("Cleaned jobs:", nrow(jobs_clean), "\n")
-cat("Data-related candidates:",
-    nrow(jobs_data_science), "\n")
-cat("Description-only review jobs:",
-    nrow(jobs_review), "\n")
-
-cat("\nFiles exported successfully.\n")
+write_csv(jobs_clean, file.path("Data", "job_postings_cleaned.csv"))
+write_csv(jobs_data_science, file.path("Data", "job_postings_data_science.csv"))
+write_csv(jobs_review, file.path("Data", "job_postings_review.csv"))
+write_csv(title_summary, file.path("Data", "job_titles_summary.csv"))

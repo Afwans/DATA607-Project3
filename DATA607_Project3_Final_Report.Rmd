@@ -1,0 +1,842 @@
+
+---
+title: "Data Science Skills: Demand and Salary Analysis"
+subtitle: "DATA 607 — Project 3"
+author: "Group Members: [Add Names]"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    theme: flatly
+---
+
+
+# Introduction
+
+The demand for data science professionals continues to evolve as organizations adopt data analytics, machine learning, and artificial intelligence technologies. Understanding which skills employers request most frequently can help students and job seekers prioritize their professional development.
+
+This project investigates the question:
+
+**Which data science skills are most valued?**
+
+We evaluate this question using two operational measures:
+
+1. **Skill demand:** The percentage of Data Science job postings mentioning each skill.
+2. **Salary association:** The median advertised annual salary for Data Science postings requiring each skill.
+
+Our analysis uses 9,173 job postings, including 229 classified Data Science positions. The data are stored in a PostgreSQL relational database and analyzed using R.
+
+The project also includes an interactive Shiny dashboard for exploring job market patterns, salaries, and technical skill requirements.
+
+[View the Interactive Dashboard](https://mohdafwan.shinyapps.io/data607-project3/)
+
+
+
+# Team Collaboration
+
+## Team Members
+
+| Team Member | Responsibilities |
+|:---|:---|
+| [Member 1] | |
+| [Member 2] | |
+| [Member 3] | |
+| [Member 4] | |
+
+## Collaboration Tools
+
+[To be completed]
+
+## Division of Responsibilities
+
+[To be completed]
+
+## Communication and Coordination
+
+[To be completed]
+
+## Individual Contributions
+
+[To be completed]
+
+## Presentation Responsibilities
+
+[To be completed]
+
+# Data Sources and Acquisition
+
+## Data Source
+
+The dataset used in this project was obtained from Kaggle:
+
+**Dataset:** Job Postings with Salaries (Updated Weekly)  
+**Publisher:** minmaxer  
+**Source:** https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries
+
+The dataset is updated weekly and contains job posting information that can be used to study employment trends, technical skill requirements, and advertised salaries.
+
+We selected this dataset because it provides relevant information for investigating which Data Science skills are most valued in the job market.
+
+## Data Collection
+
+Our group obtained the dataset from Kaggle, titled **"Job Postings with Salaries,"** published by **minmaxer**.
+
+### Data Download Process
+
+We followed these steps:
+
+1. Visited the [Kaggle dataset page](https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries).
+2. Clicked **Download** and selected **Download as Dataset**.
+3. Downloaded the dataset as a **ZIP file**.
+4. Extracted the ZIP file to access the dataset files.
+
+### Dataset Overview
+
+The Kaggle dataset is updated **weekly**. For this project, we used a fixed snapshot to keep our analysis consistent and reproducible.
+
+Our final database contains:
+
+- **9,173** job postings
+- **3,969** companies
+- **229** Data Science positions
+
+The job posting dates range from **October 5 to October 12, 2026**.
+
+## Data Storage
+
+We used PostgreSQL to store the data in a relational database named `data607_project3`.
+
+The database contains seven tables:
+
+1. `company` — Company information.
+2. `job_posting` — Job titles, locations, posting dates, and employment details.
+3. `salary` — Advertised salary information.
+4. `skill` — Unique skill names.
+5. `job_skill` — Relationships between jobs and skills.
+6. `data_science_classification` — Identifies Data Science postings.
+7. `job_sector_classification` — Assigns postings to broader employment sectors.
+
+The relational design separates different types of information and uses identifiers to connect related records. This helps reduce duplication and supports SQL queries for analysis.
+
+## Data Preparation for Analysis
+
+After storing the data in PostgreSQL, we used R to access and analyze the records.
+
+We examined duplicate identifiers, missing information, salary eligibility, and relationships between the database tables.
+
+For salary comparisons, we included only postings with eligible annual salary estimates in USD. This resulted in 7,590 salary-eligible postings across the full dataset, including 180 Data Science postings.
+
+Other currencies were excluded from USD salary comparisons rather than converted using exchange rates.
+
+
+
+
+# Database Design and Data Storage
+
+## Database Management System
+
+We used **PostgreSQL** as our relational database management system and **pgAdmin 4** to manage and query the database.
+
+Our database was named `data607_project3`.
+
+We organized the job posting data into separate relational tables instead of keeping all information in one large table. This approach reduces unnecessary duplication, improves data organization, and makes it easier to analyze relationships between jobs, companies, salaries, and skills.
+
+## Database Tables
+
+Our database contains seven tables:
+
+| Table | Number of Records | Description |
+|:---|---:|:---|
+| `company` | 3,969 | Stores company information |
+| `job_posting` | 9,173 | Stores job titles, locations, and posting dates |
+| `salary` | 9,173 | Stores advertised salary information |
+| `skill` | 30 | Stores unique technical skills |
+| `job_skill` | 7,140 | Connects job postings to their required skills |
+| `data_science_classification` | 229 | Identifies Data Science positions |
+| `job_sector_classification` | 9,173 | Classifies jobs into employment sectors |
+
+## Database Relationships
+
+We used unique identifiers to connect related tables.
+
+- **Company and Job Posting:** Each job posting is associated with a company through `company_id`.
+- **Job Posting and Salary:** Salary information is connected to a job through `job_id`.
+- **Job Posting and Skills:** The `job_skill` table connects jobs and skills through `job_id` and `skill_id`.
+- **Data Science Classification:** Identified Data Science jobs are linked to their original postings through `job_id`.
+- **Job Sector Classification:** Each posting is assigned a broader employment sector using `job_id`.
+
+The `job_skill` table represents a many-to-many relationship because one job may require multiple skills, and the same skill may appear in multiple jobs.
+
+## Database Normalization
+
+Our relational design follows normalization principles by separating different types of information into related tables.
+
+For example, company information is stored in the `company` table rather than repeated in every job posting. Similarly, skill names are stored in the `skill` table, while `job_skill` records the relationship between skills and postings.
+
+This structure reduces repeated information and supports efficient SQL joins.
+
+## Data Validation
+
+We performed database validation to check for:
+
+- Duplicate job identifiers.
+- Duplicate job-skill relationships.
+- Missing references between related tables.
+- Inconsistent Data Science classifications.
+- Missing or invalid salary information.
+
+Our key uniqueness and relationship checks passed, confirming that the database tables were consistent for analysis.
+
+
+
+## Data Import Process
+
+After downloading and extracting the Kaggle dataset, we imported the data into our PostgreSQL database using **pgAdmin 4**.
+
+We followed these steps:
+
+1. Created a PostgreSQL database named `data607_project3`.
+2. Created separate relational tables to organize the dataset.
+3. Defined the required columns and data types for each table.
+4. Imported the extracted data files into their corresponding tables.
+5. Connected the tables using identifiers such as `job_id`, `company_id`, and `skill_id`.
+6. Used SQL queries to verify that the data was imported correctly.
+
+After importing the data, we checked the record counts and relationships between tables.
+
+This process allowed us to organize the original dataset into a relational structure that supports SQL queries and further analysis in R.
+
+
+
+# Data Cleaning and Preparation
+
+## Overview
+
+Before analyzing the job postings, we examined the data for quality issues that could affect our results.
+
+We used PostgreSQL for storing and validating the relational data and R for preparing and exploring the dataset.
+
+Our data quality checks focused on:
+
+1. Duplicate records and identifiers.
+2. Missing values.
+3. Salary currencies and annual salary estimates.
+4. Data Science job classification.
+5. Relationships between jobs and technical skills.
+
+## Duplicate Records
+
+We checked for duplicate identifiers in the main database tables and duplicate job-skill combinations.
+
+Our validation checks found no duplicate keys or duplicate job-skill relationships.
+
+This was important because duplicated records could artificially increase skill demand counts or distort salary calculations.
+
+## Missing Values
+
+We examined missing information, particularly salary fields and job attributes.
+
+Not every job posting contained salary information suitable for comparison. Therefore, we separated salary-eligible records from records with missing or unsuitable salary values.
+
+We retained the complete dataset for general job market analysis while using only eligible records for salary calculations.
+
+## Salary Cleaning
+
+The dataset contains salary information in multiple currencies.
+
+To make salary comparisons consistent, we restricted our salary analysis to postings with eligible annual salary estimates in **USD**.
+
+We did not convert other currencies into USD because exchange rates and compensation practices vary across countries.
+
+After applying our eligibility criteria:
+
+- **9,173** total job postings remained available for general analysis.
+- **7,590** postings were eligible for USD salary analysis.
+- **229** postings were classified as Data Science positions.
+- **180** Data Science postings were eligible for USD salary analysis.
+
+## Outliers and Salary Distribution
+
+We examined salary distributions to understand the variation in advertised compensation.
+
+We used visualizations and summary statistics, including medians, to reduce the influence of unusually high or low salary values when comparing skills.
+
+We did not automatically remove high salaries solely because they were unusual. Such values may represent legitimate compensation for specialized or senior positions.
+
+## Data Science Classification
+
+We identified Data Science-related positions and stored their classifications in the `data_science_classification` table.
+
+This allowed us to analyze the 229 Data Science postings separately from the broader job market.
+
+## Preparing Data for R Analysis
+
+We used the relational tables to organize information about job postings, salaries, companies, and skills.
+
+In R, we combined relevant data using job and skill identifiers, prepared summary statistics, and created visualizations for exploratory analysis.
+
+The cleaned and prepared data were also used to develop our interactive Shiny dashboard.
+
+
+
+## Reproducible Data Preparation in R
+
+We used R to load the seven exported PostgreSQL tables and verify the data before performing exploratory analysis.
+
+The following code reads the CSV files, checks record counts, identifies duplicate keys, and examines missing salary information. To reproduce the analysis, place this R Markdown file in the dashboard project folder alongside the `data/` directory containing the seven exported CSV files.
+
+
+
+```{r data-preparation, message=FALSE, warning=FALSE}
+library(dplyr)
+library(knitr)
+
+# Read exported database tables
+read_data <- function(table_name) {
+  read.csv(
+    file.path("data", paste0(table_name, ".csv")),
+    stringsAsFactors = FALSE,
+    na.strings = c("", "NA")
+  )
+}
+
+company <- read_data("company")
+job_posting <- read_data("job_posting")
+salary <- read_data("salary")
+skill <- read_data("skill")
+job_skill <- read_data("job_skill")
+ds_classification <- read_data("data_science_classification")
+sector_classification <- read_data("job_sector_classification")
+
+# Count records in each table
+table_summary <- data.frame(
+  Table = c(
+    "company", "job_posting", "salary", "skill",
+    "job_skill", "data_science_classification",
+    "job_sector_classification"
+  ),
+  Records = c(
+    nrow(company), nrow(job_posting),
+    nrow(salary), nrow(skill),
+    nrow(job_skill), nrow(ds_classification),
+    nrow(sector_classification)
+  )
+)
+
+kable(table_summary, caption = "PostgreSQL Table Record Counts")
+```
+
+
+```{r data-quality-checks}
+# Duplicate identifier checks
+quality_checks <- data.frame(
+  Check = c(
+    "Duplicate job IDs",
+    "Duplicate salary job IDs",
+    "Duplicate company IDs",
+    "Duplicate skill IDs",
+    "Duplicate job-skill pairs"
+  ),
+  Count = c(
+    sum(duplicated(job_posting$job_id)),
+    sum(duplicated(salary$job_id)),
+    sum(duplicated(company$company_id)),
+    sum(duplicated(skill$skill_id)),
+    sum(duplicated(job_skill[c("job_id", "skill_id")]))
+  )
+)
+
+kable(quality_checks, caption = "Duplicate Record Checks")
+
+# Salary eligibility summary
+salary_summary <- data.frame(
+  Measure = c(
+    "Total job postings",
+    "USD salary-eligible postings",
+    "Not eligible for USD salary analysis"
+  ),
+  Count = c(
+    nrow(job_posting),
+    sum(salary$salary_usd_eligible %in% TRUE &
+        !is.na(salary$salary_midpoint_annual)),
+    nrow(job_posting) -
+      sum(salary$salary_usd_eligible %in% TRUE &
+          !is.na(salary$salary_midpoint_annual))
+  )
+)
+
+kable(salary_summary, caption = "Salary Eligibility Summary")
+```
+
+
+# Exploratory Data Analysis
+
+## Data Science Skill Demand
+
+To identify which Data Science skills are most valued by employers, we first measured how frequently each skill appeared in Data Science job postings.
+
+We defined **skill demand** as the percentage of Data Science postings mentioning a particular skill.
+
+Because a single job posting may request multiple skills, the percentages do not necessarily add up to 100%.
+
+The following analysis uses the 229 postings identified as Data Science positions.
+
+
+
+```{r skill-demand, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+library(ggplot2)
+library(scales)
+
+# Identify Data Science jobs
+ds_jobs <- job_posting %>%
+  semi_join(ds_classification, by = "job_id")
+
+# Match skills to Data Science postings
+ds_skills <- job_skill %>%
+  distinct(job_id, skill_id) %>%
+  inner_join(ds_jobs %>% select(job_id), by = "job_id") %>%
+  inner_join(skill %>% select(skill_id, skill_name),
+             by = "skill_id")
+
+# Calculate skill demand
+skill_demand <- ds_skills %>%
+  group_by(skill_name) %>%
+  summarise(
+    job_count = n_distinct(job_id),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    demand_pct = 100 * job_count / nrow(ds_jobs)
+  ) %>%
+  arrange(desc(job_count))
+
+# Display the 10 most requested skills
+top_skills <- head(skill_demand, 10)
+
+knitr::kable(
+  top_skills,
+  digits = 2,
+  caption = "Top 10 Most Requested Data Science Skills"
+)
+
+# Create skill demand chart
+ggplot(top_skills,
+       aes(x = reorder(skill_name, demand_pct),
+           y = demand_pct)) +
+  geom_col(fill = "#3366CC") +
+  geom_text(
+    aes(label = paste0(round(demand_pct, 1), "%")),
+    hjust = -0.1,
+    size = 3.5
+  ) +
+  coord_flip() +
+  scale_y_continuous(
+    limits = c(0, max(top_skills$demand_pct) * 1.15)
+  ) +
+  labs(
+    title = "Top 10 Data Science Skills by Employer Demand",
+    subtitle = "Percentage of 229 Data Science job postings",
+    x = "Skill",
+    y = "Percentage of Job Postings"
+  ) +
+  theme_minimal()
+```
+
+
+
+### Interpretation
+
+Our analysis shows that **Python and SQL** are the most frequently requested skills among the Data Science positions in our dataset.
+
+- **Python:** 163 postings (71.18%).
+- **SQL:** 133 postings (58.08%).
+- **Machine Learning:** 74 postings (32.31%).
+- **LLM:** 60 postings (26.20%).
+- **Statistics:** 55 postings (24.02%).
+
+These findings suggest that programming and database skills are foundational requirements for many Data Science positions.
+
+Machine Learning, Large Language Models (LLMs), and Statistics are also important, although they appear less frequently than Python and SQL.
+
+However, frequency alone does not determine a skill's overall value. In the next section, we compare skill requirements with advertised salaries to explore whether certain skills are associated with higher compensation.
+
+
+
+## Skill Demand and Salary Analysis
+
+Skill demand is one way to measure how much employers value a particular skill. However, frequently requested skills are not necessarily associated with the highest salaries.
+
+To explore this relationship, we compared the number of Data Science postings requesting each skill with the median advertised annual salary of those postings.
+
+We restricted the salary analysis to postings with eligible annual salary estimates in USD. This avoids mixing different currencies or including records without comparable salary information.
+
+We used the median instead of relying only on the mean because unusually high salaries can influence averages.
+
+This analysis is descriptive. A higher median salary for jobs requesting a skill does not necessarily mean that the skill itself causes higher compensation.
+
+
+
+```{r skill-salary-analysis, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+# Select eligible USD salaries for Data Science jobs
+ds_salary <- ds_jobs %>%
+  select(job_id) %>%
+  inner_join(
+    salary %>%
+      filter(
+        salary_usd_eligible %in% TRUE,
+        !is.na(salary_midpoint_annual)
+      ) %>%
+      select(job_id, salary_midpoint_annual),
+    by = "job_id"
+  )
+
+# Calculate salary statistics for each skill
+skill_salary <- ds_skills %>%
+  inner_join(ds_salary, by = "job_id") %>%
+  group_by(skill_name) %>%
+  summarise(
+    salary_job_count = n_distinct(job_id),
+    median_salary = median(salary_midpoint_annual),
+    mean_salary = mean(salary_midpoint_annual),
+    .groups = "drop"
+  ) %>%
+  left_join(skill_demand, by = "skill_name") %>%
+  arrange(desc(median_salary))
+
+# Display the 10 highest median salaries
+top_salary_skills <- skill_salary %>%
+  slice_head(n = 10)
+
+knitr::kable(
+  top_salary_skills %>%
+    select(
+      skill_name,
+      job_count,
+      salary_job_count,
+      median_salary
+    ),
+  digits = 0,
+  col.names = c(
+    "Skill",
+    "Jobs Requesting Skill",
+    "Salary-Eligible Jobs",
+    "Median Annual Salary (USD)"
+  ),
+  caption = "Top 10 Skills by Median Advertised Salary"
+)
+
+# Plot the highest-paying skills
+ggplot(
+  top_salary_skills,
+  aes(
+    x = reorder(skill_name, median_salary),
+    y = median_salary
+  )
+) +
+  geom_col(fill = "#2A9D8F") +
+  coord_flip() +
+  scale_y_continuous(
+    labels = scales::dollar_format()
+  ) +
+  labs(
+    title = "Data Science Skills by Median Advertised Salary",
+    subtitle = "Eligible annual USD salary estimates",
+    x = "Skill",
+    y = "Median Annual Salary (USD)"
+  ) +
+  theme_minimal()
+```
+
+
+
+### Interpretation
+
+The salary analysis suggests that some specialized technical skills are associated with higher advertised salaries.
+
+Among the skills examined, several of the highest median salaries were associated with:
+
+- **Generative AI:** $196,500
+- **PyTorch:** $195,050
+- **Deep Learning:** $193,300
+- **LLM:** $190,900
+- **Kubernetes:** $185,000
+
+In comparison, Python and SQL appeared more frequently across Data Science job postings.
+
+This suggests that **skill demand and salary association represent different dimensions of value**.
+
+Python and SQL are important because they are requested by many employers, while specialized machine learning and AI skills may be associated with higher-paying positions.
+
+However, some specialized skills have relatively small numbers of salary-eligible postings. Therefore, their median salaries should be interpreted cautiously.
+
+Other factors, such as job seniority, location, company, and responsibilities, may also influence advertised compensation.
+
+
+
+## Salary Distribution and Outlier Analysis
+
+We examined advertised salaries to understand how compensation varies between Data Science positions and the overall job market.
+
+For consistent comparisons, we included only salary records with eligible annual salary estimates in USD.
+
+We calculated the mean, median, minimum, maximum, and quartiles. We also used boxplots to identify potentially unusual salary values.
+
+We applied the **interquartile range (IQR) method** to flag potential outliers. Under this method, salaries below Q1 - 1.5 × IQR or above Q3 + 1.5 × IQR are considered potential outliers.
+
+We retained these observations in our descriptive analysis because an unusually high or low salary is not necessarily an error. Salary differences may reflect seniority, location, specialization, or other job characteristics.
+
+
+
+```{r salary-distribution-summary, message=FALSE, warning=FALSE}
+# Prepare eligible USD salary records
+market_salary <- salary %>%
+  filter(
+    salary_usd_eligible %in% TRUE,
+    !is.na(salary_midpoint_annual)
+  ) %>%
+  mutate(
+    job_group = if_else(
+      job_id %in% ds_jobs$job_id,
+      "Data Science",
+      "Other Jobs"
+    )
+  )
+
+# Summary statistics
+salary_stats <- market_salary %>%
+  group_by(job_group) %>%
+  summarise(
+    jobs = n(),
+    minimum = min(salary_midpoint_annual),
+    q1 = quantile(salary_midpoint_annual, 0.25),
+    median = median(salary_midpoint_annual),
+    mean = mean(salary_midpoint_annual),
+    q3 = quantile(salary_midpoint_annual, 0.75),
+    maximum = max(salary_midpoint_annual),
+    .groups = "drop"
+  )
+
+knitr::kable(
+  salary_stats,
+  digits = 0,
+  caption = "Annual USD Salary Summary by Job Group"
+)
+```
+
+
+
+```{r salary-boxplot, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
+ggplot(
+  market_salary,
+  aes(x = job_group, y = salary_midpoint_annual, fill = job_group)
+) +
+  geom_boxplot(alpha = 0.75, outlier.alpha = 0.45) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(
+    title = "Annual Salary Distribution",
+    subtitle = "Data Science vs. Other Jobs",
+    x = "Job Group",
+    y = "Annual Salary (USD)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+
+
+```{r salary-outlier-check, message=FALSE, warning=FALSE}
+outlier_summary <- market_salary %>%
+  group_by(job_group) %>%
+  mutate(
+    q1 = quantile(salary_midpoint_annual, 0.25),
+    q3 = quantile(salary_midpoint_annual, 0.75),
+    iqr = q3 - q1,
+    lower_bound = q1 - 1.5 * iqr,
+    upper_bound = q3 + 1.5 * iqr,
+    is_outlier = salary_midpoint_annual < lower_bound |
+                 salary_midpoint_annual > upper_bound
+  ) %>%
+  summarise(
+    total_jobs = n(),
+    potential_outliers = sum(is_outlier),
+    outlier_percentage = round(100 * mean(is_outlier), 2),
+    .groups = "drop"
+  )
+
+knitr::kable(
+  outlier_summary,
+  caption = "Potential Salary Outliers Using the IQR Method"
+)
+```
+
+
+
+### Salary Distribution Findings
+
+The median advertised annual salary for Data Science positions was approximately **$165,000**, compared with **$110,000** for the overall job market.
+
+The average Data Science salary was approximately **$166,753**, compared with **$121,499** across the overall market.
+
+These results suggest that the Data Science positions in our dataset generally advertised higher compensation than the broader job market.
+
+The boxplot and IQR analysis help identify potentially unusual salary values. We report these observations rather than automatically deleting them, since some may represent legitimate high-paying positions.
+
+One important distinction is that the **Other Jobs** group in our boxplot excludes Data Science positions, while the overall market salary statistics include all eligible postings.
+
+
+
+# Interactive Shiny Dashboard
+
+## Dashboard Development
+
+To make our findings easier to explore, we developed an interactive dashboard using **R Shiny**.
+
+The dashboard was built using R packages including `shiny`, `bslib`, `dplyr`, `ggplot2`, `plotly`, and `DT`.
+
+During development, we used PostgreSQL to retrieve and analyze the job posting data. For online deployment, we exported the seven relational tables into CSV files and configured the Shiny application to load these files.
+
+This allowed us to publish the dashboard without requiring a direct connection to our local PostgreSQL database.
+
+## Dashboard Features
+
+Our dashboard contains eight interactive tabs:
+
+| Dashboard Tab | Purpose |
+|:---|:---|
+| Overview | Summarizes job postings, companies, Data Science jobs, and salary eligibility |
+| Data Science Analysis | Examines Data Science positions and their classifications |
+| Salary Insights | Compares advertised salaries across job categories |
+| Salary Distribution | Visualizes salary distributions and variation |
+| Skill Demand & Salary | Compares requested skills with advertised compensation |
+| Salary Currencies | Examines salary currencies and USD eligibility |
+| Posting Trends | Shows how job postings vary across dates |
+| Explore All Jobs | Allows users to filter and examine individual postings |
+
+## Dashboard Deployment
+
+We published the dashboard using **shinyapps.io** and the `rsconnect` R package.
+
+The application uses the same dataset snapshot as the report, allowing readers to explore the findings interactively.
+
+**Live Dashboard:** [DATA 607 Project 3 — Data Science Skills](https://mohdafwan.shinyapps.io/data607-project3/)
+
+## Value of the Dashboard
+
+The dashboard complements our written analysis by allowing users to explore patterns beyond the summary tables and charts.
+
+For example, users can compare Data Science jobs with the overall market, examine technical skill demand, explore salary distributions, and filter job postings.
+
+The interactive approach makes our analysis more accessible and helps communicate the findings to audiences without extensive programming experience.
+
+
+
+
+
+
+# Limitations
+
+Although our analysis provides useful insights into Data Science skill demand and advertised salaries, several limitations should be considered.
+
+## Limited Time Period
+
+Our dataset contains job postings dated October 5 through October 12, 2026.
+
+Because this represents a short period, the findings may not reflect long-term hiring trends or seasonal changes in employer demand.
+
+Although the Kaggle dataset is updated weekly, our analysis uses one fixed snapshot.
+
+## Data Science Sample Size
+
+Of the 9,173 job postings, only 229 were classified as Data Science positions.
+
+Furthermore, only 180 Data Science postings had eligible annual salary estimates in USD.
+
+This relatively small sample limits how broadly we can generalize the findings.
+
+## Salary Information
+
+Not every job posting included salary information suitable for comparison.
+
+We restricted salary analysis to eligible annual USD salary estimates and excluded other currencies.
+
+As a result, salary findings do not represent every posting in the dataset.
+
+Advertised salaries may also differ from actual compensation, bonuses, and benefits.
+
+## Skill Identification
+
+Our analysis depends on the skills identified in the job posting data.
+
+Some employers may require skills without explicitly mentioning them in their postings.
+
+Additionally, a skill appearing in a posting does not indicate how extensively it will be used.
+
+## Factors Affecting Salary
+
+Salary differences may reflect factors beyond technical skills, including:
+
+- Job seniority and experience requirements.
+- Geographic location.
+- Employer and industry.
+- Job responsibilities and specialization.
+
+Therefore, the relationship between a skill and advertised salary should not be interpreted as causal.
+
+
+
+# Conclusion
+
+This project investigated the question:
+
+**Which Data Science skills are most valued?**
+
+We examined 9,173 job postings, including 229 Data Science positions, using data obtained from Kaggle.
+
+We evaluated skill value using two measures: how frequently employers requested a skill and the advertised salaries associated with jobs requiring that skill.
+
+Our analysis found that **Python and SQL were the most frequently requested skills** among Data Science postings.
+
+Python appeared in 163 postings (71.18%), while SQL appeared in 133 postings (58.08%).
+
+Machine Learning, Large Language Models (LLMs), and Statistics were also commonly requested.
+
+When examining advertised salaries, specialized skills such as Generative AI, PyTorch, Deep Learning, and LLMs were associated with some of the highest median salaries.
+
+These results suggest that skill value has multiple dimensions.
+
+**Python and SQL demonstrated strong demand**, while certain specialized AI and machine learning skills were associated with higher advertised compensation.
+
+We also found that Data Science positions had a median advertised annual salary of approximately $165,000, compared with $110,000 across the overall job market.
+
+Overall, our findings suggest that a combination of foundational programming, database knowledge, and specialized technical skills may be valuable for individuals pursuing Data Science careers.
+
+However, these conclusions are based on a limited dataset snapshot and should not be interpreted as universal job market rankings.
+
+
+
+# Future Improvements
+
+Our project could be expanded in several ways.
+
+1. **Longitudinal analysis:** Collect weekly Kaggle dataset updates to examine changes in skill demand over time.
+
+2. **Geographic comparisons:** Compare skill demand and advertised salaries across different locations.
+
+3. **Experience-level analysis:** Examine whether salary associations differ between entry-level, mid-level, and senior positions.
+
+4. **Skill combinations:** Investigate whether combinations such as Python, SQL, and Machine Learning are associated with different salary patterns.
+
+5. **Additional data sources:** Compare the Kaggle dataset with other job posting datasets to evaluate how consistent the findings are.
+
+6. **Advanced statistical analysis:** Explore statistical models that account for factors such as location, seniority, and industry.
+
+These improvements could provide a more comprehensive understanding of Data Science skill demand and compensation.
+
+
+# References
+
+minmaxer. (n.d.). *Job Postings with Salaries* [Data set]. Kaggle. https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries
+
+

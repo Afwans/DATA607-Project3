@@ -2,24 +2,38 @@
 .Rhistory
 .Rproj.user/
 .Ruserdata
-.Renviron
 
 # R local files
-.RData
 .Rhistory
+.RData
+.Ruserdata
 .Rproj.user/
-
-# Shiny deployment metadata
-rsconnect/
-
-# Environment and credentials
 .Renviron
+
+# R Markdown temporary files
+*_cache/
+*_files/
+*.utf8.md
+*.knit.md
+
+# Backups
+data_backups/
+
+# Local credentials
 .env
 .env.*
-*.pem
-*.key
+!.env.example
 
-# Local database files
-*.sqlite
-*.db
+# Temporary files
+*.tmp
 *.bak
+*.log
+Thumbs.db
+.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
+
+
+Dashboard_Online/rsconnect/

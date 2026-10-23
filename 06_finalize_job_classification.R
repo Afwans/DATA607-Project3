@@ -8,19 +8,25 @@ library(readr)
 library(dplyr)
 library(stringr)
 
-# STEP 1: Load the refined dataset (read-only)
-jobs <- read_csv(
-  "data/job_postings_refined_all.csv",
+# STEP 1: Load full dataset and refined Data Science candidates
+jobs_full <- read_csv(
+  "Data/job_postings_cleaned.csv",
   show_col_types = FALSE
 )
 
-# STEP 1A: Validate posting dates
-cat("\n--- POSTING DATE VALIDATION ---\n")
+jobs <- read_csv(
+  "Data/job_postings_refined_all.csv",
+  show_col_types = FALSE
+)
+
+# STEP 2: Validate records and posting dates
+stopifnot(n_distinct(jobs$job_id) == nrow(jobs))
+stopifnot(all(jobs$job_id %in% jobs_full$job_id))
 stopifnot("posted_at" %in% names(jobs))
 
 jobs %>%
   summarise(
-    total_jobs = n(),
+    total_candidates = n(),
     valid_dates = sum(!is.na(posted_at)),
     missing_dates = sum(is.na(posted_at)),
     earliest_date = if (all(is.na(posted_at))) as.Date(NA) else as.Date(min(posted_at, na.rm = TRUE)),
@@ -28,25 +34,18 @@ jobs %>%
   ) %>%
   print()
 
-# STEP 2: Define data-related job title patterns
+# STEP 3: Define data-related job title patterns
 patterns <- list(
-  "Data Science" =
-    "\\b(data scien(tist|ce)|decision scientist|applied scientist)\\b",
-  "AI/ML" =
-    "\\b(machine learning|deep learning|ai/ml|ml engineer|ai engineer|ai platform engineer|nlp engineer|computer vision|artificial intelligence researcher)\\b",
-  "Data Engineering" =
-    "\\b(data engineer(ing)?|analytics engineer(ing)?|data architect|data pipeline|etl developer|data warehouse architect)\\b",
-  "Business Intelligence" =
-    "\\b(business intelligence|bi analyst|bi developer|power bi developer|tableau developer)\\b",
-  "Statistics" =
-    "\\b(biostatistic(s|ian)|statistician|actuarial analyst|quantitative analyst|quantitative researcher|statistical programmer)\\b",
-  "Data Analytics" =
-    "\\b(data analy(st|stics|sis)|analytics lead|analytics manager|marketing analytics|product analytics|customer analytics|reporting analyst|insights analyst|information analyst|forecast analytics|data insights|analytics & insights)\\b",
-  "Database" =
-    "\\b(database administrator|database engineer|database developer|sql developer|database architect)\\b"
+  "Data Science" = "\\b(data scien(tist|ce)|decision scientist|applied scientist)\\b",
+  "AI/ML" = "\\b(machine learning|deep learning|ai/ml|ml engineer|ai engineer|ai platform engineer|nlp engineer|computer vision|artificial intelligence researcher)\\b",
+  "Data Engineering" = "\\b(data engineer(ing)?|analytics engineer(ing)?|data architect|data pipeline|etl developer|data warehouse architect)\\b",
+  "Business Intelligence" = "\\b(business intelligence|bi analyst|bi developer|power bi developer|tableau developer)\\b",
+  "Statistics" = "\\b(biostatistic(s|ian)|statistician|actuarial analyst|quantitative analyst|quantitative researcher|statistical programmer)\\b",
+  "Data Analytics" = "\\b(data analy(st|stics|sis)|analytics lead|analytics manager|marketing analytics|product analytics|customer analytics|reporting analyst|insights analyst|information analyst|forecast analytics|data insights|analytics & insights)\\b",
+  "Database" = "\\b(database administrator|database engineer|database developer|sql developer|database architect)\\b"
 )
 
-# STEP 3: Define job titles that are usually unrelated
+# STEP 4: Define usually unrelated titles
 non_data_roles <- paste(
   c(
     "account executive", "sales specialist", "sales representative",
@@ -59,7 +58,7 @@ non_data_roles <- paste(
   collapse = "|"
 )
 
-# STEP 4: Identify strong data-related responsibilities
+# STEP 5: Define data-related responsibilities
 strong_work <- paste(
   c(
     "statistical model(ing|s)?", "predictive model(ing|s)?",
@@ -73,20 +72,19 @@ strong_work <- paste(
   collapse = "|"
 )
 
-# STEP 5: Function to identify job category
+# STEP 6: Assign job categories
 find_category <- function(title) {
   if (is.na(title)) return(NA_character_)
-  
-  for (nm in names(patterns)) {
-    if (str_detect(title, regex(patterns[[nm]], ignore_case = TRUE))) {
-      return(nm)
+
+  for (category in names(patterns)) {
+    if (str_detect(title, regex(patterns[[category]], ignore_case = TRUE))) {
+      return(category)
     }
   }
-  
+
   NA_character_
 }
 
-# STEP 6: Classify all candidate jobs
 jobs_final <- jobs %>%
   mutate(
     job_category = vapply(title, find_category, character(1)),
@@ -119,35 +117,23 @@ jobs_final <- jobs %>%
     )
   )
 
-# STEP 7: Validate dataset
+# STEP 7: Validate classifications
 stopifnot(nrow(jobs_final) == nrow(jobs))
 stopifnot(n_distinct(jobs_final$job_id) == nrow(jobs_final))
-stopifnot("posted_at" %in% names(jobs_final))
 
-# STEP 8: Export classified jobs safely
-classified_path <- "data/jobs_classified_all.csv"
+jobs_final %>%
+  count(classification, sort = TRUE) %>%
+  print()
 
-if (!file.exists(classified_path)) {
-  write_csv(jobs_final, classified_path)
-  cat("New classified jobs CSV created.\n")
-} else {
-  cat("Existing classified jobs CSV preserved.\n")
-}
+# STEP 8: Export derived classification results
+write_csv(jobs_final, "Data/jobs_classified_all.csv")
 
-# STEP 9: Export provisional inclusions safely
 jobs_included <- jobs_final %>%
   filter(classification == "Include")
 
-included_path <- "data/jobs_include_provisional.csv"
+write_csv(jobs_included, "Data/jobs_include_provisional.csv")
 
-if (!file.exists(included_path)) {
-  write_csv(jobs_included, included_path)
-  cat("New provisional inclusions CSV created.\n")
-} else {
-  cat("Existing provisional inclusions CSV preserved.\n")
-}
-
-# STEP 10: Export manual review queue safely
+# STEP 9: Prepare manual review queue without overwriting existing work
 jobs_review_queue <- jobs_final %>%
   filter(classification == "Review") %>%
   select(
@@ -155,30 +141,28 @@ jobs_review_queue <- jobs_final %>%
     skill_count, classification_basis, description
   )
 
-review_queue_path <- "data/jobs_manual_review_queue.csv"
+review_queue_path <- "Data/jobs_manual_review_queue.csv"
 
 if (!file.exists(review_queue_path)) {
   write_csv(jobs_review_queue, review_queue_path)
-  cat("New manual review queue CSV created.\n")
-} else {
-  cat("Existing manual review queue CSV preserved.\n")
-  cat("Manual review work was not overwritten.\n")
 }
 
-# STEP 11: Display classification results
-cat("\nClassification counts:\n")
-print(count(jobs_final, classification, sort = TRUE))
+# STEP 10: Review classifications
+jobs_included %>%
+  count(job_category, sort = TRUE) %>%
+  print()
 
-cat("\nCategories among provisional inclusions:\n")
-print(jobs_included %>% count(job_category, sort = TRUE))
+jobs_final %>%
+  summarise(
+    full_dataset_jobs = nrow(jobs_full),
+    data_science_candidates = n(),
+    included = sum(classification == "Include"),
+    excluded = sum(classification == "Exclude"),
+    needs_review = sum(classification == "Review"),
+    usd_salary_eligible_included = sum(
+      classification == "Include" & salary_usd_eligible %in% TRUE
+    )
+  ) %>%
+  print()
 
-cat(
-  "\nUSD salary-eligible among provisional inclusions: ",
-  sum(jobs_final$classification == "Include" &
-        jobs_final$salary_usd_eligible %in% TRUE),
-  "\n",
-  sep = ""
-)
-
-cat("\nJob classification completed.\n")
-cat("Existing CSV files were preserved where present.\n")
+View(jobs_review_queue)
