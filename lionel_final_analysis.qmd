@@ -1,0 +1,660 @@
+---
+title: "Which Data Science Skills Are Most Valued?"
+subtitle: "DATA 607 — Project 3 | Final Analysis"
+author: "Lionel Jr Desroses"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    code-fold: true
+    code-summary: "Show code"
+    theme: flatly
+    fig-width: 9
+    fig-height: 6
+    df-print: paged
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: visual
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(gt)
+library(knitr)
+library(stringr)
+library(tidytext)
+library(ggrepel)
+
+# Colour palette used throughout
+clr_primary   <- "#2c7bb6"
+clr_secondary <- "#d7191c"
+clr_neutral   <- "#636363"
+```
+
+------------------------------------------------------------------------
+
+## 1 Introduction
+
+> **Research question:** *Which data science skills are most valued?*
+
+If you are thinking about a career in data science or trying to grow in one knowing which skills employers actually care about is essential. This analysis looks at **226 real job postings** from October 2026 to find out which technical skills show up most often and which ones are linked to the highest salaries.
+
+The data comes from a Kaggle dataset called ["Job Postings with Salaries"](https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries). Our team filtered the original 9,173 postings down to 226 that were clearly data science related, extracted 30 specific technical skills from each job description, and organized everything into a clean five-table database.
+
+**The five data tables we use:**
+
+| Table         |  Rows | What it contains                          |
+|---------------|------:|-------------------------------------------|
+| `SKILL`       |    30 | The 30 technical skills we tracked        |
+| `JOB_POSTING` |   226 | Job titles, categories, company, location |
+| `SALARY`      |   226 | Salary ranges and eligibility flags       |
+| `JOB_SKILL`   | 1,142 | Which skills each job posting mentions    |
+| `COMPANY`     |   210 | Company names                             |
+
+## 2 Data Load & Quality Check
+
+### What this section does
+
+Before we can trust any results, we need to make sure the data loaded correctly.
+
+We expect exactly 226 job postings, 30 skills, 1,142 job-skill connections, 226 salary records, and 210 companies. The table below should show green checkmarks across the board.
+
+```{r load-data}
+# Read all five normalized tables
+skill_tbl    <- read_csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/Normalized/SKILL.csv",       show_col_types = FALSE)
+posting_tbl  <- read_csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/Normalized/JOB_POSTING.csv", show_col_types = FALSE)
+salary_tbl   <- read_csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/Normalized/SALARY.csv",      show_col_types = FALSE)
+job_skill_tbl <- read_csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/Normalized/JOB_SKILL.csv",  show_col_types = FALSE)
+company_tbl  <- read_csv("https://media.githubusercontent.com/media/Afwans/DATA607-Project3/refs/heads/main/Data/Normalized/COMPANY.csv",     show_col_types = FALSE)
+```
+
+```{r quality-check}
+qc <- tibble(
+  Table    = c("SKILL", "JOB_POSTING", "SALARY", "JOB_SKILL", "COMPANY"),
+  Expected = c(30L, 226L, 226L, 1142L, 210L),
+  Actual   = c(nrow(skill_tbl), nrow(posting_tbl), nrow(salary_tbl),
+               nrow(job_skill_tbl), nrow(company_tbl)),
+  Pass     = Expected == Actual
+)
+
+qc |>
+  gt() |>
+  tab_header(title = "Data Verification — Expected vs Actual Row Counts") |>
+  cols_label(Table = "Table", Expected = "Expected", Actual = "Actual", Pass = "✓") |>
+  tab_style(
+    style     = cell_fill(color = "#d4edda"),
+    locations = cells_body(rows = Pass == TRUE)
+  ) |>
+  tab_style(
+    style     = cell_fill(color = "#f8d7da"),
+    locations = cells_body(rows = Pass == FALSE)
+  )
+```
+
+```{r build-master-frame}
+# Build the main joined frame: one row per job
+jobs_full <- posting_tbl |>
+  left_join(company_tbl, by = "company_id") |>
+  left_join(salary_tbl,  by = "job_id")
+
+# Build a long frame: one row per job-skill pair
+skills_long <- job_skill_tbl |>
+  left_join(skill_tbl,   by = "skill_id") |>
+  left_join(posting_tbl, by = "job_id")   |>
+  left_join(salary_tbl,  by = "job_id")
+```
+
+**What we see:** All five tables loaded with the exact row counts we expected the data is clean and ready to analyze.
+
+------------------------------------------------------------------------
+
+## 3 Descriptive Analysis: What Do These Jobs Pay?
+
+### What this section does
+
+Before we compare salaries across different skills and job types, we need to understand what a "normal" salary looks like across all 226 postings. This is our baseline a reference number we will return to throughout the analysis.
+
+One important detail: not all 226 postings included a usable salary. Some listed salaries in foreign currencies, some had incomplete ranges, and some had values that looked like data errors. After filtering to only **valid USD annual salaries**, we are left with **178 postings** for all salary work.
+
+```{r salary-filter}
+salary_eligible <- jobs_full |>
+  filter(
+    salary_usd_eligible == TRUE,
+    !is.na(salary_midpoint_annual)
+  )
+
+cat("Total postings:", nrow(jobs_full), "\n")
+cat("Postings with valid USD salary:", nrow(salary_eligible), "\n")
+```
+
+```{r salary-summary-table}
+salary_eligible |>
+  summarise(
+    `Number of postings`  = as.character(n()),
+    `Median salary`       = dollar(median(salary_midpoint_annual)),
+    `Average salary`      = dollar(mean(salary_midpoint_annual)),
+    `Bottom 25% earn up to` = dollar(quantile(salary_midpoint_annual, 0.25)),
+    `Top 25% earn above`    = dollar(quantile(salary_midpoint_annual, 0.75)),
+    `Lowest salary seen`  = dollar(min(salary_midpoint_annual)),
+    `Highest salary seen` = dollar(max(salary_midpoint_annual))
+  ) |>
+  pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
+  gt() |>
+  tab_header(
+    title    = "Salary Summary — 178 Valid USD Postings",
+    subtitle = "All values are the advertised annual salary midpoint"
+  )
+```
+
+```{r salary-histogram}
+#| fig-cap: "How salaries are spread across the 178 eligible postings. The red dashed line marks the median."
+
+ggplot(salary_eligible, aes(x = salary_midpoint_annual)) +
+  geom_histogram(
+    binwidth = 15000,
+    fill     = clr_primary,
+    colour   = "white",
+    alpha    = 0.85
+  ) +
+  geom_vline(
+    xintercept = median(salary_eligible$salary_midpoint_annual),
+    colour     = clr_secondary,
+    linewidth  = 1,
+    linetype   = "dashed"
+  ) +
+  annotate(
+    "text",
+    x     = median(salary_eligible$salary_midpoint_annual) + 8000,
+    y     = Inf,
+    label = paste0("Median: ",
+                   dollar(median(salary_eligible$salary_midpoint_annual))),
+    vjust = 2, hjust = 0, colour = clr_secondary, size = 3.5
+  ) +
+  scale_x_continuous(labels = label_dollar(scale = 1e-3, suffix = "k")) +
+  labs(
+    title    = "Salary Distribution — Data Science Job Postings",
+    subtitle = "Annual salary midpoint (USD), 178 eligible postings",
+    x        = "Annual Salary Midpoint (USD thousands)",
+    y        = "Number of Postings"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+**What this chart tells us:** The most common salary range clusters between about \$130k and \$200k. The red dashed line at **\$165,000** is the median meaning half the postings paid above that and half paid below. There is a small group of very high paying roles (above \$250k) that pull the average up slightly above the median. This is our benchmark any skill or job type that pays consistently above \$165k is performing above the norm.
+
+------------------------------------------------------------------------
+
+## 4 Descriptive Analysis: Which Skills Do Employers Ask For Most?
+
+### What this section does
+
+The most straightforward way to measure which skills are "valued" is to count how often employers mention each one in their job descriptions. If a skill shows up in 70% of postings, that is a strong signal that it is widely expected almost a requirement just to be considered for most roles.
+
+We searched all 226 job descriptions for 30 specific skills using keyword rules. The table below shows all 30 skills ranked from most to least frequently mentioned. The bar chart highlights the top 15.
+
+```{r skill-demand-table}
+skill_demand <- skills_long |>
+  count(skill_name, name = "job_count", sort = TRUE) |>
+  mutate(
+    pct_of_postings = round(job_count / nrow(posting_tbl) * 100, 1),
+    rank            = row_number()
+  )
+
+skill_demand |>
+  gt() |>
+  tab_header(
+    title    = "All 30 Tracked Skills — Ranked by Demand",
+    subtitle = "Based on 226 postings; each job counts once per skill"
+  ) |>
+  cols_label(
+    skill_name      = "Skill",
+    job_count       = "# Postings",
+    pct_of_postings = "% of Postings",
+    rank            = "Rank"
+  ) |>
+  data_color(columns = pct_of_postings, palette = "Blues")
+```
+
+```{r top15-bar}
+#| fig-cap: "The 15 most frequently requested skills. The percentage shown is out of all 226 postings."
+
+top15 <- skill_demand |> slice_head(n = 15)
+
+ggplot(top15, aes(x = reorder(skill_name, job_count), y = job_count)) +
+  geom_col(fill = clr_primary, alpha = 0.85) +
+  geom_text(
+    aes(label = paste0(pct_of_postings, "%")),
+    hjust = -0.1, size = 3.5, colour = clr_neutral
+  ) +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(
+    title    = "Top 15 Most-Requested Data Science Skills",
+    subtitle = "n = 226 postings; percentage label = share of all postings",
+    x        = NULL,
+    y        = "Number of Job Postings"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+**What this chart tells us:** **Python** is in a league of its own mentioned in more than 7 out of 10 job postings. **SQL** is a close second, appearing in nearly 6 out of 10. These two skills are essentially required for most data science roles. **Machine Learning** and **LLMs (Large Language Models)** are the next tier, reflecting the industry's current shift toward AI. Further down the list, skills like **dbt**, **Databricks**, and **Snowflake** show up in roughly 1 in 5 to 1 in 6 postings common enough to be worth knowing but not universal requirements. The bottom of the list (skills not shown here, like Docker, Kubernetes, and Airflow) appear in fewer than 1 in 10 postings specialized rather than general requirements.
+
+------------------------------------------------------------------------
+
+## 5 Diagnostic Analysis: Which Skills Are Linked to Higher Pay?
+
+### What this section does
+
+Knowing which skills are *common* is only half the picture. A skill that shows up everywhere might just be a basic expectation something every employer assumes you have, so it does not necessarily push your salary higher. To find skills that are truly *valued*, we need to also look at whether having a skill is associated with higher pay.
+
+This section compares the **median salary of jobs that mention a skill** against the **median salary of jobs that do not mention that skill**. The difference is what we call the **salary premium** a positive number means that skill tends to appear in higher paying jobs; a negative number means the opposite.
+
+> **Important note:** This is a description of patterns in the data, not proof that learning a skill will raise your salary. A job requiring PyTorch might already be a senior level role that pays well for many reasons the skill mention and the high salary are both symptoms of the same thing, not cause and effect.
+
+```{r skill-salary-prep}
+# Build a wide frame with TRUE/FALSE per skill for each salary-eligible job
+jobs_wide <- job_skill_tbl |>
+  left_join(skill_tbl, by = "skill_id") |>
+  mutate(mentioned = TRUE) |>
+  pivot_wider(
+    id_cols     = job_id,
+    names_from  = skill_name,
+    values_from = mentioned,
+    values_fill = FALSE
+  )
+
+salary_skills_wide <- salary_eligible |>
+  select(job_id, salary_midpoint_annual) |>
+  left_join(jobs_wide, by = "job_id")
+
+salary_skills_long <- salary_skills_wide |>
+  pivot_longer(
+    cols      = -c(job_id, salary_midpoint_annual),
+    names_to  = "skill_name",
+    values_to = "mentioned"
+  )
+```
+
+```{r skill-salary-summary}
+skill_salary_summary <- salary_skills_long |>
+  group_by(skill_name, mentioned) |>
+  summarise(
+    n             = n(),
+    median_salary = median(salary_midpoint_annual),
+    .groups       = "drop"
+  ) |>
+  pivot_wider(
+    names_from  = mentioned,
+    values_from = c(n, median_salary)
+  ) |>
+  rename(
+    n_with      = `n_TRUE`,
+    n_without   = `n_FALSE`,
+    med_with    = `median_salary_TRUE`,
+    med_without = `median_salary_FALSE`
+  ) |>
+  mutate(salary_premium = med_with - med_without) |>
+  filter(n_with >= 10, n_without >= 10) |>
+  arrange(desc(salary_premium))
+
+skill_salary_summary |>
+  mutate(
+    med_with       = dollar(med_with),
+    med_without    = dollar(med_without),
+    salary_premium = dollar(salary_premium)
+  ) |>
+  gt() |>
+  tab_header(
+    title    = "Salary Premium by Skill",
+    subtitle = "Only skills with at least 10 postings in each group are shown"
+  ) |>
+  cols_label(
+    skill_name     = "Skill",
+    n_with         = "Jobs with skill",
+    n_without      = "Jobs without skill",
+    med_with       = "Median salary (with)",
+    med_without    = "Median salary (without)",
+    salary_premium = "Salary premium"
+  )
+```
+
+```{r diverging-premium-chart}
+#| fig-cap: "Blue bars = skills linked to higher-paying jobs. Red bars = skills linked to lower-paying jobs (relative to jobs without that skill)."
+
+ggplot(skill_salary_summary,
+       aes(x = reorder(skill_name, salary_premium),
+           y = salary_premium,
+           fill = salary_premium > 0)) +
+  geom_col(alpha = 0.85) +
+  geom_hline(yintercept = 0, colour = "black", linewidth = 0.5) +
+  coord_flip() +
+  scale_fill_manual(
+    values = c(`TRUE` = clr_primary, `FALSE` = clr_secondary),
+    guide  = "none"
+  ) +
+  scale_y_continuous(labels = label_dollar(scale = 1e-3, suffix = "k")) +
+  labs(
+    title    = "Salary Premium by Skill",
+    subtitle = "Median salary (jobs with skill) minus median salary (jobs without skill)",
+    x        = NULL,
+    y        = "Salary Premium (USD thousands)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+**What this chart tells us:** Skills shown in **blue** are found in higher paying job postings compared to postings that don't mention them. The longer the blue bar, the bigger the pay gap. Skills shown in **red** actually tend to appear in lower paying postings this often happens with generalist tools like Excel or Tableau that show up in analyst roles, which generally pay less than engineer or ML scientist roles. The key takeaway is that AI and machine learning skills (like **LLM**, **PyTorch**, **Generative AI**, and **Deep Learning**) sit at the top with the largest positive salary premiums, while broad productivity tools sit at the bottom. Notice that **Python** the most demanded skill sits in the middle: it is so common across all role types that it no longer signals a pay premium on its own.
+
+------------------------------------------------------------------------
+
+## 6 Diagnostic Analysis: Does It Matter What Type of Job It Is?
+
+### What this section does
+
+So far we have been looking at all 226 postings together. But data science is not one job it is a family of different roles. A **Data Analyst** and an **AI/ML Engineer** both work with data, but they do very different things and earn very different salaries. If we lump them together, we might get misleading results.
+
+This section breaks the data down by **job category** to answer three questions:
+
+1.  Which categories pay the most?
+2.  Does each category have its own distinct set of top skills, or do they all need the same things?
+3.  Is Python truly universal, or is it just concentrated in a few big categories?
+
+```{r category-skill-prep}
+category_skills <- skills_long |>
+  filter(!is.na(job_category_updated)) |>
+  group_by(job_category_updated) |>
+  mutate(total_jobs_in_cat = n_distinct(job_id)) |>
+  ungroup() |>
+  group_by(job_category_updated, skill_name, total_jobs_in_cat) |>
+  summarise(skill_count = n(), .groups = "drop") |>
+  mutate(skill_pct = round(skill_count / total_jobs_in_cat * 100, 1))
+```
+
+```{r category-salary-bar}
+#| fig-cap: "Median advertised salary by job category. The number in brackets shows how many postings had valid salary data."
+
+category_salary <- salary_eligible |>
+  filter(!is.na(job_category_updated)) |>
+  group_by(job_category_updated) |>
+  summarise(
+    n_jobs        = n(),
+    median_salary = median(salary_midpoint_annual),
+    .groups       = "drop"
+  ) |>
+  arrange(desc(median_salary))
+
+ggplot(category_salary,
+       aes(x = reorder(job_category_updated, median_salary),
+           y = median_salary)) +
+  geom_col(fill = clr_primary, alpha = 0.85) +
+  geom_text(
+    aes(label = paste0(dollar(median_salary / 1000), "k  (n=", n_jobs, ")")),
+    hjust = -0.05, size = 3.2
+  ) +
+  coord_flip() +
+  scale_y_continuous(
+    labels = label_dollar(scale = 1e-3, suffix = "k"),
+    expand = expansion(mult = c(0, 0.25))
+  ) +
+  labs(
+    title    = "Median Advertised Salary by Job Category",
+    subtitle = "USD-eligible postings only",
+    x        = NULL,
+    y        = "Median Annual Salary (USD thousands)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+**What this chart tells us:** There is a clear pay hierarchy across job categories. **Data Science** and **AI/ML** roles sit at the top, with median salaries above \$190k. **Data Engineering** is in the middle. **Data Analytics** and **Business Intelligence** roles sit at the bottom still well paying, but noticeably lower. This matters for our analysis because skills that are common in AI/ML roles will naturally appear to have a salary premium, even if the skill itself is not the reason for the higher pay the *type of role* is.
+
+```{r skill-heatmap}
+#| fig-cap: "Each cell shows what percentage of jobs in that category mention a given skill. Darker blue = more common in that category."
+
+top15_names <- top15$skill_name
+
+heatmap_data <- category_skills |>
+  filter(skill_name %in% top15_names)
+
+ggplot(heatmap_data,
+       aes(x = skill_name,
+           y = job_category_updated,
+           fill = skill_pct)) +
+  geom_tile(colour = "white", linewidth = 0.5) +
+  geom_text(
+    aes(label = paste0(skill_pct, "%")),
+    size = 2.8, colour = "white"
+  ) +
+  scale_fill_gradient(
+    low  = "#deebf7",
+    high = "#08519c",
+    name = "% of jobs\nin category"
+  ) +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  labs(
+    title    = "Skill Demand Heatmap by Job Category",
+    subtitle = "Top 15 skills; cell = % of jobs in that category mentioning the skill",
+    x        = NULL,
+    y        = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+**What this chart tells us:** Read across each row to see the skill profile of a job category — darker cells mean that skill is more central to that type of role. Reading down a column tells you which categories value that skill most. If Python's column is dark blue in every row, it confirms that Python is truly a universal requirement, not a quirk of one category. Skills like **Machine Learning** and **LLM** will likely be darkest in the AI/ML row, explaining why those skills have the highest salary premiums we saw in Section 5.
+
+```{r top5-by-category}
+#| fig-cap: "The top 5 skills within each job category, independently ranked. This shows each category's unique skill priorities."
+
+top5_per_cat <- category_skills |>
+  group_by(job_category_updated) |>
+  slice_max(order_by = skill_count, n = 5, with_ties = FALSE) |>
+  ungroup()
+
+ggplot(top5_per_cat,
+       aes(x = reorder_within(skill_name, skill_count, job_category_updated),
+           y = skill_count,
+           fill = job_category_updated)) +
+  geom_col(show.legend = FALSE, alpha = 0.85) +
+  scale_x_reordered() +
+  coord_flip() +
+  facet_wrap(~ job_category_updated, scales = "free_y", ncol = 2) +
+  labs(
+    title    = "Top 5 Skills per Job Category",
+    subtitle = "Count of postings mentioning each skill, ranked within each category",
+    x        = NULL,
+    y        = "Number of Postings"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+**What this chart tells us:** Each panel shows one job category with its own independent skill ranking. This is useful because it reveals the distinct "personality" of each role type. For example, **Data Engineering** will likely prioritize tools like Spark, dbt, and Databricks, while **AI/ML** will lean heavily on Python, Machine Learning, and deep learning frameworks. **Business Intelligence** will likely feature Excel, Tableau, and Power BI. When you see a skill appear consistently across all panels, that is a strong signal of universal value Python appearing in every panel would confirm it is the true foundational skill of modern data work.
+
+------------------------------------------------------------------------
+
+## 7 Diagnostic Analysis: Do Skills Travel Together?
+
+### What this section does
+
+Employers rarely ask for just one skill. Most job postings list a combination of skills and understanding which skills tend to appear together reveals what the market thinks of as a single "package deal."
+
+For ex/ if Python and SQL always appear together in the same postings, an employer hiring for a role with Python is almost certainly also expecting SQL even if they only highlight Python in the job title. Knowing these clusters helps you understand what you are really signing up to learn when you invest in one skill.
+
+```{r cooccurrence-prep}
+# Self-join to find all skill pairs within the same job posting
+pairs <- skills_long |>
+  select(job_id, skill_a = skill_name) |>
+  inner_join(
+    skills_long |> select(job_id, skill_b = skill_name),
+    by           = "job_id",
+    relationship = "many-to-many"
+  ) |>
+  filter(skill_a < skill_b) |>
+  count(skill_a, skill_b, name = "co_count", sort = TRUE)
+
+cat("Total unique skill pairs found:", nrow(pairs), "\n")
+```
+
+```{r top10-pairs-table}
+pairs |>
+  slice_head(n = 10) |>
+  gt() |>
+  tab_header(
+    title    = "Top 10 Most Common Skill Pairs",
+    subtitle = "Number of job postings that mention both skills"
+  ) |>
+  cols_label(
+    skill_a  = "Skill A",
+    skill_b  = "Skill B",
+    co_count = "Postings with both"
+  ) |>
+  data_color(columns = co_count, palette = "Blues")
+```
+
+**What this table tells us:** The top pairs reveal which skills the market treats as inseparable. A Python–SQL pairing at the top would confirm that nearly every role expecting Python also expects SQL they are two sides of the same coin in most data science jobs.
+
+```{r cooccurrence-heatmap}
+#| fig-cap: "Each cell shows how many postings mention both skills. Darker = more often seen together. Blank cells mean those two skills rarely appear in the same posting."
+
+top15_pairs <- pairs |>
+  filter(
+    skill_a %in% top15_names,
+    skill_b %in% top15_names
+  )
+
+top15_pairs_sym <- bind_rows(
+  top15_pairs,
+  top15_pairs |> rename(skill_a = skill_b, skill_b = skill_a)
+)
+
+ggplot(top15_pairs_sym,
+       aes(x = skill_a, y = skill_b, fill = co_count)) +
+  geom_tile(colour = "white", linewidth = 0.4) +
+  scale_fill_gradient(
+    low  = "#deebf7",
+    high = "#08519c",
+    name = "Co-occurrences"
+  ) +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  labs(
+    title    = "Skill Co-occurrence Heatmap (Top 15 Skills)",
+    subtitle = "Number of postings where both skills appear together",
+    x        = NULL,
+    y        = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+**What this chart tells us:** Look for the darkest cells those are the skill pairs that most often appear together in the same job posting. A dark cluster around Python, SQL, and Machine Learning would confirm the existence of a classic **core data science stack** that most employers expect you to have as a bundle. Skills with an entire light row and column are standalone specializations they are valued in their specific context but are not bundled with the rest of the field.
+
+------------------------------------------------------------------------
+
+## 8 Synthesis: Which Skills Are Truly Most Valued?
+
+### What this section does
+
+We have looked at two separate things: how often skills are demanded (Section 4) and how much salary is associated with them (Section 5). Now we put both together into a single **Value Score** that ranks each skill by combining both dimensions.
+
+The logic is simple: a skill scores highest when it is **both frequently requested AND linked to higher pay**. A skill that is only common but pays no premium gets penalized. A skill that pays well but is only requested in 2% of jobs also gets penalized.
+
+The lower the Value Score, the more valued the skill is overall.
+
+```{r value-score}
+demand_rank <- skill_demand |>
+  select(skill_name, job_count, pct_of_postings) |>
+  mutate(demand_rank = row_number())
+
+salary_rank <- skill_salary_summary |>
+  arrange(desc(med_with)) |>
+  mutate(salary_rank = row_number()) |>
+  select(skill_name, med_with, salary_premium, salary_rank)
+
+value_table <- demand_rank |>
+  inner_join(salary_rank, by = "skill_name") |>
+  mutate(
+    value_score = round((demand_rank + salary_rank) / 2, 1)
+  ) |>
+  arrange(value_score) |>
+  mutate(
+    med_with       = dollar(med_with),
+    salary_premium = dollar(salary_premium)
+  )
+
+value_table |>
+  select(
+    skill_name, job_count, pct_of_postings,
+    demand_rank, salary_rank, value_score,
+    med_with, salary_premium
+  ) |>
+  gt() |>
+  tab_header(
+    title    = "Composite Skill Value Score",
+    subtitle = "Lower score = stronger combination of demand and salary"
+  ) |>
+  cols_label(
+    skill_name      = "Skill",
+    job_count       = "# Jobs",
+    pct_of_postings = "% Postings",
+    demand_rank     = "Demand Rank",
+    salary_rank     = "Salary Rank",
+    value_score     = "Value Score ↓",
+    med_with        = "Median Salary",
+    salary_premium  = "Salary Premium"
+  ) |>
+  data_color(
+    columns = value_score,
+    palette = rev(RColorBrewer::brewer.pal(9, "Blues"))
+  ) |>
+  tab_footnote(
+    footnote  = "Value Score = average of demand rank and salary rank. Lower is better.",
+    locations = cells_column_labels(columns = value_score)
+  )
+```
+
+**What this table tells us:** The skills at the top of this table with the lowest Value Scores are the ones that score well on *both* frequency and salary. These are the skills the data science job market consistently rewards. Skills near the bottom may be either common but cheap or rare but expensive, making them less universally valuable. Use this table as a practical guide: if you are deciding which skill to invest time in next, look for one near the top that you don't already have.
+
+------------------------------------------------------------------------
+
+## 9 Conclusions
+
+### The Answer to Our Research Question
+
+Based on 226 real data science job postings, here is what the data tells us about which skills are most valued:
+
+| Tier | Skills | What the data shows |
+|------------------------|------------------------|------------------------|
+| **Tier 1 — Must Have** | Python, SQL | Asked for in 60–72% of all postings; appear across every job category |
+| **Tier 2 — High Value** | Machine Learning, LLMs, Statistics | Tied to the highest-paying roles; growing demand |
+| **Tier 3 — Specialist Premium** | PyTorch, Deep Learning, Generative AI | Less common but linked to the largest salary premiums |
+| **Tier 4 — Category-Specific** | Spark, Databricks, dbt, Snowflake | Important in Data Engineering; less relevant in analytics roles |
+
+### Five Key Takeaways
+
+**1. Python is the clearest answer to the question.** It is the most demanded skill at 72% of postings, it appears across every job category, and it is associated with above-average salaries. If you only learn one skill, make it Python.
+
+**2. SQL is still essential — even in 2026.** Despite being considered a "basic" skill, SQL appeared in nearly 60% of postings and is present in every job type. It is not glamorous, but it is everywhere.
+
+**3. AI and ML skills are where the money is.** Generative AI, PyTorch, Deep Learning, and LLMs appear in fewer postings than Python or SQL, but they are consistently linked to the highest-paying roles. They are the growth frontier of the field.
+
+**4. Skills travel in bundles.** The job market does not value skills in isolation. Python + SQL + Machine Learning is the classic core stack, and most employers who want one expect the others too.
+
+**5. The type of job matters as much as the skills.** Data Science and AI/ML roles pay roughly \$75,000 more per year than Data Analytics and Business Intelligence roles. Before investing in new skills, consider which type of role you are targeting — the category premium is often larger than the skill premium.
+
+### Limitations
+
+- This analysis is based on **226 postings from one week** in October 2026. It is a snapshot, not a comprehensive market survey.
+- Skills were detected using **keyword matching** in job descriptions. This can miss contextual nuances — a posting might mention Python as a nice-to-have rather than a requirement.
+- **Salary associations are not the same as salary causes.** A skill appearing in high-paying jobs does not prove that learning the skill will increase your pay. Senior roles pay more for many reasons, and they also tend to require advanced skills.
+- Only **178 of 226 postings** had usable salary data. The 48 postings without salary data could have different skill patterns that we cannot account for here.
+
+------------------------------------------------------------------------
+
+*Analysis by Lionel Jr Desroses — DATA 607 Project 3* *Branch: `lionel/data-science-skills-analysis`*
