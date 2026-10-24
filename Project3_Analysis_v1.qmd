@@ -125,14 +125,16 @@ The project also includes an interactive Shiny dashboard for exploring job marke
 | Team Member | Main Responsibilities |
 |:---|:---|
 | Mohd Afwan Shaikh | Data Preparation, Analysis, Dashboard |
-| Enrique Delamonica | Analysis, Report Writing |
-| Jocelyn Slater | Analysis, Editing, Report Writing |
+| Enrique Delamonica | Analysis |
+| Jocelyn Slater | Analysis, Editing, Slide Creation |
 | Lionel Jr Desroses | Analysis |
 | Renan Charles-Pierre | Analysis |
 
 Our analysis philosophy was to do an initial brainstorm of analysis directions, and then individually implement them in code documents. We kept each other updated on progress, but did not directly collaborate on the analysis. Duplicate analysis was not seen as an error, but an opportunity to double check work and compare/contrast approaches and interpretations. The separate analysis documents were then edited together into a final report. If two or individuals explored the same topic (for example, all of us ended up plotting the overall skill demand in a bar chart), only one version is selected and shown in the report. 
 
-**TO DO: add in presenters**
+::: {style="color: red;"}
+[**TO DO: add in presenters**]{style="font-size: 1.6rem;"}
+:::
 
 ## Collaboration Tools
 
@@ -140,7 +142,8 @@ Our analysis philosophy was to do an initial brainstorm of analysis directions, 
 |:---|:---|
 | Slack | Communication |
 | Zoom | Communication |
-| Github | Code Revision Control |
+| Github | Code revision control |
+| R Studio | Code development and slide creation |
 
 # Data Sources and Acquisition
 
@@ -152,9 +155,7 @@ Our analysis philosophy was to do an initial brainstorm of analysis directions, 
 
 **Source:** https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries
 
-The dataset is updated weekly and contains job posting information that can be used to study employment trends, technical skill requirements, and advertised salaries. We selected this dataset because it provides relevant information for investigating which Data Science skills are most valued in the job market. 
-
-The Kaggle dataset is updated weekly. For this project, we used a fixed snapshot to keep our analysis consistent and reproducible.
+The dataset is updated weekly and contains job posting information that can be used to study employment trends, technical skill requirements, and advertised salaries. We selected this dataset because it provides relevant information for investigating which Data Science skills are most valued in the job market. For this project, we used a fixed snapshot to keep our analysis consistent and reproducible.
 
 Our data contain:
 
@@ -561,37 +562,21 @@ pct_of <- function(s) skill_demand$pct_of_postings[skill_demand$skill_name == s]
 
 **Findings:**
 
-* **Python (`r pct(demand$share[demand$skill_name == "Python"])`) and SQL
-  (`r pct(demand$share[demand$skill_name == "SQL"])`)** are the most frequently requested skills among the Data Science positions in our dataset. Python is in a league of its own, mentioned in more than 7 out of 10 job postings, and SQL is a close second, appearing in nearly 6 out of 10. These two skills are essentially required for most data science roles.
-    - **Python:** `r n_of("Python")` postings (`r pct_of("Python")`%).
-    - **SQL:** `r n_of("SQL")` postings (`r pct_of("SQL")`%).
-    - **Machine Learning:** `r n_of("Machine Learning")` postings (`r pct_of("Machine Learning")`%).
-    - **LLM:** `r n_of("LLM")` postings (`r pct_of("LLM")`%).
-    - **Statistics:** `r n_of("Statistics")` postings (`r pct_of("Statistics")`%).
-* The next tier is **Machine Learning, LLMs, Statistics, Data Pipelines, dbt
-  and AWS**, each mentioned in roughly a fifth to a third of postings, reflecting the industry's current shift toward AI. Skills like **dbt**, **Databricks**, and **Snowflake** show up in roughly 1 in 5 to 1 in 6 postings: common enough to be worth knowing but not universal requirements.
-* Skills like Docker, Kubernetes, and Airflow appear in fewer than 1 in 10 postings; they are specialized rather than general requirements.
-* **R** is mentioned in only `r pct(demand$share[demand$skill_name == "R"])`
+* Python (`r pct(demand$share[demand$skill_name == "Python"])`) and SQL
+  (`r pct(demand$share[demand$skill_name == "SQL"])`) are the most frequently requested skills among the Data Science positions in our dataset. Python is in a league of its own, mentioned in more than 7 out of 10 job postings, and SQL is a close second, appearing in nearly 6 out of 10. These two skills are essentially required for most data science roles.
+    - Python: `r n_of("Python")` postings (`r pct_of("Python")`%).
+    - SQL: `r n_of("SQL")` postings (`r pct_of("SQL")`%).
+    - Machine Learning: `r n_of("Machine Learning")` postings (`r pct_of("Machine Learning")`%).
+    - LLM: `r n_of("LLM")` postings (`r pct_of("LLM")`%).
+    - Statistics: `r n_of("Statistics")` postings (`r pct_of("Statistics")`%).
+* The next tier is Machine Learning, LLMs, Statistics, Data Pipelines, dbt
+  and AWS, each mentioned in roughly a fifth to a third of postings, reflecting the industry's current shift toward AI. Skills like dbt, Databricks, and Snowflake show up in roughly 1 in 5 to 1 in 6 postings: common enough to be worth knowing but not universal requirements.
+* Skills like Docker, Kubernetes, and Airflow appear in fewer than 1 in 10 postings. They are specialized rather than general requirements.
+* Despite being used in this analysis, R is mentioned in only `r pct(demand$share[demand$skill_name == "R"])`
   of postings...
 
 These findings suggest that programming and database skills are foundational requirements for many Data Science positions. However, frequency alone does not determine a skill's overall value. In @sec-pay, we compare skill requirements with advertised salaries to explore whether certain skills are associated with higher compensation.
 
-## Demand by skill family
-
-```{r family}
-family_demand <- skills %>%
-  distinct(job_id, family) %>%
-  count(family, name = "postings") %>%
-  mutate(share = postings / n_jobs) %>%
-  arrange(desc(share))
-
-ggplot(family_demand, aes(share, fct_reorder(family, share))) +
-  geom_col(fill = col_main, width = 0.65) +
-  geom_text(aes(label = pct(share, 1)), hjust = -0.2, size = 3.4, colour = "#52514e") +
-  scale_x_continuous(labels = percent, limits = c(0, 1.05), expand = c(0, 0)) +
-  labs(title = "Share of postings mentioning at least one skill from each family",
-       x = "Share of postings", y = NULL)
-```
 
 ## How many skills does a posting ask for?
 
@@ -611,17 +596,32 @@ ggplot(skills_per_job, aes(n_skills)) +
 ```
 
 A typical posting names about `r median(skills_per_job$n_skills)` of our 30
-skills. Employers usually ask for a **bundle** of skills, not a single tool, so
+skills. Employers usually ask for a bundle of skills, not a single tool, so
 @sec-cooccurrence looks at which skills appear together.
 
 ## Demand differs by role
 
-So far we have been looking at all 226 postings together. But data science is not one job; it is a family of different roles. A **Data Analyst** and an **AI/ML Engineer** both work with data, but they do very different things and earn very different salaries. If we lump them together, we might get misleading results.
+So far we have been looking at all 226 postings together. But data science is not one job; it is a family of different roles. A Data Analyst and an AI/ML Engineer both work with data, but they do very different things and earn very different salaries. If we lump them together, we might get misleading results.
 
-This section breaks the data down by **job category** to answer:
+This section breaks the data down by job category to answer:
 
 1.  Does each category have its own distinct set of top skills, or do they all need the same things?
 2.  Is Python truly universal, or is it just concentrated in a few big categories?
+
+```{r family}
+family_demand <- skills %>%
+  distinct(job_id, family) %>%
+  count(family, name = "postings") %>%
+  mutate(share = postings / n_jobs) %>%
+  arrange(desc(share))
+
+ggplot(family_demand, aes(share, fct_reorder(family, share))) +
+  geom_col(fill = col_main, width = 0.65) +
+  geom_text(aes(label = pct(share, 1)), hjust = -0.2, size = 3.4, colour = "#52514e") +
+  scale_x_continuous(labels = percent, limits = c(0, 1.05), expand = c(0, 0)) +
+  labs(title = "Share of postings mentioning at least one skill from each family",
+       x = "Share of postings", y = NULL)
+```
 
 ```{r demand-category, fig.height = 7.5}
 cat_n <- count(jobs, job_category, name = "cat_jobs")
@@ -654,18 +654,47 @@ ggplot(by_cat, aes(cat_label, skill_name, fill = share)) +
         legend.position = "right")
 ```
 
-Each role has its own profile:
+```{r combining-data}
+#Joined the job_posting, the job_skill and the skill data sets
+job_skills <- posting_tbl %>%
+  left_join(job_skill_tbl, by = "job_id") %>%
+  left_join(skill_tbl, by = "skill_id") %>%
+  select(
+    skill_id,
+    skill_name,
+    job_id,
+    title,
+    job_category_updated
+  )
 
-* **AI/ML** postings are associated with Python, Machine Learning, LLMs and
-  PyTorch. SQL appears in only `r pct(by_cat$share[by_cat$job_category == "AI/ML" & by_cat$skill_name == "SQL"], 1)`
-  of them, far less than in any other category.
-* **Data Analytics** and **Business Intelligence** rely most on SQL plus a BI
-  tool (Tableau, Power BI), with dbt appearing in about a quarter of analytics
-  postings.
-* **Data Engineering** combines SQL and Python with data pipelines, dbt, ETL,
-  Snowflake, Databricks and cloud platforms.
-* **Python and SQL** are the only skills common (≥ 40%) in nearly every
-  category.
+#Join Check for accuracy
+#n_distinct(job_skills$job_id)
+#nrow(job_skills)
+#n_distinct(job_skills$job_category_updated)
+```
+
+```{r summary-table-by-department}
+#Removed N/A values
+skill_versatility <- job_skills %>%
+  filter(
+    !is.na(skill_name),
+    !is.na(job_category_updated)
+  ) %>%
+  group_by(skill_name) %>%
+  summarise(
+    #Counts the number of times a particular skill appears in a job posting
+    job_count = n_distinct(job_id),
+
+    #Counts the number of times a particular skill appears in a job posting category
+    category_count = n_distinct(job_category_updated),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(category_count), desc(job_count))
+
+skill_versatility
+```
+
+A skill that is demanded in many different job categories is more versatile, and therefore more broadly valuable, than one concentrated in a single role. We count how many categories each skill appears in and then rank skills by their average share of postings across categories.
 
 ```{r top5-by-category}
 #| fig-cap: "The top 5 skills within each job category, independently ranked. This shows each category's unique skill priorities."
@@ -702,123 +731,22 @@ ggplot(top5_per_cat,
   theme(strip.text = element_text(face = "bold"))
 ```
 
-**What this chart tells us:** Each panel shows one job category with its own independent skill ranking. This is useful because it reveals the distinct "personality" of each role type. For example, **Data Engineering** prioritizes data pipelines, dbt, and Snowflake, **AI/ML** leans heavily on Python, Machine Learning, LLMs, and PyTorch, and **Business Intelligence** features Power BI, Excel, and Tableau. When you see a skill appear consistently across all panels, that is a strong signal of universal value; Python appearing in nearly every panel confirms it is the foundational skill of modern data work.
+Each panel shows one job category with its own independent skill ranking. This is useful because it reveals the distinct "personality" of each role type:
 
-## Skill versatility across job categories
+* AI/ML postings are associated with Python, Machine Learning, LLMs and
+  PyTorch. SQL appears in only `r pct(by_cat$share[by_cat$job_category == "AI/ML" & by_cat$skill_name == "SQL"], 1)` of them, far less than in any other category.
+* Data Analytics and Business Intelligence rely most on SQL plus a BI
+  tool (Tableau, Power BI), with dbt appearing in about a quarter of analytics
+  postings.
+* Data Engineering combines SQL and Python with data pipelines, dbt, ETL,
+  Snowflake, Databricks and cloud platforms.
+* Python and SQL are the only skills common (≥ 40%) in nearly every
+  category.
 
-A skill that is demanded in many different job categories is more versatile, and therefore more broadly valuable, than one concentrated in a single role. We count how many categories each skill appears in and then rank skills by their average share of postings across categories.
 
-```{r combining-data}
-#Joined the job_posting, the job_skill and the skill data sets
-job_skills <- posting_tbl %>%
-  left_join(job_skill_tbl, by = "job_id") %>%
-  left_join(skill_tbl, by = "skill_id") %>%
-  select(
-    skill_id,
-    skill_name,
-    job_id,
-    title,
-    job_category_updated
-  )
+# Skill Bundles {#sec-cooccurrence}
 
-#Join Check for accuracy
-n_distinct(job_skills$job_id)
-nrow(job_skills)
-n_distinct(job_skills$job_category_updated)
-```
-
-```{r summary-table-by-department}
-#Removed N/A values
-skill_versatility <- job_skills %>%
-  filter(
-    !is.na(skill_name),
-    !is.na(job_category_updated)
-  ) %>%
-  group_by(skill_name) %>%
-  summarise(
-    #Counts the number of times a particular skill appears in a job posting
-    job_count = n_distinct(job_id),
-
-    #Counts the number of times a particular skill appears in a job posting category
-    category_count = n_distinct(job_category_updated),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(category_count), desc(job_count))
-
-skill_versatility
-```
-
-```{r job-versatility-percentages}
-#Calculate the total jobs for each category
-category_totals <- job_skills %>%
-  filter(!is.na(job_category_updated)) %>%
-  group_by(job_category_updated) %>%
-  summarise(
-    total_jobs = n_distinct(job_id),
-    .groups = "drop"
-  )
-
-#Calculate the total number of jobs requiring that skill of a given category
-skill_counts <- job_skills %>%
-  filter(
-    !is.na(skill_name),
-    !is.na(job_category_updated)
-  ) %>%
-  group_by(job_category_updated, skill_name) %>%
-  summarise(
-    jobs_requiring_skill = n_distinct(job_id),
-    .groups = "drop"
-  )
-
-# Calculate the percentages job requiring a skill out of the total # of jobs in that category
-
-skill_percentages <- skill_counts %>%
-  left_join(
-    category_totals,
-    by = "job_category_updated"
-  ) %>%
-  mutate(
-    percentage = round(
-      (jobs_requiring_skill / total_jobs) * 100,
-      2
-    )
-  ) %>%
-  arrange(
-    skill_name,
-    desc(percentage)
-  )
-```
-
-```{r ranking-system}
-all_skill_percentages <- skill_percentages %>%
-  select(
-    job_category_updated,
-    skill_name,
-    percentage
-  ) %>%
-  #Replaces N/A values with 0.
-  complete(
-    job_category_updated,
-    skill_name,
-    fill = list(percentage = 0)
-  )
-
-skill_rankings <- all_skill_percentages %>%
-  group_by(skill_name) %>%
-  summarise(
-
-    average_percentage = round(mean(percentage), 2),
-    categories_present = sum(percentage > 0),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(average_percentage))
-
-skill_rankings
-```
-
-# Skill Bundles: Do Skills Travel Together? {#sec-cooccurrence}
-
-Employers rarely ask for just one skill. Most job postings list a combination of skills, and understanding which skills tend to appear together reveals what the market thinks of as a single "package deal."
+We have shown that employers rarely ask for just one skill. Most job postings list a combination of skills, and understanding which skills tend to appear together reveals what the market thinks of as a single "package deal."
 
 For example, if Python and SQL always appear together in the same postings, an employer hiring for a role with Python is almost certainly also expecting SQL, even if they only highlight Python in the job title. Knowing these clusters helps you understand what you are really signing up to learn when you invest in one skill.
 
@@ -836,25 +764,6 @@ pairs <- skills_long |>
 
 cat("Total unique skill pairs found:", nrow(pairs), "\n")
 ```
-
-```{r top10-pairs-table}
-pairs |>
-  slice_head(n = 10) |>
-  gt() |>
-  tab_header(
-    title    = "Top 10 Most Common Skill Pairs",
-    subtitle = "Number of job postings that mention both skills"
-  ) |>
-  cols_label(
-    skill_a  = "Skill A",
-    skill_b  = "Skill B",
-    co_count = "Postings with both"
-  ) |>
-  data_color(columns = co_count, palette = "Blues")
-```
-
-**What this table tells us:** The top pairs reveal which skills the market treats as inseparable. The Python–SQL pairing at the top confirms that most roles expecting Python also expect SQL; they are two sides of the same coin in most data science jobs.
-
 ```{r cooccurrence-heatmap}
 #| fig-cap: "Each cell shows how many postings mention both skills. Darker = more often seen together. Blank cells mean those two skills rarely appear in the same posting."
 
@@ -890,7 +799,25 @@ ggplot(top15_pairs_sym,
   theme(legend.position = "bottom")
 ```
 
-**What this chart tells us:** Look for the darkest cells; those are the skill pairs that most often appear together in the same job posting. A dark cluster around Python, SQL, and Machine Learning confirms the existence of a classic **core data science stack** that most employers expect you to have as a bundle. Skills with an entire light row and column are standalone specializations: they are valued in their specific context but are not bundled with the rest of the field.
+```{r top10-pairs-table}
+pairs |>
+  slice_head(n = 10) |>
+  gt() |>
+  tab_header(
+    title    = "Top 10 Most Common Skill Pairs",
+    subtitle = "Number of job postings that mention both skills"
+  ) |>
+  cols_label(
+    skill_a  = "Skill A",
+    skill_b  = "Skill B",
+    co_count = "Postings with both"
+  ) |>
+  data_color(columns = co_count, palette = "Blues")
+```
+
+In the Co-occurance Heatmap, dark cluster around Python, SQL, and Machine Learning confirms the existence of a core data science skill bundle that most employers expect you to have. 
+
+The top pairs reveal which skills the market treats as inseparable. The Python–SQL pairing at the top confirms that most roles expecting Python also expect SQL; they are two sides of the same coin in most data science jobs.
 
 # Value Proxy 2: Pay {#sec-pay}
 
@@ -902,7 +829,7 @@ We restricted the salary analysis to postings with eligible annual salary estima
 
 Before we compare salaries across different skills and job types, we need to understand what a "normal" salary looks like. This is our baseline, a reference number we will return to throughout the analysis.
 
-Not all 226 postings included a usable salary. Some listed salaries in foreign currencies, some had incomplete ranges, and some had values that looked like data errors. After filtering to only **valid USD annual salaries**, we are left with **178 postings** for all salary work.
+Not all 226 postings included a usable salary. Some listed salaries in foreign currencies, some had incomplete ranges, and some had values that looked like data errors. After filtering to only valid USD annual salaries, we are left with 178 postings for all salary work.
 
 ```{r salary-filter}
 salary_eligible <- jobs_full |>
@@ -949,11 +876,11 @@ ggplot(salary_eligible, aes(x = salary_midpoint_annual)) +
   theme_minimal(base_size = 13)
 ```
 
-**What this chart tells us:** The most common salary range clusters between about \$130k and \$200k. The red dashed line at **`r dollar(median(salary_eligible$salary_midpoint_annual))`** is the median, meaning half the postings paid above that and half paid below. There is a small group of very high paying roles (above \$250k) that pull the average up slightly above the median. This is our benchmark: any skill or job type that pays consistently above the median is performing above the norm.
+The most common salary range clusters between about \$130k and \$200k. The red dashed line at `r dollar(median(salary_eligible$salary_midpoint_annual))` is the median, meaning half the postings paid above that and half paid below. There is a small group of very high paying roles (above \$250k) that pull the average up slightly above the median. 
 
 To see how Data Science compares with the broader job market, we also compare the data-role postings against all other USD salary-eligible postings in the cleaned dataset. We calculated the mean, median, minimum, maximum, and quartiles, and used boxplots to identify potentially unusual salary values.
 
-We applied the **interquartile range (IQR) method** to flag potential outliers. Under this method, salaries below Q1 - 1.5 × IQR or above Q3 + 1.5 × IQR are considered potential outliers. We retained these observations in our descriptive analysis because an unusually high or low salary is not necessarily an error. Salary differences may reflect seniority, location, specialization, or other job characteristics.
+We applied the interquartile range (IQR) statistical method to flag potential outliers. Under this method, salaries below Q1 - 1.5 × IQR or above Q3 + 1.5 × IQR are considered potential outliers. We retained these observations in our descriptive analysis because an unusually high or low salary is not necessarily an error. Salary differences may reflect seniority, location, specialization, or other job characteristics.
 
 ```{r salary-distribution-summary}
 # Prepare eligible USD salary records
@@ -1038,15 +965,12 @@ ds_stat    <- function(col) salary_stats[[col]][salary_stats$job_group == "Data 
 other_stat <- function(col) salary_stats[[col]][salary_stats$job_group == "Other Jobs"]
 ```
 
-**Salary distribution findings:**
 
-The median advertised annual salary for Data Science positions was approximately **`r usd(ds_stat("median"))`**, compared with **`r usd(median(market_salary$salary_midpoint_annual))`** for the overall job market. The average Data Science salary was approximately **`r usd(ds_stat("mean"))`**, compared with **`r usd(mean(market_salary$salary_midpoint_annual))`** across the overall market.
-
-These results suggest that the Data Science positions in our dataset generally advertised higher compensation than the broader job market.
+The median advertised annual salary for Data Science positions was approximately `r usd(ds_stat("median"))`, compared with `r usd(median(market_salary$salary_midpoint_annual))` for the overall job market. The average Data Science salary was approximately `r usd(ds_stat("mean"))`, compared with `r usd(mean(market_salary$salary_midpoint_annual))` across the overall market.
 
 The boxplot and IQR analysis help identify potentially unusual salary values. We report these observations rather than automatically deleting them, since some may represent legitimate high-paying positions.
 
-One important distinction is that the **Other Jobs** group in our boxplot excludes Data Science positions, while the overall market salary statistics include all eligible postings.
+One important distinction is that the Other Jobs group in our boxplot excludes Data Science positions, while the overall market salary statistics include all eligible postings.
 
 ## Salary by role
 
@@ -1065,13 +989,13 @@ g1 <- ggplot(pay, aes(salary_midpoint_annual, job_category)) +
   theme = theme(plot.title = element_text(face = "bold")))
 ```
 
-There is a clear pay hierarchy across job categories. **Data Science** and **AI/ML** roles pay the most. **Data Engineering** is in the middle. **Data Analytics** and **Business Intelligence** roles sit at the bottom: still well paying, but noticeably lower. This matters for our analysis because skills that are common in AI/ML roles will naturally appear to have a salary premium, even if the skill itself is not the reason for the higher pay; the *type of role* is.
+There is a clear pay hierarchy across job categories. Data Science and AI/ML roles pay the most. Data Engineering is in the middle. Data Analytics and Business Intelligence roles sit at the bottom: still well paying, but noticeably lower. This matters for our analysis because skills that are common in AI/ML roles will naturally appear to have a salary premium, even if the skill itself is not the reason for the higher pay.
 
 ## Median salary of postings that mention each skill
 
 To explore the relationship between demand and pay, we compared the number of Data Science postings requesting each skill with the median advertised annual salary of those postings.
 
-This analysis is descriptive. A higher median salary for jobs requesting a skill does not necessarily mean that the skill itself causes higher compensation.
+A higher median salary for jobs requesting a skill does not necessarily mean that the skill itself causes higher compensation.
 
 ```{r skill-salary-analysis, fig.width=10, fig.height=6}
 # Every posting in the normalized database is a Data Science posting
@@ -1163,13 +1087,13 @@ top_salary_skills %>%
   cat(sep = "\n")
 ```
 
-In comparison, Python and SQL appeared more frequently across Data Science job postings. This suggests that **skill demand and salary association represent different dimensions of value**. Python and SQL are important because they are requested by many employers, while specialized machine learning and AI skills may be associated with higher-paying positions.
+In comparison, Python and SQL appeared more frequently across Data Science job postings. This suggests that skill demand and salary association represent different types of value. Python and SQL are important because they are requested by many employers, while specialized machine learning and AI skills may be associated with higher-paying positions.
 
 However, some specialized skills have relatively small numbers of salary-eligible postings. Therefore, their median salaries should be interpreted cautiously. Other factors, such as job seniority, location, company, and responsibilities, may also influence advertised compensation.
 
 ## Skill salary premiums {#sec-premium}
 
-Knowing which skills are *common* is only half the picture. To find skills that are truly *valued*, we also look at whether having a skill is associated with higher pay. This section compares the **median salary of jobs that mention a skill** against the **median salary of jobs that do not mention that skill**. The difference is what we call the **salary premium**: a positive number means that skill tends to appear in higher paying jobs; a negative number means the opposite.
+To find skills that are truly *valued*, we also look at whether having a skill is associated with higher pay. This section compares the median salary of jobs that mention a skill against the median salary of jobs that do not mention that skill. The difference is what we call the salary premium: a positive number means that skill tends to appear in higher paying jobs; a negative number means the opposite.
 
 * **Skill premium**: median salary of postings that mention the skill minus the
   median of postings that do not, with a 95% bootstrap confidence interval.
@@ -1243,7 +1167,7 @@ skill_salary_summary |>
   )
 ```
 
-Raw gaps can reflect the type of job rather than the skill itself, so we also estimate an adjusted premium from a regression of log salary on the skill and job category. Small categories are merged for modeling (Business Intelligence → Data
+Small categories are merged for modeling (Business Intelligence → Data
 Analytics; Database → Data Engineering; Statistics → Data Science), and only
 skills mentioned in at least 10 salaried postings are estimated.
 
@@ -1310,14 +1234,13 @@ raw_plot <- ggplot(premiums, aes(raw, factor(skill_name, levels = order_lvls))) 
 
 **Findings:**
 
-* **Raw gaps are large and mostly reflect the job type.** Machine Learning,
+* Raw gaps are large and mostly reflect the job type. Machine Learning,
   LLM and PyTorch postings advertise about \$28K–\$38K more than other
   postings. Excel, Power BI, Tableau and Data Visualization postings advertise
   \$50K–\$68K *less*. This often happens with generalist tools like Excel or Tableau that show up in analyst roles, which generally pay less than engineer or ML scientist roles.
-* SQL shows a *penalty* of \$40K, only because the
-  highest-paying category (AI/ML) rarely lists SQL.
-* **Python**, the most demanded skill, sits in the middle: it is so common across all role types that it no longer signals a pay premium on its own.
-* **Excel, Data Visualization and Power BI stay lower** even within the same
+* SQL shows a penalty of \$40K, only because the highest-paying category (AI/ML) rarely lists SQL.
+* Python, the most demanded skill, sits in the middle: it is so common across all role types that it no longer signals a pay premium on its own.
+* Excel, Data Visualization and Power BI stay lower even within the same
   job category: Excel by `r pct(-premiums$adj[premiums$skill_name == "Excel"], 1)`,
   Data Visualization by `r pct(-premiums$adj[premiums$skill_name == "Data Visualization"], 1)`
   and Power BI by `r pct(-premiums$adj[premiums$skill_name == "Power BI"], 1)`.
@@ -1326,11 +1249,11 @@ raw_plot <- ggplot(premiums, aes(raw, factor(skill_name, levels = order_lvls))) 
   reporting-focused roles, which pay less than the rest of their category.
 * With `r nrow(pay)` salaried postings, most confidence intervals include zero.
 
-# Synthesis: Which Skills Are Truly Most Valued?
+# Conclusion: Which Skills Are Truly Most Valued?
 
-We have looked at two separate things: how often skills are demanded (@sec-demand) and how much salary is associated with them (@sec-pay). Now we put both together into a single **Value Score** that ranks each skill by combining both dimensions.
+We have looked at two separate things: how often skills are demanded (@sec-demand) and how much salary is associated with them (@sec-pay). Now we put both together into a single Value Score that ranks each skill by combining both dimensions.
 
-The logic is simple: a skill scores highest when it is **both frequently requested AND linked to higher pay**. A skill that is only common but pays no premium gets penalized. A skill that pays well but is only requested in 2% of jobs also gets penalized.
+The logic is simple: a skill scores highest when it is both frequently requested AND linked to higher pay. A skill that is only common but pays no premium gets penalized. A skill that pays well but is only requested in 2% of jobs also gets penalized.
 
 The lower the Value Score, the more valued the skill is overall.
 
@@ -1386,16 +1309,20 @@ value_table |>
   )
 ```
 
-**What this table tells us:** The skills at the top of this table, with the lowest Value Scores, are the ones that score well on *both* frequency and salary. These are the skills the data science job market consistently rewards. Skills near the bottom may be either common but cheap or rare but expensive, making them less universally valuable. Use this table as a practical guide: if you are deciding which skill to invest time in next, look for one near the top that you don't already have.
+The skills at the top of this table, with the lowest Value Scores, are the ones that score well on *both* frequency and salary. These are the skills the data science job market consistently rewards. Skills near the bottom may be either common but cheap or rare but expensive, making them less universally valuable. This table is a practical guide: if you are deciding which skill to invest time in next, look for one near the top that you don't already have.
 
-## Answer to the research question
+## Discussion
 
-There is no single "most valued" skill. The proxies (demand, pay) agree on some skills and disagree on others:
+We examined 9,173 job postings, including `r nrow(jobs)` Data Science positions, using data obtained from Kaggle. We evaluated skill value using two measures: how frequently employers requested a skill and the advertised salaries associated with jobs requiring that skill.
 
-1. **Foundational skills: Python and SQL are the most valued skills by demand and reach**.
-2. **Machine Learning is the best all-round skill. Statistics follows**
-3. **BI and spreadsheet skills are in demand but not well paid.** Tableau,
-   Power BI
+Our analysis found that Python and SQL were the most frequently requested skills among Data Science postings. Python appeared in `r n_of("Python")` postings (`r pct_of("Python")`%), while SQL appeared in `r n_of("SQL")` postings (`r pct_of("SQL")`%). Machine Learning, Large Language Models (LLMs), and Statistics were also commonly requested.
+
+When examining advertised salaries, specialized skills such as Generative AI, PyTorch, Deep Learning, and LLMs were associated with some of the highest median salaries.
+
+We also found that Data Science positions had a median advertised annual salary of approximately `r usd(ds_stat("median"))`, compared with `r usd(median(market_salary$salary_midpoint_annual))` across the overall job market.
+
+There is no single "most valued" skill. The proxies (demand, pay) agree on some skills and disagree on others. We've split the skills into four tiers:
+
 
 | Tier | Skills | What the data shows |
 |------------------------|------------------------|------------------------|
@@ -1416,20 +1343,11 @@ During development, we used PostgreSQL to retrieve and analyze the job posting d
 
 This allowed us to publish the dashboard without requiring a direct connection to our local PostgreSQL database.
 
-## Dashboard Features
+The dashboard complements our written analysis by allowing users to explore patterns beyond the summary tables and charts.
 
-Our dashboard contains eight interactive tabs:
+For example, users can compare Data Science jobs with the overall market, examine technical skill demand, explore salary distributions, and filter job postings.
 
-| Dashboard Tab | Purpose |
-|:---|:---|
-| Overview | Summarizes job postings, companies, Data Science jobs, and salary eligibility |
-| Data Science Analysis | Examines Data Science positions and their classifications |
-| Salary Insights | Compares advertised salaries across job categories |
-| Salary Distribution | Visualizes salary distributions and variation |
-| Skill Demand & Salary | Compares requested skills with advertised compensation |
-| Salary Currencies | Examines salary currencies and USD eligibility |
-| Posting Trends | Shows how job postings vary across dates |
-| Explore All Jobs | Allows users to filter and examine individual postings |
+The interactive approach makes our analysis more accessible and helps communicate the findings to audiences without extensive programming experience.
 
 ## Dashboard Deployment
 
@@ -1439,45 +1357,35 @@ The application uses the same dataset snapshot as the report, allowing readers t
 
 **Live Dashboard:** [DATA 607 Project 3 — Data Science Skills](https://mohdafwan.shinyapps.io/data607-project3/)
 
-## Value of the Dashboard
-
-The dashboard complements our written analysis by allowing users to explore patterns beyond the summary tables and charts.
-
-For example, users can compare Data Science jobs with the overall market, examine technical skill demand, explore salary distributions, and filter job postings.
-
-The interactive approach makes our analysis more accessible and helps communicate the findings to audiences without extensive programming experience.
-
-# Limitations and Future Work
+# Limitations 
 
 Although our analysis provides useful insights into Data Science skill demand and advertised salaries, several limitations should be considered.
 
-## Limitations
+## Limited Time Period
 
-### Limited Time Period
+Our dataset contains job postings dated October 5 through October 12, 2026. Because this represents a short period, the findings may not reflect long-term hiring trends or seasonal changes in employer demand. Although the Kaggle dataset is updated weekly, our analysis uses one fixed snapshot, not a comprehensive market survey. Future work could download the dataset weekly and track trends in the job market longitudinally.
 
-Our dataset contains job postings dated October 5 through October 12, 2026. Because this represents a short period, the findings may not reflect long-term hiring trends or seasonal changes in employer demand. Although the Kaggle dataset is updated weekly, our analysis uses one fixed snapshot, not a comprehensive market survey.
-
-### Representativeness
+## Representativeness
 
 The postings come from companies that use specific applicant-tracking systems and are concentrated in the US and in tech.
 
-### Data Science Sample Size
+## Data Science Sample Size
 
 Of the 9,173 job postings, only `r nrow(jobs)` were classified as Data Science positions. Furthermore, only `r nrow(pay)` Data Science postings had eligible annual salary estimates in USD. This relatively small sample limits how broadly we can generalize the findings. The `r nrow(jobs) - nrow(pay)` postings without salary data could have different skill patterns that we cannot account for here.
 
-### Salary Information
+## Salary Information
 
 Not every job posting included salary information suitable for comparison. We restricted salary analysis to eligible annual USD salary estimates and excluded other currencies. As a result, salary findings do not represent every posting in the dataset.
 
 Advertised salaries may also differ from actual compensation, bonuses, and benefits.
 
-### Skill Identification
+## Skill Identification
 
 Our analysis depends on the skills identified in the job posting data. Skills were detected using **keyword matching** in job descriptions, which cannot distinguish required from preferred skills or detect proficiency. A posting might mention Python as a nice-to-have rather than a requirement.
 
 Some employers may require skills without explicitly mentioning them in their postings. Additionally, a skill appearing in a posting does not indicate how extensively it will be used.
 
-### Factors Affecting Salary
+## Factors Affecting Salary
 
 Salary differences may reflect factors beyond technical skills, including:
 
@@ -1488,19 +1396,21 @@ Salary differences may reflect factors beyond technical skills, including:
 
 Therefore, the relationship between a skill and advertised salary should not be interpreted as causal. Senior roles pay more for many reasons, and they also tend to require advanced skills.
 
-### No Supply and Demand Comparison
+## No Supply and Demand Comparison
 
 We did not integrate CV or resume data, so we cannot compare the skills employers ask for with the skills candidates offer.
 
-## Future Improvements
+# Future Work
 
 Our project could be expanded in several ways.
 
 1. **Longitudinal analysis:** Collect weekly Kaggle dataset updates to examine changes in skill demand over time.
 
-2. **Geographic comparisons:** Compare skill demand and advertised salaries across different locations.
+2. **Geographic pay comparisons:** Compare skill demand and advertised salaries across different locations.
 
-3. **Experience-level analysis:** Examine whether salary associations differ between entry-level, mid-level, and senior positions.
+3. **Geographic company comparisons:** Companies, given their business models, need specific skills and companies with similar characteristics may be located in geographic proximity to each other.
+
+3. **Experience-level analysis:** Examine how salary associations differ between entry-level, mid-level, and senior positions.
 
 4. **Skill combinations:** Investigate whether combinations such as Python, SQL, and Machine Learning are associated with different salary patterns.
 
@@ -1510,29 +1420,15 @@ Our project could be expanded in several ways.
 
 These improvements could provide a more comprehensive understanding of Data Science skill demand and compensation.
 
-# Conclusion
-
-This project investigated the question:
-
-**Which Data Science skills are most valued?**
-
-We examined 9,173 job postings, including `r nrow(jobs)` Data Science positions, using data obtained from Kaggle. We evaluated skill value using two measures: how frequently employers requested a skill and the advertised salaries associated with jobs requiring that skill.
-
-Our analysis found that **Python and SQL were the most frequently requested skills** among Data Science postings. Python appeared in `r n_of("Python")` postings (`r pct_of("Python")`%), while SQL appeared in `r n_of("SQL")` postings (`r pct_of("SQL")`%). Machine Learning, Large Language Models (LLMs), and Statistics were also commonly requested.
-
-When examining advertised salaries, specialized skills such as Generative AI, PyTorch, Deep Learning, and LLMs were associated with some of the highest median salaries.
-
-We also found that Data Science positions had a median advertised annual salary of approximately `r usd(ds_stat("median"))`, compared with `r usd(median(market_salary$salary_midpoint_annual))` across the overall job market.
-
 ## Key Takeaways
 
 **1. Python is the clearest answer to the question.** It is the most demanded skill at `r round(pct_of("Python"))`% of postings, it appears across every job category, and it is associated with above-average salaries. If you only learn one skill, make it Python.
 
-**2. SQL is still essential, even in 2026.** Despite being considered a "basic" skill, SQL appeared in nearly 60% of postings and is present in every job type. It is not glamorous, but it is everywhere.
+**2. SQL is still essential, even in 2026.** Despite being considered a "basic" skill, SQL appeared in nearly 60% of postings and is present in every job type. 
 
-**3. AI and ML skills are where the money is.** Generative AI, PyTorch, Deep Learning, and LLMs appear in fewer postings than Python or SQL, but they are consistently linked to the highest-paying roles. They are the growth frontier of the field.
+**3. AI and ML skills are where the money is.** Generative AI, PyTorch, Deep Learning, and LLMs appear in fewer postings than Python or SQL, but they are consistently linked to the highest-paying roles. 
 
-**4. Skills travel in bundles.** The job market does not value skills in isolation. Python + SQL + Machine Learning is the classic core stack, and most employers who want one expect the others too.
+**4. Skills travel in bundles.** The job market does not value skills in isolation. Python + SQL + Machine Learning is a classic core stack, and most employers who want one expect the others too.
 
 **5. The type of job matters as much as the skills.** Data Science and AI/ML roles pay roughly \$75,000 more per year than Data Analytics and Business Intelligence roles. Before investing in new skills, consider which type of role you are targeting; the category premium is often larger than the skill premium.
 
