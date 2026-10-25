@@ -1,0 +1,165 @@
+---
+title: "Geog"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+```
+
+## Introduction
+
+First I download the libraries I expect to use.
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(gt)
+```
+
+## Obtaining and Combining the Data
+
+For this exercise I work with data about Data Scientist job postings in October, 2026, according to their geographic location. First, I get data about skills from GitHub and place it in a data frame called "skills".
+
+```{r}
+url <- "https://raw.githubusercontent.com/Enrique01234/607-Fall-2026/refs/heads/main/Dataset1_Normalized_Database%20only%20skills.csv"
+```
+
+```{r}
+skills <- read_csv(file= url, show_col_types = FALSE, progress = FALSE)
+```
+
+```{r}
+skills
+```
+
+The first column has the identification number of the job posting in the data base. The second column has numbers that represent the different skills required in the advertised post, as described in the job posting. There is a separate file connecting these numbers to each of the 30 different skills in the analysis.
+
+Then, I retrieve, also from GitHub, information about the country and the the region/state of each job posting. However, in several attempts, GitHub would automatically download the CSV file to the hard drive when pressing the Raw button instead of viewing it and, most importantly, providing the url to pick up from R. So I eliminated the unnecessary columns and rows in Excel (which I would have preferred to do in R). I produce a new data frame called "location".
+
+```{r}
+url<- "https://raw.githubusercontent.com/Enrique01234/607-Fall-2026/refs/heads/main/Location.csv"
+```
+
+```{r}
+location<- read_csv(file= url, show_col_types = FALSE, progress = FALSE)
+```
+
+```{r}
+location
+```
+
+Besides the identification number of the job posting, this data frame has a column for the country and one for the state (the original Excel file had information about other countries). This data frame has less rows than the previous one because each job posting is located in one place while each job posting can require more than one skill.
+
+Then, I (left) merge the two files. The merged data frame is called "loc_skill"
+
+```{r}
+loc_skill<- location|>
+  left_join(skills)
+```
+
+R automatically selected "job_id" as the key variable to merge the two files.
+
+```{r}
+loc_skill
+```
+
+## Tidying up the Data as a way to Check and Explore the Data Frame
+
+When dealing with the classification of the job postings by location (country and sub-national region) there were 44 observations. Now, in the merged file there are 216 due to the job posting requiring various skills. I tidy the file to get one observation per job posting and different columns for each skill. This could help to count the skills per job posting but, most importantly to check if we have all the observations.
+
+First , I create a new variable ("yes") which will be one if a specific skill is required. As the kills are categorized by nuber, elevating this number to the power 0 yields 1s when the skill is required and an NA otherwise.
+
+```{r}
+loc_skill<- loc_skill|>
+  mutate(yes = skill_id^0)
+```
+
+```{r}
+loc_skill
+```
+
+Now, the data frame can be (wide)pivoted.
+
+```{r}
+pivloc_skill<- loc_skill|>
+  pivot_wider(names_from = skill_id, values_from = yes)
+```
+
+```{r}
+pivloc_skill
+```
+
+In this data frame, each observation (job posting) is a row and each required skill is a column. The values, in the cells, are dichotomous (1 if the skill is required, NA if not).
+
+For a possible analysis by state, three additional data frames are created. I select the two states (California and New York) with several observations (19 and 9, respectively). No other state has more than four observation, so they have all been combined under Other.
+
+```{r}
+Cal<-pivloc_skill|>
+ filter(region == "California")
+```
+
+```{r}
+NY<-pivloc_skill|>
+ filter(region == "New York")
+```
+
+```{r}
+Other<-pivloc_skill|>
+ filter_out(region == "California" | region == "New York")
+```
+
+```{r}
+Cal
+```
+
+```{r}
+NY
+```
+
+```{r}
+Other
+```
+
+These data frames have 19, 9, and 16 observations. This is a total of 44, as in the original location file.
+
+While these steps are useful to double-check, contrary to my expectations, they are not useful to create bar graphs. It turns out for ggplot, all the skill categories should be in one variable. Furthermore, this makes sense, as for preparing the bar graph, the different categories (skills) will be counted from the same variable
+
+## A simple analysis
+
+First, a bar graph with all the states is created.
+
+```{r}
+ggplot(loc_skill, aes(x = skill_id))+ 
+    geom_bar()
+```
+
+This graph provides the overall distribution within the sample. It could be consider a sort of baseline against which to compare the distribution of required skills across states (i.e. among California, New York and the rest of the states). In order to carry out these comparisons, a new variable ("three") is generated.
+
+```{r}
+loc_skill<- loc_skill|>
+ mutate(three = if_else(region == "California", "California", if_else(region == "New York", "New York", "Other")))
+```
+
+Then, a graph with three bar graphs, is generated.
+
+```{r}
+ggplot(loc_skill, aes(x = skill_id)) + 
+  geom_bar()+ facet_wrap(vars(three))
+```
+
+## Brief Discussion
+
+When looking at the total distribution of required skills, it is clear that working with Python (skill number 1) and SQL (skill number 2) are the most sought after skills. In the sampled job postings they are listed roughly three times more often than the two runner-ups (skills number 24, LLM, and 30, dbt).
+
+Interestingly, in New York, this is not the case. While Python and SQL are the most demanded skills, they barely edge out dbt and AWS (skill number 16). Also, there are several skills (e.g. 25-28, which are generative AI, Docker, Kubernetes, and Git, respectively) which are not mentioned at all in the New York job postings in the sample.
+
+In California and the other states as a group, the pattern is closer to the total (this is not terribly surprising as these two groups represent about three quarters of the job postings under review). Nevertheless, the patterns are not identical. In California, the runner-up is skill number 13, data pipelines. It is closely followed by LLM and dbt as in the other cases but machine learning (skill number 8) also joins this group.
+
+In the other states, as in New York, AWS is also among the most demanded skills. As in California LLM, dbt, and machine learning. The other skill required in these states is number 21, PyTorch.
+
+One skill that is not mentioned at all, number 3, is R. It may be that it is such an obvious one, that it is not worth mentioning. However, Excel is mentioned (albeit only once, in California). Other skills which mentioned only once are Azure, number 17 and Scikit-learn, number 22.
+
+Some of these conclusions may be limited, given the sample is small and covers basically just one week of job postings.

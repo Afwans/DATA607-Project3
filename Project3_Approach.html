@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Mohd Afwan Shaikh, Enrique Delamonica, Jocelyn Slater, Lionel Jr Desroses, and Renan Charles-Pierre">
-<meta name="dcterms.date" content="2026-10-14">
+<meta name="dcterms.date" content="2026-10-18">
 
 <title>Project 3</title>
 <style>
@@ -77,7 +77,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 14, 2026</p>
+      <p class="date">October 18, 2026</p>
     </div>
   </div>
   
@@ -131,19 +131,61 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="outline" class="level2">
 <h2 class="anchored" data-anchor-id="outline">Outline</h2>
-<p>Collaboration tools - zoom (communication) - slack (communication) - github (code sharing)</p>
-<p>Data Set selected: Job Postings https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries CVs?</p>
-<p>Database: - Logical model for normalized database - Entity-Relationship diagram</p>
-<p>Possible Analysis - look at job market - retrospective - how have events effected job market/resumes - ^^ Microeconomics trends - geographic variation - what is a valuable skill (by frequency mentioned or salary)</p>
-<p>ROLES:</p>
-<p>Data Acquisition (Afwan) - Extract skill information from description - pick N keywords and filter for those results - Database Design Data Preparation and Exploration (Group) - Initial data tidying, Exploratory data analysis, and structuring for R - Perform all data tidying, transformations, and exploratory data analysis in R - Address data quality issues such as missing values and outliers Editor (Jocelyn) - Mash together everyone’s analysis into final code base - Everyone to make smaller edits on github Presentation (TBD)</p>
+<p><strong>Collaboration tools:</strong></p>
+<ul>
+<li>zoom (communication)</li>
+<li>slack (communication)</li>
+<li>github (code sharing)</li>
+</ul>
+<p><strong>Data Set selected</strong></p>
+<p>https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries</p>
+<ul>
+<li>Data on job postings between October 5th and October 12th, 2026</li>
+</ul>
+<p>We did explore other databases. For instance, there were other sources for CVs (such as https://www.kaggle.com/datasets/suriyaganesh/resume-dataset-structured/data and https://www.kaggle.com/datasets/saugataroyarghya/resume-dataset) but although CVs could be a good proxy, they reflect what people offer, not what employers are looking for. We also explored descriptions about courses and programs on data science (such as https://www.mastersindatascience.org/learning/data-scientist-skills/hard-skills/ and https: //ischool.syracuse.edu/data-science-skills/). However, they reflect what these institutions teach, which is a reasonable proxy. However, the selected dataset is the best option among these alternatives as it clearly shows what companies expect their workers to do and which sills they are expected to have. Additionally we looked at the U.S. Bureau of Labor Statistics which has data on employment trends, job openings and turnover, and employment projections. These data are available for various years and by sector. However, unlike the selected data set, they do not mention skills, just the types of jobs.</p>
+<ul>
+<li>Job Postings:</li>
+</ul>
+<p><strong>Database Entity-Relationship Diagram:</strong></p>
+<p><img src="https://github.com/Afwans/DATA607-Project3/blob/main/ER_Diagram/Dataset1_ER_Diagram.png?raw=true" class="img-fluid"></p>
+<p><strong>Possible Analyses:</strong></p>
+<ul>
+<li>look at job market</li>
+<li>retrospective (longitudinal)</li>
+<li>how have events effected job market/resumes</li>
+<li>^^ Microeconomics trends</li>
+<li>geographic variation</li>
+<li>what is a valuable skill (by frequency mentioned or salary)</li>
+</ul>
+<p><strong>Roles:</strong></p>
+<p>Create database (Afwan)</p>
+<ul>
+<li>Extract skill information from description as discussed</li>
+<li>pick N keywords and filter for those results</li>
+</ul>
+<p>EDA (all)</p>
+<ul>
+<li>Initial data tidying</li>
+<li>Exploratory data analysis, and structuring for R</li>
+<li>Address data quality issues such as missing values and outliers</li>
+</ul>
+<p>Analysis and Modeling (all)</p>
+<ul>
+<li>Complete a subset of analysis topics, to be coordinated via slack</li>
+<li>Duplication is okay, compare results</li>
+</ul>
+<p>Editor (Jocelyn)</p>
+<ul>
+<li>Write up intro and discussion</li>
+<li>Mash together everyone’s analysis into final code base</li>
+</ul>
+<p>Presentation (all)</p>
 </section>
 <section id="anticipated-challenges" class="level2">
 <h2 class="anchored" data-anchor-id="anticipated-challenges">Anticipated Challenges</h2>
 <ul>
-<li>dating of CVs - using proxy of last job</li>
 <li>Extracting skills from job descriptions - inconsistent?</li>
-<li>schedule coordination</li>
+<li>Logistics - schedule coordination</li>
 </ul>
 </section>
 <section id="submission-requirements" class="level2">

@@ -27,12 +27,11 @@ library(stringr)
 
 ## Task (taken from Brightspace directly)
 
-Create a short document, with the names of all participating group members.  Only one submission per group is required.
+Create a short document, with the names of all participating group members. Only one submission per group is required.
 
 You should briefly describe your collaboration tool(s) you’ll use as a group, including for communication, code sharing, and project documentation. You should have identified your data sources, where the data can be found, and how to load it. And you should have created at least a logical model for your normalized database, and produced an Entity-Relationship (ER) diagram documenting your database design.
 
-
-This is a group project to be completed collaboratively by your entire project team. The goal is to practice effective virtual teamwork, a core professional skill for data scientists. 
+This is a group project to be completed collaboratively by your entire project team. The goal is to practice effective virtual teamwork, a core professional skill for data scientists.
 
 Note: You are required to deliver an approach document the week before the project code base is due, and make a group presentation at the first meetup after the project code base is due.
 
@@ -42,8 +41,7 @@ Which data science skills are most valued?
 
 Treat this as an exploratory analysis. There is no single “correct” answer; your evaluation and justification matter more than any specific ranking.
 
-Project Requirements and Grading Criteria
-Your group is responsible for the following:
+Project Requirements and Grading Criteria Your group is responsible for the following:
 
 Collaboration
 
@@ -53,7 +51,7 @@ Maintain shared access to code, documentation, and findings.
 
 Data Acquisition
 
-Identify relevant data sources.  Explain why you chose your data sources.
+Identify relevant data sources. Explain why you chose your data sources.
 
 Explain how the data were collected and loaded.
 
@@ -85,7 +83,7 @@ Statistical modeling will not affect your grade, as this is a first-semester cou
 
 Individual students are not required to explain advanced modeling techniques during the presentation.
 
- To Consider
+To Consider
 
 Did your team define operational proxies for “skill demand” (e.g., job postings, surveys, curricula).
 
@@ -101,53 +99,68 @@ Submit a 3–7 minute video explaining your work.
 
 Students are strongly encouraged to start early, ask questions, and actively participate in the discussion forum.
 
-Students who are unable or unwilling to work in groups may choose to make Project 3 the one course project that they drop without penalty.  There is not an option to deliver Project 3 as a sole contributor.
+Students who are unable or unwilling to work in groups may choose to make Project 3 the one course project that they drop without penalty. There is not an option to deliver Project 3 as a sole contributor.
 
 ## Outline
 
-Collaboration tools
-- zoom (communication)
-- slack (communication)
-- github (code sharing)
+**Collaboration tools:**
 
-Data Set selected:
-Job Postings
+-   zoom (communication)
+-   slack (communication)
+-   github (code sharing)
+
+**Data Set selected** 
+
 https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries
-CVs?
 
-Database:
- - Logical model for normalized database
- - Entity-Relationship diagram
+  - Data on job postings between October 5th and October 12th, 2026
 
-Possible Analysis
- - look at job market
- - retrospective - how have events effected job market/resumes
- - ^^ Microeconomics trends
- - geographic variation
- - what is a valuable skill (by frequency mentioned or salary)
- 
- ROLES:
- 
- Data Acquisition (Afwan)
- - Extract skill information from description 
- - pick N keywords and filter for those results
- - Database Design
- Data Preparation and Exploration (Group)
- - Initial data tidying, Exploratory data analysis, and structuring for R 
- - Perform all data tidying, transformations, and exploratory data analysis in R
- - Address data quality issues such as missing values and outliers
- Editor (Jocelyn)
- - Mash together everyone's analysis into final code base
- - Everyone to make smaller edits on github
- Presentation (TBD)
+We did explore other databases. For instance, there were other sources for CVs (such as https://www.kaggle.com/datasets/suriyaganesh/resume-dataset-structured/data and https://www.kaggle.com/datasets/saugataroyarghya/resume-dataset) but although CVs could be a good proxy, they reflect what people offer, not what employers are looking for. We also explored descriptions about courses and programs on data science (such as https://www.mastersindatascience.org/learning/data-scientist-skills/hard-skills/ and https: //ischool.syracuse.edu/data-science-skills/). However, they reflect what these institutions teach, which is a reasonable proxy. However, the selected dataset is the best option among these alternatives as it clearly shows what companies expect their workers to do and which sills they are expected to have. Additionally we looked at the U.S. Bureau of Labor Statistics which has data on employment trends, job openings and turnover, and employment projections. These data are available by sector. However, unlike the selected data set, they do not mention skills, just the types of jobs.
 
+- Job Postings: 
+
+**Database Entity-Relationship Diagram:**
+
+![](https://github.com/Afwans/DATA607-Project3/blob/main/ER_Diagram/Dataset1_ER_Diagram.png?raw=true)
+
+**Possible Analyses:**
+
+-   look at job market
+-   retrospective (longitudinal)
+-   how have events effected job market/resumes
+-   \^\^ Microeconomics trends
+-   geographic variation
+-   what is a valuable skill (by frequency mentioned or salary)
+
+**Roles:**
+
+Create database (Afwan)
+
+-   Extract skill information from description as discussed
+-   pick N keywords and filter for those results
+
+EDA (all)
+
+-   Initial data tidying
+-   Exploratory data analysis, and structuring for R
+-   Address data quality issues such as missing values and outliers
+
+Analysis and Modeling (all)
+
+-   Complete a subset of analysis topics, to be coordinated via slack
+-   Duplication is okay, compare results
+
+Editor (Jocelyn)
+
+-   Write up intro and discussion
+-   Mash together everyone's analysis into final code base
+
+Presentation (all)
 
 ## Anticipated Challenges
 
-- dating of CVs - using proxy of last job
-- Extracting skills from job descriptions - inconsistent?
-- schedule coordination
-
+-   Extracting skills from job descriptions - inconsistent?
+-   Logistics - schedule coordination
 
 ## Submission Requirements
 
@@ -156,5 +169,5 @@ Possible Analysis
 -   Submit the GitHub link
 
 -   RPubs publication
- 
- - Please submit your presentation collateral (e.g. slide deck) before the beginning our our meetup on Wednesday.  Only one submission per group is required.  In your submission link, please include the names of all participating group members.  
+
+-   Please submit your presentation collateral (e.g. slide deck) before the beginning our our meetup on Wednesday. Only one submission per group is required. In your submission link, please include the names of all participating group members.
