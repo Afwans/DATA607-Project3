@@ -1,0 +1,372 @@
+---
+# Slides summarize Project3_Analysis_v1.html. Figures are larger-text copies
+# of the report figures made by make_slide_figures.R (Figures/slides-*); rerun it if the
+# analysis changes, then re-render these slides. Numbers quoted on slides
+# are copied from the rendered report.
+title: "Which Data Science Skills Are Most Valued?"
+subtitle: "DATA 607 — Project 3"
+author: "Mohd Afwan Shaikh, Enrique Delamonica, Jocelyn Slater, Lionel Jr Desroses, and Renan Charles-Pierre"
+date: today
+date-format: "MMMM D, YYYY"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    transition: fade
+    embed-resources: true
+    footer: "DATA 607 — Project 3 | Which Data Science Skills Are Most Valued?"
+    include-in-header:
+      text: |
+        <style>
+          .reveal h2 { color: #1c3f6e; }
+          .reveal .slide-title-section h1 { color: #1c3f6e; }
+          .reveal table { font-size: 0.6em; }
+          .reveal .small { font-size: 0.7em; }
+          .reveal .big-number { font-size: 2.2em; font-weight: 700; color: #2a78d6; line-height: 1.1; }
+          .reveal .callout { font-size: 0.75em; }
+          .reveal .todo { color: #d7191c; font-weight: 700; }
+        </style>
+---
+
+## Research question
+
+> **Which data science skills are most valued?**
+
+"Valued" isn't directly observable, so we measure it two ways:
+
+| Proxy | Definition | What it captures |
+|---|---|---|
+| **Demand** | Share of data-related postings whose description mentions the skill | How often employers ask for it |
+| **Pay** | Difference in advertised salary between postings that do and do not mention the skill, before and after adjusting for job category | What employers are willing to pay for it |
+
+## Data and approach
+
+:::: {.columns}
+::: {.column width="55%"}
+::: {.small}
+**Kaggle: *Job Postings with Salaries*** (minmaxer)
+
+- Jobs posted in one week on 4,000+ company career sites, with pay ranges
+- Snapshot: **October 5–12, 2026**
+- Pairs the skills employers ask for with the pay they offer
+
+**Alternatives considered:** CV/resume datasets (what people offer, not what employers want), course descriptions (what schools teach), BLS data (job types, no skills)
+:::
+:::
+
+::: {.column width="45%"}
+[9,173]{.big-number}<br>cleaned job postings
+
+[226]{.big-number}<br>data science postings, 30 tracked skills
+
+[178]{.big-number}<br>with a usable USD salary
+:::
+::::
+
+
+## Database design
+
+![](ER_Diagram/Dataset1_ER_Diagram.png){fig-align="center" width="85%"}
+
+::: {.small}
+PostgreSQL (`data607_project3`) managed in pgAdmin 4 
+
+5 normalized tables: `COMPANY` (210), `JOB_POSTING` (226), `SALARY` (226), `SKILL` (30), `JOB_SKILL` (1,142)
+:::
+
+
+## Data cleaning and quality
+
+:::: {.columns}
+::: {.column width="50%"}
+**Duplicate checks: all zero**
+
+| Check | Count |
+|:---|---:|
+| Duplicate job IDs | 0 |
+| Duplicate salary job IDs | 0 |
+| Duplicate company IDs | 0 |
+| Duplicate skill IDs | 0 |
+| Duplicate job-skill pairs | 0 |
+:::
+
+::: {.column width="50%"}
+**Salary status of the 226 postings**
+
+| Status | n |
+|:---|---:|
+| USD-eligible (used for pay analysis) | 178 |
+| Non-USD currency | 44 |
+| Outlier flag (< \$30K or > \$400K) | 4 |
+
+:::
+::::
+
+# Value Proxy 1: Demand
+
+## Python and SQL dominate demand
+
+:::: {.columns}
+::: {.column width="58%"}
+![](Figures/slides-demand-plot-1.png)
+:::
+
+::: {.column width="42%"}
+::: {.small}
+| Skill | Postings | Share |
+|:---|---:|---:|
+| Python | 163 | 72.1% |
+| SQL | 133 | 58.8% |
+| Machine Learning | 74 | 32.7% |
+| LLM | 60 | 26.5% |
+| Statistics | 55 | 24.3% |
+
+:::
+:::
+::::
+
+
+## Employers ask for bundles of skills
+
+:::: {.columns}
+::: {.column width="50%"}
+![](Figures/slides-breadth-1.png)
+
+::: {.small}
+A typical posting names about **5** of our 30 skills.
+:::
+:::
+
+::: {.column width="50%"}
+![](Figures/slides-family-1.png)
+:::
+::::
+
+## Demand differs by job category
+
+![](Figures/slides-demand-category-1.png){fig-align="center" height="560"}
+
+::: notes
+AI/ML: Python, ML, LLMs, PyTorch; SQL in only 7% of AI/ML postings. Data Analytics and BI: SQL plus a BI tool (Tableau, Power BI). Data Engineering: SQL and Python with pipelines, dbt, ETL, Snowflake, Databricks and cloud. Python and SQL are the only skills common (≥ 40%) in nearly every category. Small categories (n < 15) are noisy.
+:::
+
+## Each role has its own skill "personality"
+
+:::: {.columns}
+::: {.column width="62%"}
+![](Figures/slides-top5-by-category-1.png)
+:::
+
+::: {.column width="38%"}
+::: {.small}
+- **AI/ML:** Python, Machine Learning, LLMs, PyTorch. SQL in only 7%
+- **Analytics & BI:** SQL + a BI tool (Tableau, Power BI)
+- **Data Engineering:** SQL, Python, pipelines, dbt, Snowflake, cloud
+- **Python and SQL** are the only skills common (≥ 40%) in nearly every category
+:::
+:::
+::::
+
+## Skills travel together
+
+:::: {.columns}
+::: {.column width="60%"}
+![](Figures/slides-cooccurrence-heatmap-1.png)
+:::
+
+::: {.column width="40%"}
+| Skill pair | Postings with both |
+|:---|---:|
+| Python + SQL | 106 |
+| Machine Learning + Python | 61 |
+| LLM + Python | 50 |
+| dbt + SQL | 47 |
+| Python + Statistics | 45 |
+| Data Pipelines + Python | 44 |
+
+::: {.small}
+Python, SQL and Machine Learning form a **core bundle**.
+:::
+:::
+::::
+
+
+# Value Proxy 2: Pay
+
+## Data science pays well above the market
+
+:::: {.columns}
+::: {.column width="50%"}
+![](Figures/slides-salary-histogram-1.png)
+:::
+
+::: {.column width="50%"}
+![](Figures/slides-salary-boxplot-1.png)
+:::
+::::
+
+| Group | Postings | Median | Mean | IQR outliers |
+|:---|---:|---:|---:|---:|
+| Data Science | 178 | \$165,000 | \$166,885 | 2 (1.1%) |
+| Other jobs | 7,412 | \$108,875 | \$120,410 | 78 (1.1%) |
+
+
+## Pay depends on the type of role
+
+![](Figures/slides-pay-context-1.png){fig-align="center" width="90%"}
+
+- Data Science and AI/ML pay the most; Data Engineering is in the middle; Data Analytics and BI pay least
+- Skills common in AI/ML roles will *look* like they carry a premium even when the role, not the skill, drives pay
+
+## Highest-paying skills
+
+:::: {.columns}
+::: {.column width="50%"}
+| Skill | Median salary | n |
+|:---|---:|---:|
+| Generative AI | \$196,500 | 15 |
+| PyTorch | \$195,050 | 23 |
+| Deep Learning | \$193,300 | 13 |
+| LLM | \$190,900 | 51 |
+| Kubernetes | \$185,000 | 15 |
+| Machine Learning | \$182200 | 59 |
+| Data Pipelines | \$182,025 | 42 |
+| Scikit-learn | \$181,775 | 10 |
+| Docker | \$180,000 | 9 |
+| TensorFlow | \$180,000 | 13 |
+| NLP	| \$176,800 | 12 |
+| Spark | \$176,800 | 19 |
+| AWS | \$169,250 | 40 |
+:::
+
+::: {.column width="50%"}
+| Skill | Median salary | n |
+|:---|---:|---:|
+| Airflow | \$168,750 | 16 |
+| ETL | \$168,500 | 23 |
+| Google Cloud | \$168,500 | 23 |
+| Python | \$165,000 | 131 |
+| Statistics | \$164,900 | 44 |
+| Snowflak | \$164,250 | 32 |
+| Looker | 162,972 | 15 |
+| dbt | \$156,000 | 37 |
+| Databricks | \$155,000 | 28
+| SQL	| \$152,500 | 105 |
+| R	| \$151,160 | 22 |
+| Git | \$149,216 | 18 |
+| Azure	| \$148,012 | 25 |
+
+:::
+::::
+
+
+## Salary premiums by skill {.smaller}
+
+:::: {.columns}
+::: {.column width="55%"}
+![](Figures/slides-premium-plot-1.png)
+
+**Association, not causation.** Most confidence intervals include zero (n = 178).
+:::
+
+::: {.column width="45%"}
+::: {.small}
+- **ML, LLM, PyTorch:** about **+\$28K to +\$38K**
+- **Excel, Power BI, Tableau, Data Viz:** **\$50K–\$68K less**
+- **SQL:** −\$40K, only because AI/ML (highest paid) rarely lists SQL
+- **Python:** too common to signal a premium
+- Within the same category, Excel (−26%), Data Viz (−23%) and Power BI (−18%) stay lower; these are the only significant estimates (p < 0.05)
+
+:::
+:::
+::::
+
+# Which Skills Are Most Valued?
+
+## Composite value score
+
+Average of demand rank and salary rank; lower is better.
+
+| Skill | % Postings | Demand Rank | Salary Rank | Value Score | Median Salary |
+|:---|---:|---:|---:|---:|---:|
+| LLM | 26.5 | 4 | 4 | **4.0** | \$190,900 |
+| Machine Learning | 32.7 | 3 | 6 | **4.5** | \$182,200 |
+| Data Pipelines | 23.9 | 6 | 7 | **6.5** | \$182,025 |
+| Python | 72.1 | 1 | 16 | **8.5** | \$165,000 |
+| PyTorch | 11.9 | 16 | 2 | **9.0** | \$195,050 |
+| AWS | 20.8 | 8 | 12 | **10.0** | \$169,250 |
+| Statistics | 24.3 | 5 | 17 | **11.0** | \$164,900 |
+| Generative AI | 9.7 | 21 | 1 | **11.0** | \$196,500 |
+| SQL | 58.8 | 2 | 22 | **12.0** | \$152,500 |
+
+::: notes
+A skill scores best when it is both frequently requested and linked to higher pay. Common-but-cheap and rare-but-expensive skills both get penalized.
+:::
+
+## There is no single "most valued" skill
+
+| Tier | Skills | What the data shows |
+|:---|:---|:---|
+| **Tier 1 — Must Have** | Python, SQL | Asked for in 60–72% of all postings; appear across every job category |
+| **Tier 2 — High Value** | Machine Learning, LLMs, Statistics | Tied to the highest-paying roles; growing demand |
+| **Tier 3 — Specialist Premium** | PyTorch, Deep Learning, Generative AI | Less common but linked to the largest salary premiums |
+| **Tier 4 — Category-Specific** | Spark, Databricks, dbt, Snowflake | Important in Data Engineering; less relevant in analytics roles |
+
+## Key takeaways
+
+::: {style="font-size: 0.85em;"}
+1. **Python is the clearest answer.** It is in 72% of postings and appears across every category.
+2. **SQL is still essential.** It is in nearly 60% of postings and present in every job type.
+3. **AI/ML skills are where the money is.** Generative AI, PyTorch, Deep Learning and LLMs are linked to the highest-paying roles.
+4. **Skills travel in bundles.** Python + SQL + Machine Learning is the core stack.
+5. **Role type matters as much as skills.** Data Science and AI/ML pay roughly \$75K more than Analytics/BI.
+:::
+
+## Interactive Shiny dashboard
+
+- Built with `shiny`, `bslib`, `dplyr`, `ggplot2`, `plotly`, `DT`
+- Developed against PostgreSQL; deployed to **shinyapps.io** from exported CSVs
+- Lets users compare data science jobs with the overall market, explore skill demand and salaries, and filter postings
+
+**Live:** [mohdafwan.shinyapps.io/data607-project3](https://mohdafwan.shinyapps.io/data607-project3/)
+
+## Limitations and future work
+
+:::: {.columns}
+::: {.column width="50%"}
+**Limitations**
+
+::: {.small}
+- One-week snapshot (Oct 5–12, 2026)
+- Postings from specific applicant-tracking systems; US- and tech-heavy
+- Small sample: 226 postings, 178 with salary
+- Advertised, not realized, pay; USD only
+- Keyword matching can't tell required from preferred
+- No seniority adjustment; associations aren't causal
+- No supply-side (CV) comparison
+:::
+:::
+
+::: {.column width="50%"}
+**Future work**
+
+::: {.small}
+- Longitudinal tracking with weekly Kaggle updates
+- Geographic pay and company comparisons
+- Experience-level analysis
+- Salary patterns of skill combinations
+- Other job-posting and CV datasets
+- Models controlling for location, seniority and industry
+:::
+:::
+::::
+
+## Thank you! Questions?
+
+::: {.small}
+**Data:** minmaxer. (n.d.). *Job Postings with Salaries* [Data set]. Kaggle. <https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries>
+
+**Full report:** `Project3_Analysis_v1.html`
+
+**Dashboard:** <https://mohdafwan.shinyapps.io/data607-project3/>
+:::
