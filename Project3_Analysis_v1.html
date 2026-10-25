@@ -440,6 +440,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>Job Sector Classification:</strong> Each posting is assigned a broader employment sector using <code>job_id</code>.</li>
 </ul>
 <p>The <code>job_skill</code> table represents a many-to-many relationship because one job may require multiple skills, and the same skill may appear in multiple jobs.</p>
+<p>The relationships are reflected in the ER Diagram. <img src="https://github.com/Afwans/DATA607-Project3/blob/main/ER_Diagram/Dataset1_ER_Diagram.png?raw=true" class="img-fluid" alt="ER Diagram demonstating table relationships"></p>
 </section>
 <section id="database-normalization" class="level2" data-number="4.4">
 <h2 data-number="4.4" class="anchored" data-anchor-id="database-normalization"><span class="header-section-number">4.4</span> Database Normalization</h2>
@@ -889,23 +890,23 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
 <span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_color</span>(<span class="at">columns =</span> pct_of_postings, <span class="at">palette =</span> <span class="st">"Blues"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="bqjxdnhkxu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#bqjxdnhkxu table {
+<div id="ocwvvxznre" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ocwvvxznre table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#bqjxdnhkxu thead, #bqjxdnhkxu tbody, #bqjxdnhkxu tfoot, #bqjxdnhkxu tr, #bqjxdnhkxu td, #bqjxdnhkxu th {
+#ocwvvxznre thead, #ocwvvxznre tbody, #ocwvvxznre tfoot, #ocwvvxznre tr, #ocwvvxznre td, #ocwvvxznre th {
   border-style: none;
 }
 
-#bqjxdnhkxu p {
+#ocwvvxznre p {
   margin: 0;
   padding: 0;
 }
 
-#bqjxdnhkxu .gt_table {
+#ocwvvxznre .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -931,12 +932,12 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-left-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_caption {
+#ocwvvxznre .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#bqjxdnhkxu .gt_title {
+#ocwvvxznre .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -948,7 +949,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-width: 0;
 }
 
-#bqjxdnhkxu .gt_subtitle {
+#ocwvvxznre .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -960,7 +961,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-top-width: 0;
 }
 
-#bqjxdnhkxu .gt_heading {
+#ocwvvxznre .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -972,13 +973,13 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_bottom_border {
+#ocwvvxznre .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_col_headings {
+#ocwvvxznre .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -993,7 +994,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_col_heading {
+#ocwvvxznre .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1013,7 +1014,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   overflow-x: hidden;
 }
 
-#bqjxdnhkxu .gt_column_spanner_outer {
+#ocwvvxznre .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1025,15 +1026,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 4px;
 }
 
-#bqjxdnhkxu .gt_column_spanner_outer:first-child {
+#ocwvvxznre .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#bqjxdnhkxu .gt_column_spanner_outer:last-child {
+#ocwvvxznre .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#bqjxdnhkxu .gt_column_spanner {
+#ocwvvxznre .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1045,11 +1046,11 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   width: 100%;
 }
 
-#bqjxdnhkxu .gt_spanner_row {
+#ocwvvxznre .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#bqjxdnhkxu .gt_group_heading {
+#ocwvvxznre .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1075,7 +1076,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   text-align: left;
 }
 
-#bqjxdnhkxu .gt_empty_group_heading {
+#ocwvvxznre .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1090,15 +1091,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   vertical-align: middle;
 }
 
-#bqjxdnhkxu .gt_from_md > :first-child {
+#ocwvvxznre .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#bqjxdnhkxu .gt_from_md > :last-child {
+#ocwvvxznre .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#bqjxdnhkxu .gt_row {
+#ocwvvxznre .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1117,7 +1118,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   overflow-x: hidden;
 }
 
-#bqjxdnhkxu .gt_stub {
+#ocwvvxznre .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1130,7 +1131,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#bqjxdnhkxu .gt_stub_row_group {
+#ocwvvxznre .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1144,15 +1145,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   vertical-align: top;
 }
 
-#bqjxdnhkxu .gt_row_group_first td {
+#ocwvvxznre .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#bqjxdnhkxu .gt_row_group_first th {
+#ocwvvxznre .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#bqjxdnhkxu .gt_summary_row {
+#ocwvvxznre .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1162,16 +1163,16 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#bqjxdnhkxu .gt_first_summary_row {
+#ocwvvxznre .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_first_summary_row.thick {
+#ocwvvxznre .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#bqjxdnhkxu .gt_last_summary_row {
+#ocwvvxznre .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1181,7 +1182,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_grand_summary_row {
+#ocwvvxznre .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1191,7 +1192,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#bqjxdnhkxu .gt_first_grand_summary_row {
+#ocwvvxznre .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1201,7 +1202,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-top-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_last_grand_summary_row_top {
+#ocwvvxznre .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1211,11 +1212,11 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_striped {
+#ocwvvxznre .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#bqjxdnhkxu .gt_table_body {
+#ocwvvxznre .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1224,7 +1225,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_footnotes {
+#ocwvvxznre .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1238,7 +1239,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_footnote {
+#ocwvvxznre .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1247,7 +1248,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#bqjxdnhkxu .gt_sourcenotes {
+#ocwvvxznre .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1261,7 +1262,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#bqjxdnhkxu .gt_sourcenote {
+#ocwvvxznre .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1269,72 +1270,72 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#bqjxdnhkxu .gt_left {
+#ocwvvxznre .gt_left {
   text-align: left;
 }
 
-#bqjxdnhkxu .gt_center {
+#ocwvvxznre .gt_center {
   text-align: center;
 }
 
-#bqjxdnhkxu .gt_right {
+#ocwvvxznre .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#bqjxdnhkxu .gt_font_normal {
+#ocwvvxznre .gt_font_normal {
   font-weight: normal;
 }
 
-#bqjxdnhkxu .gt_font_bold {
+#ocwvvxznre .gt_font_bold {
   font-weight: bold;
 }
 
-#bqjxdnhkxu .gt_font_italic {
+#ocwvvxznre .gt_font_italic {
   font-style: italic;
 }
 
-#bqjxdnhkxu .gt_super {
+#ocwvvxznre .gt_super {
   font-size: 65%;
 }
 
-#bqjxdnhkxu .gt_footnote_marks {
+#ocwvvxznre .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#bqjxdnhkxu .gt_asterisk {
+#ocwvvxznre .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#bqjxdnhkxu .gt_indent_1 {
+#ocwvvxznre .gt_indent_1 {
   text-indent: 5px;
 }
 
-#bqjxdnhkxu .gt_indent_2 {
+#ocwvvxznre .gt_indent_2 {
   text-indent: 10px;
 }
 
-#bqjxdnhkxu .gt_indent_3 {
+#ocwvvxznre .gt_indent_3 {
   text-indent: 15px;
 }
 
-#bqjxdnhkxu .gt_indent_4 {
+#ocwvvxznre .gt_indent_4 {
   text-indent: 20px;
 }
 
-#bqjxdnhkxu .gt_indent_5 {
+#ocwvvxznre .gt_indent_5 {
   text-indent: 25px;
 }
 
-#bqjxdnhkxu .katex-display {
+#ocwvvxznre .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#bqjxdnhkxu div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#ocwvvxznre div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1854,23 +1855,23 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_color</span>(<span class="at">columns =</span> co_count, <span class="at">palette =</span> <span class="st">"Blues"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="npjbhwhpzu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#npjbhwhpzu table {
+<div id="froxlkxrnl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#froxlkxrnl table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#npjbhwhpzu thead, #npjbhwhpzu tbody, #npjbhwhpzu tfoot, #npjbhwhpzu tr, #npjbhwhpzu td, #npjbhwhpzu th {
+#froxlkxrnl thead, #froxlkxrnl tbody, #froxlkxrnl tfoot, #froxlkxrnl tr, #froxlkxrnl td, #froxlkxrnl th {
   border-style: none;
 }
 
-#npjbhwhpzu p {
+#froxlkxrnl p {
   margin: 0;
   padding: 0;
 }
 
-#npjbhwhpzu .gt_table {
+#froxlkxrnl .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1896,12 +1897,12 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-left-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_caption {
+#froxlkxrnl .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#npjbhwhpzu .gt_title {
+#froxlkxrnl .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1913,7 +1914,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-width: 0;
 }
 
-#npjbhwhpzu .gt_subtitle {
+#froxlkxrnl .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1925,7 +1926,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-top-width: 0;
 }
 
-#npjbhwhpzu .gt_heading {
+#froxlkxrnl .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1937,13 +1938,13 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_bottom_border {
+#froxlkxrnl .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_col_headings {
+#froxlkxrnl .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1958,7 +1959,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_col_heading {
+#froxlkxrnl .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1978,7 +1979,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   overflow-x: hidden;
 }
 
-#npjbhwhpzu .gt_column_spanner_outer {
+#froxlkxrnl .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1990,15 +1991,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 4px;
 }
 
-#npjbhwhpzu .gt_column_spanner_outer:first-child {
+#froxlkxrnl .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#npjbhwhpzu .gt_column_spanner_outer:last-child {
+#froxlkxrnl .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#npjbhwhpzu .gt_column_spanner {
+#froxlkxrnl .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2010,11 +2011,11 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   width: 100%;
 }
 
-#npjbhwhpzu .gt_spanner_row {
+#froxlkxrnl .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#npjbhwhpzu .gt_group_heading {
+#froxlkxrnl .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2040,7 +2041,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   text-align: left;
 }
 
-#npjbhwhpzu .gt_empty_group_heading {
+#froxlkxrnl .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2055,15 +2056,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   vertical-align: middle;
 }
 
-#npjbhwhpzu .gt_from_md > :first-child {
+#froxlkxrnl .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#npjbhwhpzu .gt_from_md > :last-child {
+#froxlkxrnl .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#npjbhwhpzu .gt_row {
+#froxlkxrnl .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2082,7 +2083,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   overflow-x: hidden;
 }
 
-#npjbhwhpzu .gt_stub {
+#froxlkxrnl .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2095,7 +2096,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#npjbhwhpzu .gt_stub_row_group {
+#froxlkxrnl .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2109,15 +2110,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   vertical-align: top;
 }
 
-#npjbhwhpzu .gt_row_group_first td {
+#froxlkxrnl .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#npjbhwhpzu .gt_row_group_first th {
+#froxlkxrnl .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#npjbhwhpzu .gt_summary_row {
+#froxlkxrnl .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2127,16 +2128,16 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#npjbhwhpzu .gt_first_summary_row {
+#froxlkxrnl .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_first_summary_row.thick {
+#froxlkxrnl .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#npjbhwhpzu .gt_last_summary_row {
+#froxlkxrnl .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2146,7 +2147,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_grand_summary_row {
+#froxlkxrnl .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2156,7 +2157,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#npjbhwhpzu .gt_first_grand_summary_row {
+#froxlkxrnl .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2166,7 +2167,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-top-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_last_grand_summary_row_top {
+#froxlkxrnl .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2176,11 +2177,11 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_striped {
+#froxlkxrnl .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#npjbhwhpzu .gt_table_body {
+#froxlkxrnl .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2189,7 +2190,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_footnotes {
+#froxlkxrnl .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2203,7 +2204,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_footnote {
+#froxlkxrnl .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -2212,7 +2213,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#npjbhwhpzu .gt_sourcenotes {
+#froxlkxrnl .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2226,7 +2227,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#npjbhwhpzu .gt_sourcenote {
+#froxlkxrnl .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2234,72 +2235,72 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#npjbhwhpzu .gt_left {
+#froxlkxrnl .gt_left {
   text-align: left;
 }
 
-#npjbhwhpzu .gt_center {
+#froxlkxrnl .gt_center {
   text-align: center;
 }
 
-#npjbhwhpzu .gt_right {
+#froxlkxrnl .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#npjbhwhpzu .gt_font_normal {
+#froxlkxrnl .gt_font_normal {
   font-weight: normal;
 }
 
-#npjbhwhpzu .gt_font_bold {
+#froxlkxrnl .gt_font_bold {
   font-weight: bold;
 }
 
-#npjbhwhpzu .gt_font_italic {
+#froxlkxrnl .gt_font_italic {
   font-style: italic;
 }
 
-#npjbhwhpzu .gt_super {
+#froxlkxrnl .gt_super {
   font-size: 65%;
 }
 
-#npjbhwhpzu .gt_footnote_marks {
+#froxlkxrnl .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#npjbhwhpzu .gt_asterisk {
+#froxlkxrnl .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#npjbhwhpzu .gt_indent_1 {
+#froxlkxrnl .gt_indent_1 {
   text-indent: 5px;
 }
 
-#npjbhwhpzu .gt_indent_2 {
+#froxlkxrnl .gt_indent_2 {
   text-indent: 10px;
 }
 
-#npjbhwhpzu .gt_indent_3 {
+#froxlkxrnl .gt_indent_3 {
   text-indent: 15px;
 }
 
-#npjbhwhpzu .gt_indent_4 {
+#froxlkxrnl .gt_indent_4 {
   text-indent: 20px;
 }
 
-#npjbhwhpzu .gt_indent_5 {
+#froxlkxrnl .gt_indent_5 {
   text-indent: 25px;
 }
 
-#npjbhwhpzu .katex-display {
+#froxlkxrnl .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#npjbhwhpzu div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#froxlkxrnl div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -2917,23 +2918,23 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
 <span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="ogsgyqjeiv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#ogsgyqjeiv table {
+<div id="fizkmdtzqe" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#fizkmdtzqe table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#ogsgyqjeiv thead, #ogsgyqjeiv tbody, #ogsgyqjeiv tfoot, #ogsgyqjeiv tr, #ogsgyqjeiv td, #ogsgyqjeiv th {
+#fizkmdtzqe thead, #fizkmdtzqe tbody, #fizkmdtzqe tfoot, #fizkmdtzqe tr, #fizkmdtzqe td, #fizkmdtzqe th {
   border-style: none;
 }
 
-#ogsgyqjeiv p {
+#fizkmdtzqe p {
   margin: 0;
   padding: 0;
 }
 
-#ogsgyqjeiv .gt_table {
+#fizkmdtzqe .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -2959,12 +2960,12 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-left-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_caption {
+#fizkmdtzqe .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#ogsgyqjeiv .gt_title {
+#fizkmdtzqe .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2976,7 +2977,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-width: 0;
 }
 
-#ogsgyqjeiv .gt_subtitle {
+#fizkmdtzqe .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2988,7 +2989,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-top-width: 0;
 }
 
-#ogsgyqjeiv .gt_heading {
+#fizkmdtzqe .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -3000,13 +3001,13 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_bottom_border {
+#fizkmdtzqe .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_col_headings {
+#fizkmdtzqe .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3021,7 +3022,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_col_heading {
+#fizkmdtzqe .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3041,7 +3042,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   overflow-x: hidden;
 }
 
-#ogsgyqjeiv .gt_column_spanner_outer {
+#fizkmdtzqe .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3053,15 +3054,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 4px;
 }
 
-#ogsgyqjeiv .gt_column_spanner_outer:first-child {
+#fizkmdtzqe .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#ogsgyqjeiv .gt_column_spanner_outer:last-child {
+#fizkmdtzqe .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#ogsgyqjeiv .gt_column_spanner {
+#fizkmdtzqe .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -3073,11 +3074,11 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   width: 100%;
 }
 
-#ogsgyqjeiv .gt_spanner_row {
+#fizkmdtzqe .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#ogsgyqjeiv .gt_group_heading {
+#fizkmdtzqe .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3103,7 +3104,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   text-align: left;
 }
 
-#ogsgyqjeiv .gt_empty_group_heading {
+#fizkmdtzqe .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -3118,15 +3119,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   vertical-align: middle;
 }
 
-#ogsgyqjeiv .gt_from_md > :first-child {
+#fizkmdtzqe .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#ogsgyqjeiv .gt_from_md > :last-child {
+#fizkmdtzqe .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#ogsgyqjeiv .gt_row {
+#fizkmdtzqe .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3145,7 +3146,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   overflow-x: hidden;
 }
 
-#ogsgyqjeiv .gt_stub {
+#fizkmdtzqe .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3158,7 +3159,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#ogsgyqjeiv .gt_stub_row_group {
+#fizkmdtzqe .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3172,15 +3173,15 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   vertical-align: top;
 }
 
-#ogsgyqjeiv .gt_row_group_first td {
+#fizkmdtzqe .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#ogsgyqjeiv .gt_row_group_first th {
+#fizkmdtzqe .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#ogsgyqjeiv .gt_summary_row {
+#fizkmdtzqe .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3190,16 +3191,16 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#ogsgyqjeiv .gt_first_summary_row {
+#fizkmdtzqe .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_first_summary_row.thick {
+#fizkmdtzqe .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#ogsgyqjeiv .gt_last_summary_row {
+#fizkmdtzqe .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3209,7 +3210,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_grand_summary_row {
+#fizkmdtzqe .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3219,7 +3220,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#ogsgyqjeiv .gt_first_grand_summary_row {
+#fizkmdtzqe .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3229,7 +3230,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-top-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_last_grand_summary_row_top {
+#fizkmdtzqe .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3239,11 +3240,11 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_striped {
+#fizkmdtzqe .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#ogsgyqjeiv .gt_table_body {
+#fizkmdtzqe .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3252,7 +3253,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-bottom-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_footnotes {
+#fizkmdtzqe .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3266,7 +3267,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_footnote {
+#fizkmdtzqe .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -3275,7 +3276,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#ogsgyqjeiv .gt_sourcenotes {
+#fizkmdtzqe .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3289,7 +3290,7 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   border-right-color: #D3D3D3;
 }
 
-#ogsgyqjeiv .gt_sourcenote {
+#fizkmdtzqe .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -3297,72 +3298,72 @@ $ salary_usd_eligible    &lt;lgl&gt; TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, 
   padding-right: 5px;
 }
 
-#ogsgyqjeiv .gt_left {
+#fizkmdtzqe .gt_left {
   text-align: left;
 }
 
-#ogsgyqjeiv .gt_center {
+#fizkmdtzqe .gt_center {
   text-align: center;
 }
 
-#ogsgyqjeiv .gt_right {
+#fizkmdtzqe .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#ogsgyqjeiv .gt_font_normal {
+#fizkmdtzqe .gt_font_normal {
   font-weight: normal;
 }
 
-#ogsgyqjeiv .gt_font_bold {
+#fizkmdtzqe .gt_font_bold {
   font-weight: bold;
 }
 
-#ogsgyqjeiv .gt_font_italic {
+#fizkmdtzqe .gt_font_italic {
   font-style: italic;
 }
 
-#ogsgyqjeiv .gt_super {
+#fizkmdtzqe .gt_super {
   font-size: 65%;
 }
 
-#ogsgyqjeiv .gt_footnote_marks {
+#fizkmdtzqe .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#ogsgyqjeiv .gt_asterisk {
+#fizkmdtzqe .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#ogsgyqjeiv .gt_indent_1 {
+#fizkmdtzqe .gt_indent_1 {
   text-indent: 5px;
 }
 
-#ogsgyqjeiv .gt_indent_2 {
+#fizkmdtzqe .gt_indent_2 {
   text-indent: 10px;
 }
 
-#ogsgyqjeiv .gt_indent_3 {
+#fizkmdtzqe .gt_indent_3 {
   text-indent: 15px;
 }
 
-#ogsgyqjeiv .gt_indent_4 {
+#fizkmdtzqe .gt_indent_4 {
   text-indent: 20px;
 }
 
-#ogsgyqjeiv .gt_indent_5 {
+#fizkmdtzqe .gt_indent_5 {
   text-indent: 25px;
 }
 
-#ogsgyqjeiv .katex-display {
+#fizkmdtzqe .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#ogsgyqjeiv div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#fizkmdtzqe div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>

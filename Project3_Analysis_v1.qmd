@@ -20,10 +20,6 @@ execute:
   warning: false
   message: false
 params:
-  # "sqlite" rebuilds the normalized database in memory from the exported
-  # tables in Data/Normalized/ (no credentials needed, used for RPubs).
-  # "postgres" reads the team's PostgreSQL database instead; set the
-  # PGPASSWORD environment variable before rendering.
   db_backend: "sqlite"
 ---
 
@@ -210,6 +206,9 @@ We used unique identifiers to connect related tables.
 - **Job Sector Classification:** Each posting is assigned a broader employment sector using `job_id`.
 
 The `job_skill` table represents a many-to-many relationship because one job may require multiple skills, and the same skill may appear in multiple jobs.
+
+The relationships are reflected in the ER Diagram.
+![ER Diagram demonstating table relationships](https://github.com/Afwans/DATA607-Project3/blob/main/ER_Diagram/Dataset1_ER_Diagram.png?raw=true)
 
 ## Database Normalization
 
