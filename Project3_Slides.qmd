@@ -322,14 +322,6 @@ A skill scores best when it is both frequently requested and linked to higher pa
 5. **Role type matters as much as skills.** Data Science and AI/ML pay roughly \$75K more than Analytics/BI.
 :::
 
-## Interactive Shiny dashboard
-
-- Built with `shiny`, `bslib`, `dplyr`, `ggplot2`, `plotly`, `DT`
-- Developed against PostgreSQL; deployed to **shinyapps.io** from exported CSVs
-- Lets users compare data science jobs with the overall market, explore skill demand and salaries, and filter postings
-
-**Live:** [mohdafwan.shinyapps.io/data607-project3](https://mohdafwan.shinyapps.io/data607-project3/)
-
 ## Limitations and future work
 
 :::: {.columns}
@@ -361,12 +353,24 @@ A skill scores best when it is both frequently requested and linked to higher pa
 :::
 ::::
 
-## Thank you! Questions?
+## Interactive Shiny dashboard
+
+- Built with `shiny`, `bslib`, `dplyr`, `ggplot2`, `plotly`, `DT`
+- Developed against PostgreSQL; deployed to **shinyapps.io** from exported CSVs
+- Lets users compare data science jobs with the overall market, explore skill demand and salaries, and filter postings
+
+**Live:** [mohdafwan.shinyapps.io/data607-project3](https://mohdafwan.shinyapps.io/data607-project3/)
+
+## Thank you! 
+
+::: {.huge}
+Questions?
+:::
 
 ::: {.small}
 **Data:** minmaxer. (n.d.). *Job Postings with Salaries* [Data set]. Kaggle. <https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries>
 
-**Full report:** `Project3_Analysis_v1.html`
+**Full project:** `https://github.com/Afwans/DATA607-Project3/tree/main/`
 
 **Dashboard:** <https://mohdafwan.shinyapps.io/data607-project3/>
 :::
