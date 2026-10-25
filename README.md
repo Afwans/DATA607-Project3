@@ -1,143 +1,337 @@
 # DATA 607 — Project 3: Data Science Skills and Salaries
 
-## Research question
-
-**Which data science skills are most in demand, and how do those skills relate to salaries?**
-
-This project uses job-posting data to investigate skill demand and advertised compensation for data-related roles. The analysis is performed in R, with a proposed normalized relational model documenting how companies, postings, salaries, and skills relate.
-
-## Dataset 1 overview
-
-| Measure | Result |
-| --- | ---: |
-| Cleaned job postings | 9,173 |
-| Postings included in the revised skill analysis | 226 |
-| Individual skills tracked | 30 |
-| Detected job–skill associations | 1,142 |
-| Jobs with no detected tracked skill | 6 |
-| Jobs eligible for the USD salary analysis | 178 |
-| Median advertised annual salary midpoint (eligible jobs) | $165,000 |
-
-The 226 postings analyzed for skills are a subset of the 9,173 cleaned postings. Salary summaries should not be interpreted as representing all postings.
-
-
-## Interactive Data Science Job Market Dashboard
-
-**Live Dashboard:** https://mohdafwan.shinyapps.io/data607-project3/
-
-This dashboard was developed for DATA 607 Project 3 to explore the following research question:
+## Research Question
 
 **Which data science skills are most in demand, and how do those skills relate to advertised salaries?**
 
+This project analyzes job postings to identify commonly requested data science skills and explore their relationships with advertised compensation.
+
+Data cleaning, classification, transformation, skill extraction, and exploratory analysis were performed in **R**. The cleaned data was organized into a normalized **PostgreSQL relational database** and used to develop interactive dashboards with **R Shiny**.
+
+The project examines both the broader job market and a selected group of Data Science-related positions.
+
+## Dataset 1 Overview
+
+The dataset was obtained from the Kaggle dataset [Job Postings with Salaries](https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries).
+
+The analyzed snapshot covers job postings dated **October 5–12, 2026**.
+
+| Measure | Result |
+|---|---:|
+| Cleaned job postings | 9,173 |
+| Companies | 3,969 |
+| Data Science-related postings | 229 |
+| Individual skills tracked | 30 |
+| Job–skill relationships across all postings | 7,140 |
+| Jobs with at least one tracked skill | 3,428 |
+| Eligible annual USD salaries — full market | 7,590 |
+| Eligible annual USD salaries — Data Science | 180 |
+| Median annual salary midpoint — full market | $110,000 |
+| Median annual salary midpoint — Data Science | $165,000 |
+
+The 229 Data Science-related postings are a subset of the 9,173 cleaned job postings.
+
+Salary results are based only on records that passed the project's salary validation rules. The reported salary values represent advertised annual USD salary midpoints, not actual employee earnings.
+
+## Interactive Data Science Job Market Dashboard
+
+**Dashboard URL:** https://mohdafwan.shinyapps.io/data607-project3/
+
+The project includes two versions of the dashboard:
+
+- **Local Dashboard:** Connects directly to the PostgreSQL database.
+- **Online Dashboard:** Reads CSV files exported from the finalized PostgreSQL database.
+
+Both versions are designed to explore the same cleaned dataset and analysis results.
+
 ### Dashboard Features
 
-- **Job Market Overview:** Displays total job postings, jobs with eligible USD salaries, number of skills tracked, and median advertised annual salary.
-- **Top Data Science Skills:** Visualizes the ten most frequently requested skills.
-- **Job Category Filter:** Allows users to explore skill demand across different data science job categories.
-- **Salary Comparison:** Compares median advertised annual salaries across job categories.
-- **Interactive Visualizations:** Provides interactive charts with hover information.
+The dashboard is organized into five sections:
+
+**1. Overview**
+
+Provides a summary of the broader job market, including total job postings, companies, Data Science-related jobs, and eligible salary records.
+
+**2. Data Science Analysis**
+
+Examines the 229 Data Science-related postings, including frequently requested technical skills and job category comparisons.
+
+**3. Salary Insights**
+
+Compares advertised annual USD salary midpoints across Data Science job categories and technical skills.
+
+**4. Posting Trends**
+
+Explores daily job posting counts during the dataset's eight-day observation period.
+
+**5. Explore All Jobs**
+
+Provides a searchable interface for exploring job postings and their associated information.
+
+The dashboard uses interactive charts, hover information, and filters to help users explore the results.
 
 ### Technology Stack
 
-- **R:** Data cleaning, transformation, analysis, and visualization
-- **PostgreSQL:** Relational database containing five normalized tables
-- **SQL:** Data retrieval and analysis
-- **R Shiny:** Interactive dashboard development
-- **ggplot2 and Plotly:** Data visualization
-- **shinyapps.io:** Online dashboard hosting
-- **GitHub:** Version control and project collaboration
+| Technology | Purpose |
+|---|---|
+| R | Data cleaning, classification, transformation, and exploratory analysis |
+| PostgreSQL | Storage of the six normalized relational tables |
+| SQL | Data retrieval, joins, and validation |
+| R Shiny | Interactive dashboard development |
+| bslib | Dashboard layout and styling |
+| ggplot2 | Statistical visualizations |
+| Plotly | Interactive charts |
+| DT | Searchable job tables |
+| shinyapps.io | Online dashboard hosting |
+| GitHub | Version control and project collaboration |
 
 ### Dashboard Data
 
-The project database contains 226 selected job postings, 210 companies, 30 tracked skills, and 1,142 job-skill relationships.
+The PostgreSQL database contains six normalized tables:
 
-The local dashboard connects directly to PostgreSQL. The published dashboard uses summarized CSV files generated from the database, allowing visitors to explore the results without needing database credentials.
+| Table | Records |
+|---|---:|
+| `company` | 3,969 |
+| `job_posting` | 9,173 |
+| `salary` | 9,173 |
+| `skill` | 30 |
+| `job_skill` | 7,140 |
+| `data_science_classification` | 229 |
 
-Salary comparisons use eligible annual USD advertised salary midpoints. The findings describe the selected dataset and should not be interpreted as representative of the entire data science job market.
+The `data_science_classification` table identifies the selected Data Science-related postings and stores their reviewed classifications.
 
-### Running the Dashboard Locally
+The local dashboard queries PostgreSQL directly. The online dashboard uses exported CSV files, allowing visitors to explore the data without accessing the local database or requiring database credentials.
 
-The PostgreSQL-connected dashboard is located in `Dashboard/app.R`.
+## Running the Dashboard Locally
 
-The standalone version used for online deployment is located in `Dashboard_Online/app.R`.
+### PostgreSQL-Connected Dashboard
 
-To run the standalone dashboard in RStudio:
+The local dashboard is located at:
+
+`Dashboard/app.R`
+
+Requirements:
+
+- R and RStudio
+- PostgreSQL running locally
+- Database named `data607_project3`
+- Required R packages installed
+
+To launch the dashboard:
+
+```r
+shiny::runApp("Dashboard")
+```
+
+The application prompts for the local PostgreSQL password.
+
+### Online Dashboard
+
+The standalone dashboard is located at:
+
+`Dashboard_Online/app.R`
+
+The online version uses prepared CSV files stored in:
+
+`Dashboard_Online/data/`
+
+To refresh the dashboard data, run the following scripts from the `Dashboard_Online` folder:
+
+```r
+source("01_export_data.R")
+source("02_prepare_dashboard_data.R")
+```
+
+The first script exports the six PostgreSQL tables. The second prepares or validates the data required by the dashboard.
+
+To launch the standalone dashboard:
 
 ```r
 shiny::runApp("Dashboard_Online")
 ```
 
-**Published Dashboard:** https://mohdafwan.shinyapps.io/data607-project3/
+The online dashboard can be deployed to shinyapps.io after the exported data and dashboard functionality have been verified.
 
+**Published dashboard URL:** https://mohdafwan.shinyapps.io/data607-project3/
 
-## Selected findings
+*The URL is the project's existing published address. Updated results will appear there only after the revised dashboard is successfully redeployed.*
 
-Among the **226 postings** analyzed for skills:
+## Selected Findings
 
-| Skill | Job postings | Share |
-| --- | ---: | ---: |
-| Python | 163 | 72.1% |
-| SQL | 133 | 58.8% |
-| Machine learning | 74 | 32.7% |
-| Large language models (LLMs) | 60 | 26.5% |
+### Most In-Demand Data Science Skills
 
-Skill indicators were extracted from job descriptions using keyword/regular-expression rules. A skill being mentioned in a posting is not proof of proficiency requirements or causal effects on salary. The salary analysis is descriptive rather than causal.
+Among the **229 Data Science-related job postings**, the ten most frequently detected skills were:
 
-## Entity–relationship (ER) diagram
+| Skill | Job postings | Share of Data Science jobs |
+|---|---:|---:|
+| Python | 163 | 71.18% |
+| SQL | 133 | 58.08% |
+| Machine Learning | 74 | 32.31% |
+| Large Language Models (LLMs) | 60 | 26.20% |
+| Statistics | 55 | 24.02% |
+| Data Pipelines | 54 | 23.58% |
+| dbt | 51 | 22.27% |
+| AWS | 47 | 20.52% |
+| Snowflake | 38 | 16.59% |
+| Databricks | 33 | 14.41% |
 
-![Proposed normalized Dataset 1 ER diagram](ER_Diagram/Dataset1_ER_Diagram.png)
+Python and SQL were the most frequently mentioned technical skills among the selected Data Science-related positions.
 
-The diagram is a **proposed relational design**, not a claim that these five tables currently exist as physical database tables.
+Skills were identified using keyword and regular-expression matching in job descriptions. Multiple skills may appear in one posting, so percentages do not add up to 100%.
 
-| Entity | Purpose | Key |
-| --- | --- | --- |
-| `COMPANY` | Identifies organizations advertising roles | `company_id` (PK) |
-| `JOB_POSTING` | Describes each job and links it to a company | `job_id` (PK), `company_id` (FK) |
-| `SALARY` | Holds compensation attributes for a posting | `job_id` (PK and FK) |
-| `SKILL` | Catalog of the 30 tracked skills | `skill_id` (proposed PK) |
-| `JOB_SKILL` | Connects jobs to detected skills | (`job_id`, `skill_id`) composite PK and FKs |
+### Salary Comparison
 
-A company can advertise multiple jobs. Each posting has a corresponding salary record in the proposed model. Job postings and skills have a many-to-many relationship, implemented through `JOB_SKILL`; a posting may have no detected skills among the 30 tracked indicators.
+| Job population | Eligible salary records | Median annual USD salary midpoint |
+|---|---:|---:|
+| Full job market | 7,590 | $110,000 |
+| Data Science-related jobs | 180 | $165,000 |
 
-The original `jobs_skills_revised.csv` stores the 30 skill indicators as TRUE/FALSE columns. The `JOB_SKILL` entity represents a normalized transformation of these columns. The stored `skill_count` field differs from the sum of the individual indicators for **187 of 226** postings; the ER model therefore uses the individual skill flags to define the **1,142** detected associations. The reason for the discrepancy has not been established.
+The median advertised salary midpoint for the Data Science-related subgroup was **$55,000 higher**, or **50% higher**, than the full-market median.
 
-See [ER diagram documentation](Dataset1_ER_Diagram_Documentation.Rmd) for further detail. The diagram source and reproducible R script are in [`ER_Diagram/`](ER_Diagram/).
+This is a descriptive comparison, not evidence that working in Data Science causes higher compensation.
 
-## Project files
+### Salary by Data Science Job Category
 
-- `Data/` — project data and derived analysis outputs.
-- `01_explore_jobs.R` through `12_validate_results.R`, including the `12B` and `12C` review scripts — data exploration, cleaning, classification, validation, skill extraction, and salary analysis.
-- `DATA607_Project3_Dataset1_Documentation.Rmd` — Dataset 1 analysis documentation.
-- `Dataset1_ER_Diagram_Documentation.Rmd` — ER diagram documentation.
-- `ER_Diagram/Dataset1_ER_Diagram.png` — ER diagram image.
-- `ER_Diagram/Dataset1_ER_Diagram.dot` — editable Graphviz source.
-- `ER_Diagram/Dataset1_ER_Diagram.R` — R script to render the diagram.
-- `ER_Diagram/Dataset1_ER_Diagram.html` — HTML version of the diagram.
+| Job category | Total postings | Eligible salary records | Median annual salary |
+|---|---:|---:|---:|
+| AI / Machine Learning | 60 | 51 | $190,000 |
+| Data Science | 41 | 28 | $188,250 |
+| Statistics | 10 | 10 | $179,500 |
+| Data Engineering | 55 | 40 | $170,000 |
+| Database | 8 | 7 | $152,500 |
+| Data Analytics | 49 | 40 | $118,750 |
+| Business Intelligence | 6 | 4 | $114,213.25 |
 
-## Reproducing the ER diagram
+AI / Machine Learning and Data Science categories had the highest median advertised salaries in the selected subgroup.
 
-Open the project in RStudio and run the following from the **repository root**:
+However, the number of eligible salary records differs across categories, and smaller categories should be interpreted cautiously.
+
+### Skills and Advertised Salaries
+
+Selected skill-level median salary midpoints among eligible Data Science-related postings were:
+
+| Skill | Eligible postings mentioning skill | Median annual salary |
+|---|---:|---:|
+| PyTorch | 23 | $195,050 |
+| Deep Learning | 13 | $193,300 |
+| LLM | 51 | $190,900 |
+| Machine Learning | 59 | $182,200 |
+| Data Pipelines | 42 | $182,025 |
+| Python | 131 | $165,000 |
+| SQL | 105 | $152,500 |
+
+Among the skills shown, specialized AI and machine learning skills were associated with higher median advertised salary midpoints.
+
+These comparisons are descriptive. They do not control for seniority, location, employer, job category, or overlapping skills.
+
+## Entity–Relationship (ER) Diagram
+
+![Normalized Dataset 1 ER Diagram](ER_Diagram/Dataset1_ER_Diagram.png)
+
+The project uses an implemented relational database containing six normalized tables.
+
+| Entity | Purpose | Primary and foreign keys |
+|---|---|---|
+| `COMPANY` | Stores organizations advertising jobs | `company_id` (PK) |
+| `JOB_POSTING` | Stores job descriptions and related attributes | `job_id` (PK), `company_id` (FK) |
+| `SALARY` | Stores advertised compensation and validation fields | `job_id` (PK and FK) |
+| `SKILL` | Stores the 30 tracked technical skills | `skill_id` (PK) |
+| `JOB_SKILL` | Connects postings to detected skills | (`job_id`, `skill_id`) composite PK and FKs |
+| `DATA_SCIENCE_CLASSIFICATION` | Stores reviewed Data Science classifications | `job_id` (PK and FK) |
+
+### Database Relationships
+
+- One company can advertise multiple job postings.
+- Each job posting has one corresponding salary record in the current database.
+- A job posting can reference multiple technical skills.
+- A technical skill can appear in multiple job postings.
+- The `JOB_SKILL` table resolves the many-to-many relationship between postings and skills.
+- A posting may have a corresponding record in `DATA_SCIENCE_CLASSIFICATION` when it belongs to the selected Data Science-related subgroup.
+
+The relational database was validated using foreign-key checks. No orphaned records were found in the five tested foreign-key relationships.
+
+See [ER diagram documentation](Dataset1_ER_Diagram_Documentation.Rmd) for additional details.
+
+## Project Files
+
+```text
+DATA607-Project3/
+│
+├── Data/
+│   └── Normalized/
+│
+├── Dashboard/
+│   ├── app.R
+│   └── 01_test_connection.R
+│
+├── Dashboard_Online/
+│   ├── 01_export_data.R
+│   ├── 02_prepare_dashboard_data.R
+│   ├── app.R
+│   ├── data/
+│   └── rsconnect/
+│
+├── ER_Diagram/
+│   ├── Dataset1_ER_Diagram.png
+│   ├── Dataset1_ER_Diagram.dot
+│   ├── Dataset1_ER_Diagram.R
+│   └── Dataset1_ER_Diagram.html
+│
+├── 01_explore_jobs.R
+├── 02_clean_jobs.R
+├── ...
+├── 13_normalize_data.R
+│
+├── DATA607_Project3_Dataset1_Documentation.Rmd
+├── Dataset1_ER_Diagram_Documentation.Rmd
+└── README.md
+```
+
+The project scripts cover source exploration, cleaning, Data Science classification, manual review, skill extraction, salary analysis, validation, and relational normalization.
+
+## Reproducing the ER Diagram
+
+Open the project in RStudio and run the following commands from the repository root:
 
 ```r
-# Install once if needed:
 install.packages(c("DiagrammeR", "DiagrammeRsvg", "rsvg"))
 
 source("ER_Diagram/Dataset1_ER_Diagram.R")
 ```
 
-The script uses the `.dot` file in the `ER_Diagram/` folder. Consult the script for its exact output behavior and package requirements.
+The script uses the Graphviz `.dot` file stored in the `ER_Diagram` folder.
 
-To render the ER documentation in RStudio, open `Dataset1_ER_Diagram_Documentation.Rmd` and knit to HTML, using the project root as the working directory if necessary.
+To render the ER documentation, open `Dataset1_ER_Diagram_Documentation.Rmd` in RStudio and knit it to HTML.
 
 ## Limitations
 
-- The job-posting dataset is not necessarily representative of the entire data science labor market.
-- The skill analysis uses 226 selected postings, not the entire cleaned dataset.
-- Keyword-based extraction may miss skills or identify mentions that are not actual requirements.
-- Salary ranges, currencies, and validity flags require filtering before meaningful comparisons.
-- Relationships between skill mentions and salary are associations, not evidence that a skill causes higher pay.
-- The ER diagram is a proposed normalized structure derived from flat CSV data.
+- **Short observation period:** The job postings cover October 5–12, 2026, so the data cannot establish long-term hiring trends.
+- **Dataset representativeness:** The selected postings may not represent the full labor market.
+- **Skill detection:** Keyword and regular-expression matching can miss relevant skills or identify mentions that are not actual job requirements.
+- **Limited skill catalog:** The analysis tracks 30 technical skills rather than every skill employers may request.
+- **Salary availability:** Not every posting contains a usable annual USD salary range.
+- **Salary exclusions:** Invalid, non-USD, incomplete, and flagged outlier salary records were excluded from the eligible salary comparisons.
+- **Confounding factors:** Salary differences may reflect job seniority, location, employer, and other characteristics rather than the listed skill itself.
+- **Classification uncertainty:** Data Science job categories are based on rule-based classification and review rather than verified employer-provided labels.
+
+The findings describe patterns in the selected dataset and should not be interpreted as causal relationships.
+
+## Conclusion
+
+The analysis found that **Python and SQL were the most frequently requested skills** among the selected Data Science-related postings.
+
+Machine Learning and Large Language Models were also commonly mentioned, suggesting that AI-related capabilities are important within this sample.
+
+Specialized AI skills, including PyTorch and LLM-related skills, were associated with relatively high advertised salary midpoints. However, these relationships may also reflect differences in job type, seniority, and employer.
+
+Overall, the project demonstrates how R, PostgreSQL, SQL, and interactive dashboards can be combined to explore skill demand and advertised compensation in job-posting data.
+
+## Data Source
+
+[Job Postings with Salaries — Kaggle](https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries)
 
 ## Repository
 
-[Afwans/DATA607-Project3](https://github.com/Afwans/DATA607-Project3) — working branch: `Afwans-patch-1`.
+[Afwans/DATA607-Project3](https://github.com/Afwans/DATA607-Project3)
+
+Working branch: `Afwans-patch-1`

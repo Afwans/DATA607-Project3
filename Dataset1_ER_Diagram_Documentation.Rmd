@@ -1,6 +1,6 @@
 ---
 title: "Dataset 1: Entity–Relationship Diagram"
-subtitle: "DATA 607 — Project 3 | Redesigned ER Model"
+subtitle: "DATA 607 — Project 3 | Full Job Market and Data Science-Related Jobs"
 author: "Mohd Afwan Shaikh"
 date: "`r Sys.Date()`"
 output:
@@ -12,114 +12,211 @@ output:
 
 # Purpose
 
-This document describes a **proposed normalized relational database design** for Dataset 1 of Project 3. The research question is:
+This document describes the relational design produced by **Script 13 (`13_normalize_dataset.R`)** for DATA 607 Project 3. The main research question is:
 
-> Which data science skills are most in demand, and how do those skills relate to salaries?
+> Which technical skills are most frequently mentioned across the full job market, and how do skill mentions and advertised salaries compare with Data Science-related jobs?
 
-The original files are CSV datasets, **not** five existing relational tables. The ER diagram illustrates how the available information could be organized into related tables to support analysis of jobs, employers, advertised salaries, and skills.
+The full cleaned job-postings dataset is the **primary population**. Data Science-related postings are a separately classified subgroup. Script 13 creates **six core CSV tables and an Excel workbook** under `Data/Normalized/`. The supplied current dataset also includes `job_sector_classification.csv`, giving **seven tables** in the verified CSV snapshot.
+
+The project also has an earlier **five-table PostgreSQL 18 implementation**, based on 226 selected postings. That implementation is documented separately below; running Script 13 does not automatically update the PostgreSQL tables or the existing Graphviz diagram.
+
+# Data acquisition and preparation
+
+The source is the Kaggle *Job Postings with Salaries* dataset by minmaxer. The dataset was downloaded manually as a ZIP archive, extracted, and processed with the project's R scripts. Scripts 01–12C cover exploration, cleaning, classification, technical-skill extraction, salary analysis, validation, and manual-review decisions. Script 13 (`13_normalize_dataset.R`) creates the normalized CSV exports documented here. This ER document describes the resulting table structure rather than repeating the EDA charts in the main Dataset 1 documentation.
+
+The posting snapshot covers October 2026. The full-market and Data Science subgroup exports must be kept distinct; the exact counts used for the diagram are verified by the R chunks below.
 
 # Source data and scope
 
-- `Data/job_postings_cleaned.csv`: 9,173 cleaned job postings, with 31 columns.
-- `Data/jobs_skills_revised.csv`: 226 analyzed job postings, with 79 columns, including 30 individual `skill_` TRUE/FALSE indicators and a separate `skill_count` field.
+- `Data/job_postings_cleaned.csv`: the cleaned source dataset (previously confirmed at 9,173 postings).
+- `Data/jobs_skills_analyzed_full.csv`: full-market postings with 30 technical-skill indicators from Script 09.
+- `Data/jobs_skills_analyzed.csv`: Data Science-related postings with skill indicators from Script 09.
+- `Data/Normalized/`: six core normalized CSV exports and `Dataset1_Normalized_Database.xlsx` from Script 13; the current seventh `job_sector_classification.csv` is a separate supplied export.
 
-Skill extraction was performed on a subset of postings. Consequently, a job posting can exist in the proposed database without a matching `JOB_SKILL` record. The `SKILL` and `JOB_SKILL` entities are **derived** from the wide skill indicator columns; they are not existing CSV tables.
+The current number of Data Science-related postings is read from the generated file rather than hardcoded, because manual review decisions can change the subset size.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(readr)
+library(dplyr)
+library(knitr)
 ```
 
 ```{r load-data}
-jobs <- read.csv("Data/job_postings_cleaned.csv")
-skills <- read.csv("Data/jobs_skills_revised.csv")
+jobs <- read_csv("Data/jobs_skills_analyzed_full.csv", show_col_types = FALSE)
+jobs_ds <- read_csv("Data/jobs_skills_analyzed.csv", show_col_types = FALSE)
 
-# The 'skill_count' column is a summary, not a skill flag.
-skill_cols <- setdiff(
-  grep("^skill_", names(skills), value = TRUE),
-  "skill_count"
+skill_cols <- setdiff(grep("^skill_", names(jobs), value = TRUE), "skill_count")
+
+stopifnot(
+  length(skill_cols) == 30,
+  all(skill_cols %in% names(jobs_ds)),
+  !anyNA(jobs$job_id),
+  anyDuplicated(jobs$job_id) == 0,
+  !anyNA(jobs_ds$job_id),
+  anyDuplicated(jobs_ds$job_id) == 0,
+  all(jobs_ds$job_id %in% jobs$job_id)
 )
 ```
 
 # Data validation
 
-The following checks support the proposed keys and the many-to-many job–skill relationship.
+The checks below validate the full-market primary keys, subgroup membership, and technical-skill flags. Skill mentions are detected from job descriptions and are not necessarily formal employer requirements.
 
 ```{r validation}
 validation <- data.frame(
   Check = c(
-    "Cleaned job postings",
-    "Unique job IDs in cleaned data",
-    "Missing job IDs in cleaned data",
-    "Analyzed postings",
-    "Unique job IDs in analyzed data",
-    "Analyzed job IDs not found in cleaned data",
+    "Full-market postings",
+    "Unique full-market job IDs",
+    "Missing full-market job IDs",
+    "Data Science-related postings",
+    "Subgroup job IDs absent from full market",
     "Individual skill indicators",
-    "Missing values in skill indicators",
-    "Job–skill matches (TRUE flags)",
-    "Analyzed jobs with no detected skill",
-    "Jobs with inconsistent stored skill_count"
+    "Missing full-market skill indicators",
+    "Full-market job–skill associations",
+    "Subgroup job–skill associations",
+    "Full-market postings with no detected skills"
   ),
   Result = c(
     nrow(jobs),
-    length(unique(jobs$job_id)),
-    sum(is.na(jobs$job_id) | trimws(jobs$job_id) == ""),
-    nrow(skills),
-    length(unique(skills$job_id)),
-    sum(!skills$job_id %in% jobs$job_id),
+    dplyr::n_distinct(jobs$job_id),
+    sum(is.na(jobs$job_id)),
+    nrow(jobs_ds),
+    sum(!jobs_ds$job_id %in% jobs$job_id),
     length(skill_cols),
-    sum(is.na(skills[skill_cols])),
-    sum(as.matrix(skills[skill_cols]) == TRUE, na.rm = TRUE),
-    sum(rowSums(skills[skill_cols]) == 0),
-    sum(rowSums(skills[skill_cols]) != skills$skill_count)
+    sum(is.na(as.matrix(jobs[skill_cols]))),
+    sum(as.matrix(jobs[skill_cols]) == TRUE, na.rm = TRUE),
+    sum(as.matrix(jobs_ds[skill_cols]) == TRUE, na.rm = TRUE),
+    sum(rowSums(as.matrix(jobs[skill_cols]), na.rm = TRUE) == 0)
   )
 )
-knitr::kable(validation, caption = "Dataset 1 validation checks")
+knitr::kable(validation, caption = "Full-Market and Subgroup Validation")
 ```
 
-In the validated analysis, the 30 skill indicators produced **1,142 job–skill matches**, **6 analyzed jobs with no detected skills**, and **187 jobs whose stored `skill_count` differs from the number of TRUE flags**. The cause of the discrepancies has not been established. For the proposed junction table, the individual skill flags are used rather than `skill_count`; the source files are not modified.
+The original `skill_count` column is not the same as the 30 Boolean skill indicators and is excluded from the `SKILL` lookup and `JOB_SKILL` junction table. Script 13 builds job–skill associations directly from individual TRUE flags.
 
-# Proposed entities
+# Normalized entities from Script 13
 
-| Entity | Primary key | Selected attributes | Purpose |
+| Entity | Primary key | Key attributes | Purpose |
 |:--|:--|:--|:--|
-| `COMPANY` | `company_id` | `company_name` (from source `company`) | Identifies the employer. |
-| `JOB_POSTING` | `job_id` | `company_id` (FK), `title`, `department`, `seniority`, `employment_type`, `workplace_type`, `city`, `region`, `country_code`, `posted_at`, `description` | Stores job-level details. |
-| `SALARY` | `job_id` (also FK) | `salary_min`, `salary_max`, `salary_currency`, `salary_period`, `salary_min_annual`, `salary_max_annual`, `salary_valid`, `salary_usd_eligible` | Stores advertised compensation and quality flags. |
-| `SKILL` | `skill_id` (proposed/generated) | `skill_name` | Stores the 30 distinct tracked skills. |
-| `JOB_SKILL` | (`job_id`, `skill_id`) | Both columns are also FKs | Records each detected job–skill association. |
+| `COMPANY` | `company_id` | `company_name` | Unique employers, with generated company keys. |
+| `JOB_POSTING` | `job_id` | `company_id` (FK), `title`, `posted_at`, `is_data_science_related`, and available job details | All cleaned job postings. |
+| `SALARY` | `job_id` (also FK) | Advertised salary fields, eligibility flags, `salary_midpoint_annual` | One salary row per posting, including records without eligible salary values. |
+| `SKILL` | `skill_id` | `skill_name`, `source_column` | Lookup of 30 tracked skills. |
+| `JOB_SKILL` | (`job_id`, `skill_id`) | Both columns are FKs | One row per detected skill in a job posting. |
+| `DATA_SCIENCE_CLASSIFICATION` | `job_id` (also FK) | `job_category_updated`, `classification_updated`, `classification_basis` | Subgroup-specific classifications; only Data Science-related jobs have rows. |
+| `JOB_SECTOR_CLASSIFICATION` | `job_id` (also FK) | `sector_name`, `classification_method`, `needs_review` | Sector classification for each full-market posting. |
 
-**Key design decisions:**
+The current Script 13 derives a generated `company_id` from normalized company names. This is an analytical identifier, not necessarily the original source system's employer ID.
 
-- `COMPANY` → `JOB_POSTING`: one company can publish many jobs; each job references one company.
-- `JOB_POSTING` → `SALARY`: modeled as one-to-one for this dataset, using `job_id` as the salary table's PK and FK. This is a **design choice**, not evidence of a separate salary table in the CSV. Salary validity should still be assessed using the provided flags.
-- `JOB_POSTING` → `JOB_SKILL`: a job can have zero or many detected skills.
-- `SKILL` → `JOB_SKILL`: a skill can appear in zero or many jobs.
-- `JOB_SKILL` uses the composite key (`job_id`, `skill_id`) to prevent duplicate associations. `skill_id` would need to be generated when normalizing the source.
+## Keys and relationships
 
-# Diagram design and visual conventions
+- **COMPANY → JOB_POSTING:** one employer can have many job postings; each posting references one employer.
+- **JOB_POSTING → SALARY:** one-to-one in this exported model, using `job_id` as the salary table's PK and FK. Not all salary rows have valid annual USD amounts.
+- **JOB_POSTING → JOB_SKILL:** one-to-many; a posting may have zero detected skills.
+- **SKILL → JOB_SKILL:** one-to-many; a skill may occur in zero or many postings.
+- **JOB_POSTING → DATA_SCIENCE_CLASSIFICATION:** optional one-to-one; only subgroup postings appear in this table.
+- **JOB_POSTING → JOB_SECTOR_CLASSIFICATION:** one-to-one in the supplied CSV snapshot; every posting has a sector classification.
 
-The **updated ER diagram** replaces the original plain blue record boxes with a more readable Graphviz design. The diagram has a descriptive title, a light background, and HTML-like entity tables with separate colored headers and key labels:
+The junction table implements the many-to-many relationship between jobs and skills. Its composite key prevents duplicate job–skill pairs.
 
-- **Dark blue:** `COMPANY` and `JOB_POSTING` (employers and job information).
-- **Teal:** `SALARY` (advertised compensation).
-- **Purple:** `SKILL` and `JOB_SKILL` (skill catalog and junction table).
-- **PK:** primary key; **FK:** foreign key; **PK/FK:** a column serving both roles.
-- **1, 0..N:** relationship multiplicities; a posting can have zero detected skills because only 226 postings underwent skill extraction.
+## Current seven-entity logical diagram (generated from this document)
 
-The connections are **labeled Graphviz relationships, not formal crow's-foot endpoints**. The diagram is a conceptual logical design; labels and arrows should be interpreted alongside the cardinality descriptions above.
+The following diagram represents the **seven entities** listed above, regardless of whether the saved `.dot` and PNG artwork has been refreshed. It is a logical model of the CSV exports, not proof of a database deployment.
 
-```{r diagram-image, echo=FALSE, out.width='100%', fig.cap='Redesigned Dataset 1 ER diagram'}
+```{r current-seven-entity-diagram, echo=TRUE}
+if (requireNamespace("DiagrammeR", quietly = TRUE)) {
+  DiagrammeR::grViz(r"(digraph ER {
+    graph [rankdir=LR, bgcolor=white, nodesep=0.55, ranksep=0.9]
+    node [shape=record, style=filled, fillcolor=aliceblue, color=steelblue4,
+          fontname=Helvetica, fontsize=11]
+    edge [color=gray35, fontname=Helvetica, fontsize=10]
+    COMPANY [label='{COMPANY|PK company_id\lcompany_name\l}']
+    JOB_POSTING [label='{JOB_POSTING|PK job_id\lFK company_id\ltitle\lposted_at\lis_data_science_related\l}']
+    SALARY [label='{SALARY|PK/FK job_id\lsalary_midpoint_annual\lsalary_usd_eligible\l}']
+    SKILL [label='{SKILL|PK skill_id\lskill_name\lsource_column\l}']
+    JOB_SKILL [label='{JOB_SKILL|PK/FK job_id\lPK/FK skill_id\l}']
+    DATA_SCIENCE_CLASSIFICATION [label='{DATA_SCIENCE_CLASSIFICATION|PK/FK job_id\ljob_category_updated\lclassification_updated\l}']
+    JOB_SECTOR_CLASSIFICATION [label='{JOB_SECTOR_CLASSIFICATION|PK/FK job_id\lsector_name\lclassification_method\lneeds_review\l}']
+    COMPANY -> JOB_POSTING [label='1 to many']
+    JOB_POSTING -> SALARY [label='1 to 1']
+    JOB_POSTING -> JOB_SKILL [label='1 to many']
+    SKILL -> JOB_SKILL [label='1 to many']
+    JOB_POSTING -> DATA_SCIENCE_CLASSIFICATION [label='1 to 0..1']
+    JOB_POSTING -> JOB_SECTOR_CLASSIFICATION [label='1 to 1']
+  })")
+} else {
+  cat("Install DiagrammeR to display the seven-entity diagram: install.packages('DiagrammeR')")
+}
+```
+
+# Current normalized export validation
+
+This section reads the actual output tables from Script 13 and checks foreign-key membership. It does not require PostgreSQL access.
+
+```{r normalized-exports}
+# Script 13 produces six core files; the sector file is supplied separately.
+# Put all seven CSVs together in Data/Normalized/ or Dashboard_Online/data/.
+file_names <- c("COMPANY", "JOB_POSTING", "SALARY", "SKILL",
+                "JOB_SKILL", "DATA_SCIENCE_CLASSIFICATION", "JOB_SECTOR_CLASSIFICATION")
+locations <- c("Data/Normalized", "Dashboard_Online/data", "data")
+find_csv <- function(name) {
+  candidates <- unlist(lapply(locations, function(dir) {
+    c(file.path(dir, paste0(name, ".csv")),
+      file.path(dir, paste0(tolower(name), ".csv")))
+  }))
+  found <- candidates[file.exists(candidates)]
+  if (!length(found)) stop("Missing current CSV for ", name,
+                           ". Place all seven exports in Data/Normalized/ or Dashboard_Online/data/.")
+  found[1]
+}
+paths <- vapply(file_names, find_csv, character(1))
+tables <- setNames(lapply(paths, readr::read_csv, show_col_types = FALSE), file_names)
+knitr::kable(data.frame(table = file_names,
+                        rows = vapply(tables, nrow, integer(1))),
+             caption = "Current Seven-Table CSV Counts")
+stopifnot(
+  nrow(tables$COMPANY) == 3969,
+  nrow(tables$JOB_POSTING) == 9173,
+  nrow(tables$SALARY) == 9173,
+  nrow(tables$SKILL) == 30,
+  nrow(tables$JOB_SKILL) == 7140,
+  nrow(tables$DATA_SCIENCE_CLASSIFICATION) == 229,
+  nrow(tables$JOB_SECTOR_CLASSIFICATION) == 9173,
+  !anyDuplicated(tables$COMPANY$company_id),
+  !anyDuplicated(tables$JOB_POSTING$job_id),
+  !anyDuplicated(tables$SALARY$job_id),
+  !anyDuplicated(tables$SKILL$skill_id),
+  !anyDuplicated(tables$DATA_SCIENCE_CLASSIFICATION$job_id),
+  !anyDuplicated(tables$JOB_SECTOR_CLASSIFICATION$job_id),
+  !anyDuplicated(tables$JOB_SKILL[c("job_id", "skill_id")]),
+  all(tables$JOB_POSTING$company_id %in% tables$COMPANY$company_id),
+  all(tables$SALARY$job_id %in% tables$JOB_POSTING$job_id),
+  all(tables$JOB_SKILL$job_id %in% tables$JOB_POSTING$job_id),
+  all(tables$JOB_SKILL$skill_id %in% tables$SKILL$skill_id),
+  all(tables$DATA_SCIENCE_CLASSIFICATION$job_id %in% tables$JOB_POSTING$job_id),
+  all(tables$JOB_SECTOR_CLASSIFICATION$job_id %in% tables$JOB_POSTING$job_id)
+)
+```
+
+# ER diagram: current design and existing artwork
+
+The **current seven-entity model** is generated directly in this report and described in the table and relationships above. The existing `ER_Diagram/Dataset1_ER_Diagram.dot` and PNG may still show the **older five-entity model**. Do not label that artwork as a diagram of the current seven-table export unless its source has been revised to include both classification entities and the full-market scope.
+
+The existing diagram uses dark blue for employers and postings, teal for salary, and purple for skills and their junction table. PK and FK labels indicate keys. Relationship multiplicities are textual Graphviz annotations, not formal crow's-foot endpoints.
+
+```{r diagram-image, echo=FALSE, out.width='100%', fig.cap='Historical saved ER artwork (may not show all seven current entities)'}
 image_path <- "ER_Diagram/Dataset1_ER_Diagram.png"
 if (file.exists(image_path)) {
   knitr::include_graphics(image_path)
 } else {
-  cat("PNG preview not found; generate it using the R script described below.")
+  cat("Existing PNG not found. See the Graphviz source section below.")
 }
 ```
 
 # Render the ER diagram
 
-The existing project includes the Graphviz source at `ER_Diagram/Dataset1_ER_Diagram.dot`. Rendering directly from that file keeps this report synchronized with the saved diagram.
+The existing project includes a Graphviz source at `ER_Diagram/Dataset1_ER_Diagram.dot`. It may be historical. **Use the seven-entity diagram generated above as the current logical model**; rendering the saved file below is only for comparing older artwork.
 
 ```{r er-diagram, results='asis'}
 if (!requireNamespace("DiagrammeR", quietly = TRUE)) {
@@ -138,31 +235,30 @@ er_diagram <- DiagrammeR::grViz(
 er_diagram
 ```
 
-The rendered diagram uses the **updated styling** defined in the current `.dot` file: color-coded headers, separate key labels, and explicit multiplicity labels. It uses Graphviz arrows and text labels, rather than formal crow's-foot symbols.
+The saved-file diagram uses the styling defined in its `.dot` file, which may be historical: color-coded headers, separate key labels, and explicit multiplicity labels. It uses Graphviz arrows and text labels, rather than formal crow's-foot symbols.
 
 # How the junction table is derived
 
-Each `skill_` column (except `skill_count`) represents one tracked skill. A `TRUE` value becomes one row in `JOB_SKILL`; a `FALSE` value produces no row. The following code constructs a **preview** of the normalized associations without overwriting any files.
+Each `skill_` column except `skill_count` is a TRUE/FALSE skill indicator. Script 13 converts each TRUE value into one row in `JOB_SKILL`. The current association count is calculated from the full-market dataset, not from the earlier 226-job subset.
 
 ```{r job-skill-preview}
-# Base R transformation: one row per TRUE skill flag.
-match_positions <- which(as.matrix(skills[skill_cols]), arr.ind = TRUE)
+match_positions <- which(as.matrix(jobs[skill_cols]) == TRUE, arr.ind = TRUE)
 
 job_skill_preview <- data.frame(
-  job_id = skills$job_id[match_positions[, "row"]],
+  job_id = jobs$job_id[match_positions[, "row"]],
   skill_name = sub("^skill_", "", skill_cols[match_positions[, "col"]]),
   stringsAsFactors = FALSE
 )
 
-stopifnot(nrow(job_skill_preview) == 1142)
+stopifnot(nrow(job_skill_preview) == nrow(tables$JOB_SKILL))
 head(job_skill_preview, 10)
 ```
 
-For an actual relational implementation, a separate `SKILL` lookup table would assign a stable `skill_id` to each `skill_name`, and `JOB_SKILL` would store that ID rather than the name. The 1,142 associations reflect **detected skill mentions**, not a verified list of employer requirements.
+The `SKILL` table maps skill names to generated `skill_id` values. `JOB_SKILL` stores the corresponding IDs and references the primary key of `JOB_POSTING`.
 
 # Reproducing and exporting the diagram
 
-The following code recreates the **redesigned** diagram from its `.dot` source and optionally exports a high-resolution PNG. The saved `Dataset1_ER_Diagram.R` script performs the same steps. The original HTML export may still display the older design until it is regenerated; use the updated PNG or re-render from the current `.dot` source.
+The following code recreates the **redesigned** diagram from its `.dot` source and can export a high-resolution PNG after explicit review. The saved `Dataset1_ER_Diagram.R` script performs the same steps. The existing HTML export may display an older design until it is regenerated. Keep the original HTML and PNG intact; the optional example below writes a separate `_Updated.png` file.
 
 ```{r export-instructions, eval=FALSE}
 library(DiagrammeR)
@@ -175,25 +271,62 @@ er_diagram <- grViz(
 svg_code <- DiagrammeRsvg::export_svg(er_diagram)
 rsvg::rsvg_png(
   charToRaw(svg_code),
-  file = "ER_Diagram/Dataset1_ER_Diagram.png",
+  file = "ER_Diagram/Dataset1_ER_Diagram_Updated.png",
   width = 2400
 )
 ```
 
 # Limitations
 
-1. The ER diagram is a **conceptual normalized design**, not a physical database schema deployed in SQL Server or another DBMS.
-2. Skill indicators cover **226 analyzed postings**, not all 9,173 cleaned postings.
-3. The `skill_count` discrepancies require separate investigation; this design relies on the 30 individual skill flags.
-4. Salary fields describe advertised ranges and require validity and currency eligibility checks before comparing salaries.
-5. Job categories and review classifications are present in the revised analysis file but are not modeled as separate entities in this compact ER diagram.
+1. The normalized exports are a logical relational design. They do not, by themselves, prove that the updated schema was imported into PostgreSQL or that SQL foreign-key constraints were created.
+2. The saved Graphviz diagram and PostgreSQL SQL scripts may still represent the earlier five-table model and should be updated separately before being presented as the current seven-table implementation.
+3. Technical skills are identified from description text; a detected mention does not necessarily imply a required qualification.
+4. Salary midpoints are based on advertised ranges. Only valid, eligible annual USD records should be used for salary comparisons.
+5. The Data Science-related subgroup is produced through title, responsibility, and manual-review classification, so classification uncertainty remains.
+6. A short snapshot of postings cannot establish long-term job market trends.
+
+# Current seven-table CSV dataset (verified October 23, 2026)
+
+The seven CSV files supplied for the current project have the following **verified file row counts**. These counts describe the uploaded exports, not a fresh query against PostgreSQL.
+
+| Table | Uploaded CSV rows | Primary key |
+|---|---:|---|
+| `company` | 3,969 | `company_id` |
+| `job_posting` | 9,173 | `job_id` |
+| `salary` | 9,173 | `job_id` (PK and FK) |
+| `skill` | 30 | `skill_id` |
+| `job_skill` | 7,140 | (`job_id`, `skill_id`) |
+| `data_science_classification` | 229 | `job_id` (PK and FK) |
+| `job_sector_classification` | 9,173 | `job_id` (PK and FK) |
+
+The current CSV set adds `JOB_SECTOR_CLASSIFICATION` to the six core Script 13 exports; the seven-entity model above includes it. Each job can have one sector-classification row; Data Science classification applies only to the selected subgroup. The 229 subgroup rows in the uploaded export must not be confused with the historical 226-job reviewed dataset.
+
+**Important:** The six-table normalization code and ER diagram sections earlier in this document describe Script 13's six-table export, whereas this table documents the seven CSV files provided for the current project. To present a fully synchronized seven-entity diagram, the normalization workflow and Graphviz source should be updated to include `JOB_SECTOR_CLASSIFICATION`. PostgreSQL row counts and foreign-key constraints should be checked directly in pgAdmin before labeling this a verified database state.
+
+# Previous PostgreSQL implementation (historical)
+
+The earlier `data607_project3` PostgreSQL 18 implementation was verified with five tables, using a selected 226-job subset:
+
+| PostgreSQL table | Previously verified rows | Key |
+|---|---:|---|
+| `company` | 210 | `company_id` |
+| `job_posting` | 226 | `job_id` |
+| `salary` | 226 | `job_id` (PK and FK) |
+| `skill` | 30 | `skill_id` |
+| `job_skill` | 1,142 | (`job_id`, `skill_id`) |
+
+These counts describe the **older database state** and must not be presented as the current full-market normalized export counts. Re-running R normalization does not automatically reload PostgreSQL or change its schema. The SQL scripts under `SQL guide/` should be reviewed and updated before a new full-market import.
 
 # Project files
 
-- `ER_Diagram/Dataset1_ER_Diagram.dot` — redesigned Graphviz source (entity colors, labels, layout, and edges).
-- `ER_Diagram/Dataset1_ER_Diagram.R` — script to recreate the redesigned diagram and export PNG when optional packages are installed.
-- `ER_Diagram/Dataset1_ER_Diagram.html` — previously generated HTML; may show the older design until regenerated.
-- `ER_Diagram/Dataset1_ER_Diagram.png` — redesigned high-resolution image for the report or README.
-- `ER_Diagram/Dataset1_ER_Diagram_Documentation.Rmd` — this documentation, after copying it into the project.
+- `13_normalize_dataset.R` — produces six normalized tables from the current full-market and Data Science-related skill datasets.
+- `Data/Normalized/` — six core Script 13 CSV files and `Dataset1_Normalized_Database.xlsx`; also place `job_sector_classification.csv` with them for seven-table validation.
+- `ER_Diagram/Dataset1_ER_Diagram.dot` — existing Graphviz source; may still describe the older five-table model.
+- `ER_Diagram/Dataset1_ER_Diagram.R` — existing diagram rendering script.
+- `ER_Diagram/Dataset1_ER_Diagram.png` — existing diagram image; check its entity list before using it as current documentation.
+- `SQL guide/Dataset1_Create_Tables.sql` — existing PostgreSQL DDL, which may need updates for the new table and full-market import.
 
-**Knit instructions:** Open this `.Rmd` in RStudio with `DATA607-Project3-Upload` as the working project, then select **Knit → Knit to HTML**. The required CSV files and `.dot` file must be present at the relative paths shown above.
+**Knit instructions:** Open this R Markdown file in RStudio with the `DATA607-Project3` project as the working directory, and choose **Knit → Knit to HTML**. The seven current CSV exports must be available together in `Data/Normalized/` or `Dashboard_Online/data/`. The existing Graphviz source and DiagrammeR package are required for the diagram rendering chunk.
+# References
+
+minmaxer. (n.d.). *Job Postings with Salaries* [Data set]. Kaggle. <https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries>

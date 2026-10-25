@@ -1,4 +1,3 @@
-
 # =====================================================
 # DATA 607 - PROJECT 3
 # Dataset 1: Technical Skills Demand Analysis
@@ -11,36 +10,81 @@ library(stringr)
 library(tidyr)
 library(ggplot2)
 
-# STEP 1: Load the updated job dataset
+# STEP 1: Load the full cleaned dataset and Data Science candidates
 
-jobs <- read_csv(
-  "data/jobs_include_updated.csv",
+jobs_all <- read_csv(
+  "Data/job_postings_cleaned.csv",
   show_col_types = FALSE
 )
 
-# Load the reviewed validation sample
-validation <- read_csv(
-  "data/jobs_validation_reviewed.csv",
+jobs_ds <- read_csv(
+  "Data/jobs_include_updated.csv",
   show_col_types = FALSE
 )
 
-# STEP 2: Apply manual validation decisions
-# Exclude only jobs marked "No".
-# Jobs not in the validation sample remain provisional.
+stopifnot(
+  all(c("job_id", "description", "posted_at", "salary_usd_eligible") %in% names(jobs_all)),
+  all(c("job_id", "description", "posted_at", "salary_usd_eligible") %in% names(jobs_ds)),
+  !anyNA(jobs_all$job_id),
+  !anyDuplicated(jobs_all$job_id),
+  !anyNA(jobs_ds$job_id),
+  !anyDuplicated(jobs_ds$job_id),
+  all(jobs_ds$job_id %in% jobs_all$job_id)
+)
 
-excluded_ids <- validation %>%
-  filter(str_to_lower(str_trim(manual_relevant)) == "no") %>%
-  pull(job_id)
+# STEP 2: Apply reviewed decisions to Data Science candidates
 
-jobs_final <- jobs %>%
-  filter(!job_id %in% excluded_ids)
+review_path <- "Data/jobs_validation_reviewed.csv"
 
-cat("Original included jobs:", nrow(jobs), "\n")
-cat("Excluded after validation:", nrow(jobs) - nrow(jobs_final), "\n")
-cat("Jobs retained for analysis:", nrow(jobs_final), "\n")
+if (file.exists(review_path)) {
+  validation <- read_csv(review_path, show_col_types = FALSE)
 
-# STEP 3: Define technical skill patterns
-# Word boundaries help avoid false substring matches.
+  stopifnot(
+    all(c("job_id", "manual_relevant") %in% names(validation)),
+    !anyNA(validation$job_id),
+    !anyDuplicated(validation$job_id)
+  )
+
+  validation <- validation %>%
+    mutate(
+      manual_decision = str_to_lower(str_trim(coalesce(manual_relevant, "")))
+    )
+
+  stopifnot(all(validation$manual_decision %in% c("", "yes", "no")))
+
+  validation %>%
+    count(manual_decision, sort = TRUE) %>%
+    print()
+
+  excluded_ids <- validation %>%
+    filter(manual_decision == "no") %>%
+    pull(job_id)
+
+  jobs_ds <- jobs_ds %>%
+    filter(!job_id %in% excluded_ids)
+}
+
+stopifnot(nrow(jobs_ds) > 0)
+
+# STEP 3: Review dataset sizes and posting dates
+
+data_summary <- tibble(
+  dataset = c("Full Job Market", "Data Science Candidates"),
+  total_jobs = c(nrow(jobs_all), nrow(jobs_ds)),
+  unique_jobs = c(n_distinct(jobs_all$job_id), n_distinct(jobs_ds$job_id)),
+  missing_dates = c(sum(is.na(jobs_all$posted_at)), sum(is.na(jobs_ds$posted_at)))
+)
+
+print(data_summary)
+
+jobs_all %>%
+  summarise(
+    earliest_date = if (all(is.na(posted_at))) as.Date(NA) else as.Date(min(posted_at, na.rm = TRUE)),
+    latest_date = if (all(is.na(posted_at))) as.Date(NA) else as.Date(max(posted_at, na.rm = TRUE))
+  ) %>%
+  print()
+
+# STEP 4: Define technical skill patterns
 
 skill_patterns <- c(
   "Python" = "\\bpython\\b",
@@ -75,148 +119,167 @@ skill_patterns <- c(
   "dbt" = "\\bdbt\\b"
 )
 
-# STEP 4: Create skill indicators
-# Each job counts at most once for each skill.
+stopifnot(
+  length(skill_patterns) == 30,
+  !anyDuplicated(names(skill_patterns))
+)
 
-for (skill in names(skill_patterns)) {
+print(names(skill_patterns))
+
+# STEP 5: Extract skill mentions from job descriptions
+
+extract_skills <- function(jobs) {
   
+  skill_matches <- lapply(seq_along(skill_patterns), function(i) {
+    
+    skill <- names(skill_patterns)[i]
+    pattern <- unname(skill_patterns[i])
+    case_insensitive <- !identical(skill, "R")
+    
+    tibble(
+      job_id = jobs$job_id,
+      skill = skill,
+      mentioned = str_detect(
+        coalesce(jobs$description, ""),
+        regex(pattern, ignore_case = case_insensitive)
+      )
+    )
+  })
+  
+  bind_rows(skill_matches) %>%
+    filter(mentioned) %>%
+    select(job_id, skill)
+}
+
+skills_all <- extract_skills(jobs_all)
+skills_ds <- extract_skills(jobs_ds)
+
+# Retain one indicator column per skill for downstream salary analysis
+for (i in seq_along(skill_patterns)) {
+  skill <- names(skill_patterns)[i]
+  pattern <- skill_patterns[[i]]
   column_name <- paste0(
     "skill_",
-    str_replace_all(
-      str_to_lower(skill),
-      "[^a-z0-9]+",
-      "_"
-    )
+    str_replace_all(str_to_lower(skill), "[^a-z0-9]+", "_")
   )
-  
-  jobs_final[[column_name]] <- str_detect(
-    coalesce(jobs_final$description, ""),
-    regex(
-      skill_patterns[[skill]],
-      ignore_case = skill != "R"
-    )
+
+  jobs_all[[column_name]] <- str_detect(
+    coalesce(jobs_all$description, ""),
+    regex(pattern, ignore_case = skill != "R")
+  )
+
+  jobs_ds[[column_name]] <- str_detect(
+    coalesce(jobs_ds$description, ""),
+    regex(pattern, ignore_case = skill != "R")
   )
 }
 
-
-# STEP 5: Convert skill indicators to long format
-# Exclude skill_count because it is numeric.
-
-skills_long <- jobs_final %>%
-  select(
-    job_id,
-    starts_with("skill_"),
-    -skill_count
-  ) %>%
-  pivot_longer(
-    cols = -job_id,
-    names_to = "skill",
-    values_to = "mentioned"
-  ) %>%
-  filter(mentioned == TRUE) %>%
-  mutate(
-    skill = str_remove(skill, "^skill_"),
-    skill = str_replace_all(skill, "_", " ")
-  )
-
-cat("\nSkill matches:", nrow(skills_long), "\n")
-
-
-# STEP 6: Count skill demand
-
-skill_summary <- skills_long %>%
-  count(skill, name = "job_count", sort = TRUE) %>%
-  mutate(
-    percentage = round(
-      job_count / nrow(jobs_final) * 100,
-      1
-    )
-  )
-
-cat("\nTOP 20 MOST REQUESTED SKILLS:\n")
-
-print(
-  head(skill_summary, 20),
-  n = 20
+stopifnot(
+  !anyDuplicated(skills_all[c("job_id", "skill")]),
+  !anyDuplicated(skills_ds[c("job_id", "skill")])
 )
 
-# STEP 7: Create a bar chart
+# STEP 6: Summarize skill demand for each population
 
-top_skills <- skill_summary %>%
-  slice_max(
-    order_by = job_count,
-    n = 15,
-    with_ties = FALSE
-  )
+summarize_skills <- function(skills, jobs, population) {
+  tibble(skill = names(skill_patterns)) %>%
+    left_join(
+      skills %>% count(skill, name = "job_count"),
+      by = "skill"
+    ) %>%
+    mutate(
+      job_count = coalesce(job_count, 0L),
+      percentage = round(100 * job_count / nrow(jobs), 1),
+      population = population,
+      total_jobs = nrow(jobs)
+    ) %>%
+    arrange(desc(job_count), skill)
+}
 
-p <- ggplot(
-  top_skills,
-  aes(
-    x = reorder(skill, job_count),
-    y = job_count
-  )
+skill_summary_all <- summarize_skills(skills_all, jobs_all, "Full Job Market")
+skill_summary_ds <- summarize_skills(skills_ds, jobs_ds, "Data Science Candidates")
+skill_comparison <- bind_rows(skill_summary_all, skill_summary_ds)
+
+print(head(skill_summary_all, 20), n = 20)
+print(head(skill_summary_ds, 20), n = 20)
+
+# STEP 7: Visualize the top skills in the full job market
+
+top_skills_all <- skill_summary_all %>%
+  slice_max(job_count, n = 15, with_ties = FALSE)
+
+p_all <- ggplot(
+  top_skills_all,
+  aes(x = reorder(skill, job_count), y = job_count)
 ) +
   geom_col(fill = "steelblue") +
   coord_flip() +
   labs(
-    title = "Top 15 Technical Skills in Data Science Job Postings",
-    subtitle = paste(
-      "Based on",
-      nrow(jobs_final),
-      "provisionally relevant job postings"
-    ),
+    title = "Top 15 Technical Skills Mentioned Across All Job Postings",
+    subtitle = paste("Based on", nrow(jobs_all), "cleaned job postings"),
     x = "Technical Skill",
     y = "Number of Job Postings"
   ) +
   theme_minimal()
 
-print(p)
+print(p_all)
 
-# STEP 8: Save analysis files
+# STEP 8: Visualize the top skills among Data Science candidates
 
+top_skills_ds <- skill_summary_ds %>%
+  slice_max(job_count, n = 15, with_ties = FALSE)
+
+p_ds <- ggplot(
+  top_skills_ds,
+  aes(x = reorder(skill, job_count), y = job_count)
+) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Top 15 Technical Skills in Data Science-Related Job Postings",
+    subtitle = paste("Based on", nrow(jobs_ds), "provisionally relevant jobs"),
+    x = "Technical Skill",
+    y = "Number of Job Postings"
+  ) +
+  theme_minimal()
+
+print(p_ds)
+
+# STEP 9: Export full-market results and Data Science comparison
+
+write_csv(jobs_all, "Data/jobs_skills_analyzed_full.csv")
+write_csv(skills_all, "Data/job_skills_long_full.csv")
+write_csv(skill_summary_all, "Data/skill_demand_summary_full.csv")
+write_csv(skill_comparison, "Data/skill_demand_comparison.csv")
+
+# Retain the established output names for downstream Data Science scripts
+write_csv(jobs_ds, "Data/jobs_skills_analyzed.csv")
 write_csv(
-  jobs_final,
-  "data/jobs_skills_analyzed.csv"
+  skills_ds %>%
+    mutate(
+      skill = str_replace_all(str_to_lower(skill), "[^a-z0-9]+", " ")
+    ),
+  "Data/job_skills_long.csv"
 )
-
 write_csv(
-  skills_long,
-  "data/job_skills_long.csv"
-)
-
-write_csv(
-  skill_summary,
-  "data/skill_demand_summary.csv"
+  skill_summary_ds %>% select(skill, job_count, percentage),
+  "Data/skill_demand_summary.csv"
 )
 
 ggsave(
-  filename = "data/top_15_skills.png",
-  plot = p,
+  "Data/top_15_skills_full.png",
+  plot = p_all,
   width = 10,
   height = 7,
   dpi = 300
 )
 
-# STEP 9: Display final summary
-
-cat("\n--- FINAL SUMMARY ---\n")
-
-cat(
-  "Jobs analyzed:",
-  nrow(jobs_final),
-  "\n"
+ggsave(
+  "Data/top_15_skills.png",
+  plot = p_ds,
+  width = 10,
+  height = 7,
+  dpi = 300
 )
 
-cat(
-  "Distinct technical skills tracked:",
-  length(skill_patterns),
-  "\n"
-)
-
-cat(
-  "Jobs with eligible USD salaries:",
-  sum(jobs_final$salary_usd_eligible %in% TRUE),
-  "\n"
-)
-
-cat("\nAnalysis files saved successfully.\n")
+View(skill_comparison)

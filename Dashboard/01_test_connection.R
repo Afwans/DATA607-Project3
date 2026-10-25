@@ -29,7 +29,9 @@ print(dbGetQuery(con, "
     (SELECT COUNT(*) FROM public.job_posting) AS jobs,
     (SELECT COUNT(*) FROM public.salary) AS salaries,
     (SELECT COUNT(*) FROM public.skill) AS skills,
-    (SELECT COUNT(*) FROM public.job_skill) AS job_skills;
+    (SELECT COUNT(*) FROM public.job_skill) AS job_skills,
+    (SELECT COUNT(*) FROM public.data_science_classification) AS data_science_jobs,
+    (SELECT COUNT(*) FROM public.job_sector_classification) AS job_sector_classifications;
 "))
 
 # Close connection

@@ -1,4 +1,3 @@
-
 # =====================================================
 # DATA 607 - PROJECT 3
 # Dataset 1: Improve Job Classification
@@ -9,156 +8,101 @@ library(readr)
 library(dplyr)
 library(stringr)
 
-# STEP 1: Load the previously classified dataset
+# STEP 1: Load classified Data Science candidates and full cleaned data
+jobs <- read_csv("Data/jobs_classified_all.csv", show_col_types = FALSE)
+jobs_full <- read_csv("Data/job_postings_cleaned.csv", show_col_types = FALSE)
 
-jobs <- read_csv(
-  "data/jobs_classified_all.csv",
-  show_col_types = FALSE
-)
+jobs %>% count(classification, sort = TRUE) %>% print()
 
-# STEP 2: Define additional job title patterns
+# STEP 2: Validate job IDs and posting dates
+stopifnot(n_distinct(jobs$job_id) == nrow(jobs))
+stopifnot(all(jobs$job_id %in% jobs_full$job_id))
+stopifnot("posted_at" %in% names(jobs))
 
+jobs %>%
+  summarise(
+    total_jobs = n(),
+    valid_dates = sum(!is.na(posted_at)),
+    missing_dates = sum(is.na(posted_at)),
+    earliest_date = if (all(is.na(posted_at))) as.Date(NA) else as.Date(min(posted_at, na.rm = TRUE)),
+    latest_date = if (all(is.na(posted_at))) as.Date(NA) else as.Date(max(posted_at, na.rm = TRUE))
+  ) %>%
+  print()
+
+# STEP 3: Define additional data-related job title patterns
 extra_patterns <- list(
-  "AI/ML" = paste(
-    c(
-      "mlops",
-      "ai software engineer",
-      "ai research",
-      "llm engineer",
-      "generative ai",
-      "genai",
-      "ai scientist",
-      "machine learning operations",
-      "model evaluation",
-      "benchmarks & evals"
-    ),
-    collapse = "|"
+  "AI/ML" = c(
+    "mlops", "ai software engineer", "ai research", "llm engineer",
+    "generative ai", "genai", "ai scientist", "machine learning operations",
+    "model evaluation", "benchmarks & evals"
   ),
-  
-  "Data Engineering" = paste(
-    c(
-      "data operations engineer",
-      "data platform engineer",
-      "data infrastructure engineer",
-      "data reliability engineer",
-      "data systems engineer"
-    ),
-    collapse = "|"
+  "Data Engineering" = c(
+    "data operations engineer", "data platform engineer", "data infrastructure engineer",
+    "data reliability engineer", "data systems engineer"
   ),
-  
-  "Data Analytics" = paste(
-    c(
-      "head of data",
-      "director of analytics",
-      "director, analytics",
-      "manager, data & analytics",
-      "analytics director",
-      "advanced analytics",
-      "analytics consultant",
-      "insights & analytics",
-      "analytics and insights"
-    ),
-    collapse = "|"
+  "Data Analytics" = c(
+    "head of data", "director of analytics", "director, analytics",
+    "manager, data & analytics", "analytics director", "advanced analytics",
+    "analytics consultant", "insights & analytics", "analytics and insights"
   ),
-  
-  "Statistics" = paste(
-    c(
-      "biostatistics",
-      "statistical scientist",
-      "statistical analyst",
-      "quantitative expert",
-      "forecasting modeler"
-    ),
-    collapse = "|"
+  "Statistics" = c(
+    "biostatistics", "statistical scientist", "statistical analyst",
+    "quantitative expert", "forecasting modeler"
   )
 )
 
-# STEP 3: Match additional titles
-
+# STEP 4: Match additional job titles
 find_extra_category <- function(title) {
-  
-  if (is.na(title)) {
-    return(NA_character_)
-  }
-  
+  if (is.na(title)) return(NA_character_)
+
   for (category in names(extra_patterns)) {
-    
-    if (
-      str_detect(
-        title,
-        regex(
-          extra_patterns[[category]],
-          ignore_case = TRUE
-        )
-      )
-    ) {
-      return(category)
-    }
+    matched <- any(vapply(
+      extra_patterns[[category]],
+      function(phrase) str_detect(title, fixed(phrase, ignore_case = TRUE)),
+      logical(1)
+    ))
+    if (matched) return(category)
   }
-  
+
   NA_character_
 }
 
-# STEP 4: Improve classification
-
+# STEP 5: Improve classifications without changing prior exclusions
 jobs_updated <- jobs %>%
   mutate(
-    extra_category = vapply(
-      title,
-      find_extra_category,
-      character(1)
-    ),
-    
-    job_category_updated = coalesce(
-      job_category,
-      extra_category
-    ),
-    
+    extra_category = vapply(title, find_extra_category, character(1)),
+    job_category_updated = coalesce(job_category, extra_category),
     classification_updated = case_when(
       classification == "Include" ~ "Include",
-      
       classification == "Exclude" ~ "Exclude",
-      
       classification == "Review" &
         !is.na(extra_category) &
-        !non_data_title ~ "Include",
-      
+        !coalesce(non_data_title, FALSE) ~ "Include",
       TRUE ~ "Review"
     )
   )
 
-# STEP 5: Display results
+# STEP 6: Validate updated results
+stopifnot(nrow(jobs_updated) == nrow(jobs))
+stopifnot(n_distinct(jobs_updated$job_id) == nrow(jobs_updated))
+stopifnot(identical(jobs_updated$posted_at, jobs$posted_at))
 
-cat("\nUpdated classification counts:\n")
-
-jobs_updated %>%
-  count(classification_updated, sort = TRUE) %>%
-  print()
-
-cat("\nUpdated job categories:\n")
+jobs_updated %>% count(classification_updated, sort = TRUE) %>% print()
 
 jobs_updated %>%
   filter(classification_updated == "Include") %>%
   count(job_category_updated, sort = TRUE) %>%
   print()
 
-# STEP 6: Export results
+# STEP 7: Export generated classifications
+write_csv(jobs_updated, "Data/jobs_classified_updated.csv")
 
-write_csv(
-  jobs_updated,
-  "data/jobs_classified_updated.csv"
-)
+jobs_included <- jobs_updated %>%
+  filter(classification_updated == "Include")
+write_csv(jobs_included, "Data/jobs_include_updated.csv")
 
-write_csv(
-  jobs_updated %>%
-    filter(classification_updated == "Include"),
-  "data/jobs_include_updated.csv"
-)
+jobs_review_remaining <- jobs_updated %>%
+  filter(classification_updated == "Review")
+write_csv(jobs_review_remaining, "Data/jobs_review_remaining.csv")
 
-write_csv(
-  jobs_updated %>%
-    filter(classification_updated == "Review"),
-  "data/jobs_review_remaining.csv"
-)
-
-cat("\nFiles saved successfully.\n")
+View(jobs_review_remaining)

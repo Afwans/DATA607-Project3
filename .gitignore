@@ -2,4 +2,38 @@
 .Rhistory
 .Rproj.user/
 .Ruserdata
+
+# R local files
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
 .Renviron
+
+# R Markdown temporary files
+*_cache/
+*_files/
+*.utf8.md
+*.knit.md
+
+# Backups
+data_backups/
+
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+Thumbs.db
+.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
+
+
+Dashboard_Online/rsconnect/

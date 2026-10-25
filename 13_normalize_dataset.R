@@ -1,258 +1,172 @@
 # =====================================================
-# DATA 607 Project 3
-# Script 13: Normalize Dataset 1
+# DATA 607 - PROJECT 3
+# Dataset 1: Normalize Job Postings
+# Script: 13_normalize_dataset.R
 # =====================================================
 
-# Load required libraries
 library(readr)
 library(dplyr)
 library(tidyr)
 library(stringr)
+library(writexl)
 
-# Read the cleaned original dataset
-jobs_original <- read_csv(
-  "Data/job_postings_cleaned.csv",
+# STEP 1: Load the full job market and Data Science-related jobs
+
+jobs <- read_csv(
+  "Data/jobs_skills_analyzed_full.csv",
   show_col_types = FALSE
 )
 
-# Read the revised selected dataset
-jobs_revised <- read_csv(
-  "Data/jobs_skills_revised.csv",
+jobs_ds <- read_csv(
+  "Data/jobs_skills_analyzed.csv",
   show_col_types = FALSE
 )
 
-# Check the number of records
-cat("Original jobs:", nrow(jobs_original), "\n")
-cat("Selected jobs:", nrow(jobs_revised), "\n")
-
-# Display column names
-names(jobs_revised)
-
-# =====================================================
-# Step 3: Create COMPANY Table
-# =====================================================
-
-company_table <- jobs_revised %>%
-  select(company_id, company) %>%
-  distinct() %>%
-  rename(company_name = company) %>%
-  arrange(company_name)
-
-# Check total company records
-cat("Total companies:", nrow(company_table), "\n")
-
-# Check for duplicate company IDs
-cat(
-  "Duplicate company IDs:",
-  sum(duplicated(company_table$company_id)),
-  "\n"
+required_columns <- c(
+  "job_id", "company", "title", "posted_at",
+  "salary_min_annual", "salary_max_annual", "salary_usd_eligible"
 )
 
-# Check for missing company IDs
-cat(
-  "Missing company IDs:",
-  sum(is.na(company_table$company_id)),
-  "\n"
+stopifnot(
+  all(required_columns %in% names(jobs)),
+  "job_id" %in% names(jobs_ds),
+  nrow(jobs) > 0,
+  !anyNA(jobs$job_id),
+  !anyDuplicated(jobs$job_id),
+  !anyNA(jobs_ds$job_id),
+  !anyDuplicated(jobs_ds$job_id),
+  all(jobs_ds$job_id %in% jobs$job_id)
 )
 
-# Preview the first 10 companies
-print(head(company_table, 10))
+print(tibble(
+  dataset = c("Full Job Market", "Data Science-Related Jobs"),
+  job_count = c(nrow(jobs), nrow(jobs_ds)),
+  missing_dates = c(
+    sum(is.na(jobs$posted_at)),
+    sum(is.na(jobs_ds$posted_at))
+  )
+))
 
+# STEP 2: Prepare stable company keys
 
-# =====================================================
-# Step 4: Create JOB_POSTING Table
-# =====================================================
+if (!"company_id" %in% names(jobs)) {
+  jobs$company_id <- NA_character_
+}
 
-job_posting_table <- jobs_revised %>%
-  select(
-    job_id,
-    company_id,
-    title,
-    department,
-    location,
-    city,
-    region,
-    country_code,
-    workplace_type,
-    employment_type,
-    seniority,
-    posted_at,
-    first_seen_at,
-    language,
-    url,
-    apply_url,
-    description,
-    job_category_updated,
-    classification_updated
+jobs <- jobs %>%
+  mutate(
+    company = na_if(str_squish(as.character(company)), ""),
+    company_id = na_if(str_squish(as.character(company_id)), "")
+  )
+
+if (anyNA(jobs$company)) {
+  stop("Missing company names found. Review the source data.")
+}
+
+# Use source IDs when available. Otherwise, assign a stable key by company name.
+company_names <- sort(unique(jobs$company))
+company_keys <- tibble(
+  company = company_names,
+  normalized_company_id = seq_along(company_names)
+)
+
+jobs <- jobs %>%
+  left_join(company_keys, by = "company")
+
+company_table <- jobs %>%
+  distinct(
+    company_id = normalized_company_id,
+    company_name = company
   ) %>%
-  distinct() %>%
+  arrange(company_id)
+
+stopifnot(
+  !anyNA(jobs$normalized_company_id),
+  !anyDuplicated(company_table$company_id),
+  !anyDuplicated(company_table$company_name)
+)
+
+# STEP 3: Create JOB_POSTING table for the entire dataset
+
+posting_columns <- intersect(
+  c(
+    "job_id", "normalized_company_id", "title", "department",
+    "location", "city", "region", "country_code",
+    "workplace_type", "employment_type", "seniority",
+    "posted_at", "first_seen_at", "language",
+    "url", "apply_url", "description"
+  ),
+  names(jobs)
+)
+
+job_posting_table <- jobs %>%
+  select(all_of(posting_columns)) %>%
+  rename(company_id = normalized_company_id) %>%
+  mutate(
+    is_data_science_related = job_id %in% jobs_ds$job_id
+  ) %>%
   arrange(job_id)
 
-# Check total job postings
-cat("Total job postings:", nrow(job_posting_table), "\n")
-
-# Check duplicate job IDs
-cat(
-  "Duplicate job IDs:",
-  sum(duplicated(job_posting_table$job_id)),
-  "\n"
+stopifnot(
+  nrow(job_posting_table) == nrow(jobs),
+  !anyDuplicated(job_posting_table$job_id),
+  all(job_posting_table$company_id %in% company_table$company_id)
 )
 
-# Check missing job IDs
-cat(
-  "Missing job IDs:",
-  sum(is.na(job_posting_table$job_id)),
-  "\n"
-)
+# STEP 4: Create SALARY table (including jobs without salary data)
 
-# Check company relationships
-cat(
-  "Jobs with unmatched company IDs:",
-  sum(
-    !job_posting_table$company_id %in%
-      company_table$company_id
+salary_columns <- intersect(
+  c(
+    "job_id", "salary_min", "salary_max", "salary_currency",
+    "salary_period", "salary_text", "salary_source",
+    "salary_min_annual", "salary_max_annual",
+    "salary_complete", "salary_valid",
+    "salary_outlier_flag", "salary_usd_eligible"
   ),
-  "\n"
+  names(jobs)
 )
 
-# Preview the first 10 records
-print(
-  job_posting_table %>%
-    select(
-      job_id,
-      company_id,
-      title,
-      job_category_updated
-    ) %>%
-    head(10)
-)
-
-
-# =====================================================
-# Step 5: Create SALARY Table
-# =====================================================
-
-salary_table <- jobs_revised %>%
-  select(
-    job_id,
-    salary_min,
-    salary_max,
-    salary_currency,
-    salary_period,
-    salary_text,
-    salary_source,
-    salary_min_annual,
-    salary_max_annual,
-    salary_midpoint_annual,
-    salary_complete,
-    salary_valid,
-    salary_outlier_flag,
-    salary_usd_eligible
+salary_table <- jobs %>%
+  select(all_of(salary_columns)) %>%
+  mutate(
+    salary_midpoint_annual = if_else(
+      salary_usd_eligible %in% TRUE &
+        is.finite(salary_min_annual) &
+        is.finite(salary_max_annual) &
+        salary_min_annual <= salary_max_annual,
+      (salary_min_annual + salary_max_annual) / 2,
+      NA_real_
+    )
   ) %>%
-  distinct() %>%
   arrange(job_id)
 
-# Check total salary records
-cat("Total salary records:", nrow(salary_table), "\n")
-
-# Check duplicate job IDs
-cat(
-  "Duplicate job IDs:",
-  sum(duplicated(salary_table$job_id)),
-  "\n"
+stopifnot(
+  nrow(salary_table) == nrow(jobs),
+  !anyDuplicated(salary_table$job_id),
+  all(salary_table$job_id %in% job_posting_table$job_id)
 )
 
-# Check missing job IDs
-cat(
-  "Missing job IDs:",
-  sum(is.na(salary_table$job_id)),
-  "\n"
-)
+# STEP 5: Create SKILL lookup from the 30 indicators
 
-# Check relationship with JOB_POSTING
-cat(
-  "Salary records with unmatched job IDs:",
-  sum(
-    !salary_table$job_id %in%
-      job_posting_table$job_id
-  ),
-  "\n"
-)
-
-# Check eligible USD salary records
-cat(
-  "Eligible USD salary records:",
-  sum(salary_table$salary_usd_eligible %in% TRUE),
-  "\n"
-)
-
-# Preview first 10 salary records
-print(
-  salary_table %>%
-    select(
-      job_id,
-      salary_min_annual,
-      salary_max_annual,
-      salary_midpoint_annual,
-      salary_usd_eligible
-    ) %>%
-    head(10)
-)
-
-# =====================================================
-# Step 6: Create SKILL Table
-# =====================================================
-
-# Identify skill columns, excluding numeric skill_count
 skill_columns <- setdiff(
-  grep("^skill_", names(jobs_revised), value = TRUE),
+  grep("^skill_", names(jobs), value = TRUE),
   "skill_count"
 )
 
-# Create a lookup table for the technical skills
+stopifnot(
+  length(skill_columns) == 30,
+  all(vapply(jobs[skill_columns], is.logical, logical(1))),
+  all(vapply(jobs[skill_columns], function(x) !anyNA(x), logical(1)))
+)
+
 skill_table <- tibble(
   skill_id = seq_along(skill_columns),
+  source_column = skill_columns,
   skill_name = skill_columns %>%
     str_remove("^skill_") %>%
     str_replace_all("_", " ") %>%
-    str_to_title(),
-  source_column = skill_columns
-)
-
-# Check total skills
-cat("Total technical skills:", nrow(skill_table), "\n")
-
-# Check duplicate skill IDs
-cat(
-  "Duplicate skill IDs:",
-  sum(duplicated(skill_table$skill_id)),
-  "\n"
-)
-
-# Check duplicate skill names
-cat(
-  "Duplicate skill names:",
-  sum(duplicated(skill_table$skill_name)),
-  "\n"
-)
-
-# Check missing skill names
-cat(
-  "Missing skill names:",
-  sum(is.na(skill_table$skill_name)),
-  "\n"
-)
-
-# Display all skills
-print(skill_table, n = 30)
-
-
-# =====================================================
-# Step 7: Create JOB_SKILL Table
-# =====================================================
-
-# Improve skill name capitalization
-skill_table <- skill_table %>%
+    str_to_title()
+) %>%
   mutate(
     skill_name = case_when(
       source_column == "skill_sql" ~ "SQL",
@@ -264,102 +178,122 @@ skill_table <- skill_table %>%
       source_column == "skill_scikit_learn" ~ "Scikit-learn",
       source_column == "skill_nlp" ~ "NLP",
       source_column == "skill_llm" ~ "LLM",
-      source_column == "skill_generative_ai" ~ "Generative AI",
       source_column == "skill_dbt" ~ "dbt",
+      source_column == "skill_r" ~ "R",
       TRUE ~ skill_name
     )
   )
 
-# Convert TRUE skill indicators into job-skill relationships
-job_skill_table <- jobs_revised %>%
+stopifnot(
+  !anyDuplicated(skill_table$skill_id),
+  !anyDuplicated(skill_table$skill_name)
+)
+
+# STEP 6: Create JOB_SKILL bridge table
+
+job_skill_table <- jobs %>%
   select(job_id, all_of(skill_columns)) %>%
   pivot_longer(
     cols = all_of(skill_columns),
     names_to = "source_column",
-    values_to = "has_skill"
+    values_to = "mentioned"
   ) %>%
-  filter(has_skill %in% TRUE) %>%
+  filter(mentioned) %>%
   inner_join(
-    skill_table,
+    skill_table %>% select(skill_id, source_column),
     by = "source_column"
   ) %>%
   select(job_id, skill_id) %>%
   distinct() %>%
   arrange(job_id, skill_id)
 
-# Validate the JOB_SKILL table
-cat("Total job-skill relationships:", nrow(job_skill_table), "\n")
+expected_links <- sum(vapply(
+  jobs[skill_columns], sum, integer(1)
+))
 
-cat(
-  "Duplicate job-skill pairs:",
-  sum(duplicated(job_skill_table)),
-  "\n"
+stopifnot(
+  nrow(job_skill_table) == expected_links,
+  !anyDuplicated(job_skill_table),
+  all(job_skill_table$job_id %in% job_posting_table$job_id),
+  all(job_skill_table$skill_id %in% skill_table$skill_id)
 )
 
-cat(
-  "Unmatched job IDs:",
-  sum(!job_skill_table$job_id %in% job_posting_table$job_id),
-  "\n"
+# STEP 7: Keep detailed Data Science classification separately
+
+classification_columns <- intersect(
+  c(
+    "job_id", "job_category_updated",
+    "classification_updated", "classification_basis"
+  ),
+  names(jobs_ds)
 )
 
-cat(
-  "Unmatched skill IDs:",
-  sum(!job_skill_table$skill_id %in% skill_table$skill_id),
-  "\n"
+classification_table <- jobs_ds %>%
+  select(all_of(classification_columns)) %>%
+  distinct(job_id, .keep_all = TRUE) %>%
+  arrange(job_id)
+
+stopifnot(
+  nrow(classification_table) == nrow(jobs_ds),
+  all(classification_table$job_id %in% job_posting_table$job_id)
 )
 
-# Preview first 10 relationships
-print(head(job_skill_table, 10))
+# STEP 8: Validate normalized tables
 
-# =====================================================
-# Step 8: Export Normalized Database
-# =====================================================
+normalized_summary <- tibble(
+  table_name = c(
+    "COMPANY", "JOB_POSTING", "SALARY",
+    "SKILL", "JOB_SKILL", "DATA_SCIENCE_CLASSIFICATION"
+  ),
+  row_count = c(
+    nrow(company_table), nrow(job_posting_table),
+    nrow(salary_table), nrow(skill_table),
+    nrow(job_skill_table), nrow(classification_table)
+  )
+)
 
-library(writexl)
+print(normalized_summary)
 
-# Create output folder
+date_check <- job_posting_table %>%
+  select(job_id, posted_at) %>%
+  inner_join(
+    jobs %>% select(job_id, posted_at),
+    by = "job_id",
+    suffix = c("_normalized", "_source")
+  )
+
+stopifnot(
+  nrow(date_check) == nrow(jobs),
+  identical(
+    as.character(date_check$posted_at_normalized),
+    as.character(date_check$posted_at_source)
+  )
+)
+
+# STEP 9: Export normalized tables
+
 output_folder <- "Data/Normalized"
+dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
 
-dir.create(
-  output_folder,
-  recursive = TRUE,
-  showWarnings = FALSE
-)
-
-# Store the five tables in a named list
 normalized_tables <- list(
   COMPANY = company_table,
   JOB_POSTING = job_posting_table,
   SALARY = salary_table,
   SKILL = skill_table,
-  JOB_SKILL = job_skill_table
+  JOB_SKILL = job_skill_table,
+  DATA_SCIENCE_CLASSIFICATION = classification_table
 )
 
-# Export all tables into one Excel workbook
-write_xlsx(
-  normalized_tables,
-  path = file.path(
-    output_folder,
-    "Dataset1_Normalized_Database.xlsx"
-  )
-)
-
-# Export each table as a separate CSV
 for (table_name in names(normalized_tables)) {
-  
   write_csv(
     normalized_tables[[table_name]],
-    file.path(
-      output_folder,
-      paste0(table_name, ".csv")
-    )
+    file.path(output_folder, paste0(table_name, ".csv"))
   )
-  
 }
 
-# Confirm exported files
-cat("\nNormalized database exported successfully!\n")
-
-print(
-  list.files(output_folder)
+write_xlsx(
+  normalized_tables,
+  path = file.path(output_folder, "Dataset1_Normalized_Database.xlsx")
 )
+
+View(normalized_summary)

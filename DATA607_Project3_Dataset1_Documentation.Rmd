@@ -1,6 +1,6 @@
 ---
 title: "DATA 607 Project 3: Dataset 1 Documentation"
-subtitle: "Data Science Skills Demand and Salary Analysis"
+subtitle: "Full Job Market Analysis and Data Science-Related Job Comparison"
 author: "DATA 607 Project 3 Team"
 date: "`r Sys.Date()`"
 output:
@@ -32,31 +32,183 @@ library(knitr)
 
 ## Research Question
 
-**Which data science skills are most in demand, and how do those skills relate to advertised salaries?**
+**Which technical skills appear most frequently across the full job-postings dataset, and how do skill mentions and advertised salaries compare with the Data Science-related subgroup?**
 
-The purpose of Dataset 1 is to identify technical skills frequently mentioned in data science-related job postings and investigate their relationship with advertised annual salaries.
+The primary population is the full cleaned job-postings dataset. Data Science-related postings form a smaller, separately classified subgroup for focused comparisons. The project investigates technical skill mentions and advertised annual salary midpoints; these are descriptive associations.
 
-We used R to clean the original dataset, classify relevant occupations, extract technical skills, analyze salary ranges, compare job categories, and validate the results.
+We used R to clean the original dataset, classify relevant occupations, extract technical skills, analyze salary ranges, compare job categories, and validate the results. The full-market and subgroup analyses should be reported separately rather than treating the subgroup as the entire market.
+
+## Data Source and Acquisition
+
+The only external dataset used for Dataset 1 is **Job Postings with Salaries** by **minmaxer**, available on Kaggle: <https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries>. The dataset was downloaded manually as a ZIP file, extracted, and saved locally for analysis in R. The downloaded snapshot was used rather than treating weekly Kaggle updates as part of the same sample. PostgreSQL was used to store normalized exports and check relationships; the cleaning, classification, and exploratory analysis were performed in R.
+
+**Scope note:** The job-posting dates describe the observed snapshot, not a long-term hiring trend. Skill mentions are identified from job-description text and do not necessarily indicate mandatory qualifications.
 
 ## Dataset Summary
 
 | Measure | Result |
 |---|---:|
-| Original job postings | 9,173 |
+| Full cleaned job postings | 9,173 |
 | Original columns | 27 |
 | Potentially relevant postings | 892 |
 | Initially included postings | 232 |
 | Exclusions after initial validation | 3 |
 | Additional exclusions after review | 3 |
-| Revised skill-analysis sample | 226 |
-| Revised USD salary sample | 178 |
+| Historical revised Data Science subgroup | 226 |
+| Historical revised subgroup USD salary sample | 178 |
 | Technical skills tracked | 30 |
-| Median advertised salary midpoint | $165,000 |
+| Historical revised subgroup median salary midpoint | $165,000 |
 | Unresolved candidate postings | 627 |
 
-Our revised analysis includes 226 selected postings for skill demand and 178 eligible USD postings for salary analysis.
+The full cleaned dataset contains 9,173 postings. The figures for 226 selected jobs and 178 eligible USD salary records describe the earlier manually reviewed Data Science-related subgroup, not the full job market. Updated full-market salary and skill results should be read from the latest Script 09–11 outputs.
 
-These results are descriptive and provisional. They should not be interpreted as representative estimates of the entire data science labor market.
+These results are descriptive. The full dataset is a limited posting snapshot, while the Data Science-related subgroup is provisional and subject to classification uncertainty.
+
+# Full-Market Analysis: Updated Scripts 09–13
+
+The current project workflow treats **all 9,173 cleaned postings as the primary dataset** and uses Data Science-related postings as a comparison subgroup. The older 226-job results documented later in this report are retained as a historical, manually reviewed analysis and should not be labeled as full-market findings.
+
+## Full-Market Dataset Check
+
+```{r full-market-overview}
+full_jobs <- read_csv("Data/job_postings_cleaned.csv", show_col_types = FALSE)
+
+stopifnot(
+  all(c("job_id", "posted_at") %in% names(full_jobs)),
+  !anyNA(full_jobs$job_id),
+  anyDuplicated(full_jobs$job_id) == 0
+)
+
+full_jobs %>%
+  summarise(
+    total_postings = n(),
+    unique_postings = n_distinct(job_id),
+    missing_dates = sum(is.na(posted_at)),
+    first_date = as.Date(min(posted_at, na.rm = TRUE)),
+    last_date = as.Date(max(posted_at, na.rm = TRUE))
+  ) %>%
+  kable(caption = "Full Cleaned Job Market Overview")
+```
+
+## Full-Market Skill Demand
+
+Script 09 produces full-market technical skill indicators and a Data Science-related comparison. The following section reads the full-market summary when available. The report does not substitute subgroup counts for market-wide counts.
+
+```{r full-market-skills}
+full_skill_path <- "Data/skill_demand_summary_full.csv"
+
+if (file.exists(full_skill_path)) {
+  full_skill_summary <- read_csv(full_skill_path, show_col_types = FALSE)
+  full_skill_summary %>%
+    slice_head(n = 15) %>%
+    kable(caption = "Top Technical Skills Across the Full Job Market")
+} else {
+  cat("Full-market skill summary not found at", full_skill_path,
+      "- verify the output filename generated by Script 09.")
+}
+```
+
+### Full-Market Skill Chart
+
+```{r full-market-skill-chart, fig.width=10, fig.height=7}
+if (exists("full_skill_summary") &&
+    all(c("skill", "job_count") %in% names(full_skill_summary))) {
+  full_skill_summary %>%
+    slice_max(job_count, n = 15, with_ties = FALSE) %>%
+    mutate(skill = str_replace_all(skill, "_", " ")) %>%
+    ggplot(aes(x = reorder(skill, job_count), y = job_count)) +
+    geom_col(fill = "steelblue") +
+    coord_flip() +
+    labs(title = "Most Mentioned Skills: Full Job Market",
+         x = "Technical skill", y = "Number of postings") +
+    theme_minimal()
+} else {
+  cat("Full-market skill chart requires the skill and job_count columns from Script 09.")
+}
+```
+
+## Full-Market Salary Analysis
+
+Script 10 separately analyzes salary-eligible postings in the full market and in the Data Science-related subgroup. Salary comparisons use the midpoint of valid, eligible annual USD salary ranges. The number of eligible records and overall median should be calculated from the saved full-market output rather than inferred from the subgroup.
+
+```{r full-market-salaries}
+full_salary_path <- "Data/jobs_salary_analysis_full.csv"
+
+if (file.exists(full_salary_path)) {
+  full_salary_jobs <- read_csv(full_salary_path, show_col_types = FALSE)
+  stopifnot("salary_midpoint_annual" %in% names(full_salary_jobs))
+  full_salary_jobs %>%
+    summarise(
+      eligible_postings = n(),
+      median_salary_midpoint = median(salary_midpoint_annual, na.rm = TRUE),
+      mean_salary_midpoint = mean(salary_midpoint_annual, na.rm = TRUE)
+    ) %>%
+    kable(caption = "Full-Market Eligible USD Salary Summary")
+} else {
+  cat("Full-market salary file not found at", full_salary_path,
+      "- verify the output filename generated by Script 10.")
+}
+```
+
+### Full-Market Salary Distribution
+
+```{r full-market-salary-chart, fig.width=9, fig.height=5}
+if (exists("full_salary_jobs") &&
+    "salary_midpoint_annual" %in% names(full_salary_jobs)) {
+  full_salary_jobs %>%
+    filter(is.finite(salary_midpoint_annual)) %>%
+    ggplot(aes(x = salary_midpoint_annual)) +
+    geom_histogram(bins = 35, fill = "steelblue", color = "white") +
+    scale_x_continuous(labels = label_dollar()) +
+    labs(title = "Advertised Annual Salary Midpoints: Full Market",
+         x = "Salary midpoint (USD)", y = "Number of postings") +
+    theme_minimal()
+} else {
+  cat("Full-market salary chart requires Script 10's eligible salary export.")
+}
+```
+
+## Job Categories and Normalization
+
+Script 11 compares full-market salaries with the separately classified Data Science-related categories. Script 13 exports the core six normalized relational tables; the current supplied CSV snapshot includes a seventh table, `job_sector_classification`. The PostgreSQL and Shiny results in the later sections of this document describe the **previously verified 226-posting subgroup implementation** unless the database and dashboard have been explicitly rebuilt using the new full-market exports. Updating R scripts alone does not update a PostgreSQL database or an online dashboard.
+
+## Current Seven-Table Relational Dataset (Verified CSV Snapshot)
+
+| Table | CSV rows | Primary key | Role |
+|---|---:|---|---|
+| `company` | 3,969 | `company_id` | Employers |
+| `job_posting` | 9,173 | `job_id` | Full-market job postings |
+| `salary` | 9,173 | `job_id` (PK/FK) | Salary information for each posting, including ineligible records |
+| `skill` | 30 | `skill_id` | Technical skill dictionary |
+| `job_skill` | 7,140 | (`job_id`, `skill_id`) | Detected job-to-skill links |
+| `data_science_classification` | 229 | `job_id` (PK/FK) | Data Science-related subgroup |
+| `job_sector_classification` | 9,173 | `job_id` (PK/FK) | Sector classification for all postings |
+
+These counts were checked against the **seven supplied CSV files**, not against a live PostgreSQL connection. The 229 Data Science classification rows are from the current uploaded snapshot; the older 226/178 figures refer to the separately reviewed historical analysis. The `salary` table contains 9,173 rows, **not** 9,173 salary-eligible jobs. The `job_skill` count is 7,140 detected associations, not 7,140 distinct jobs.
+
+**Relationships:** `company` 1-to-many `job_posting`; `job_posting` 1-to-1 `salary`; `job_posting` 1-to-many `job_skill`; `skill` 1-to-many `job_skill`; `job_posting` 1-to-0-or-1 `data_science_classification`; and `job_posting` 1-to-1 `job_sector_classification` in this snapshot. The two classification tables refer to `job_posting.job_id`. These are relationships inferred and checked from CSV keys, not proof that foreign-key constraints have been deployed in PostgreSQL.
+
+```{r seven-table-csv-verification, eval=FALSE}
+# Place the seven exports in Dashboard_Online/data/ (or adjust this path).
+files <- c("company", "job_posting", "salary", "skill", "job_skill",
+           "data_science_classification", "job_sector_classification")
+tables <- setNames(lapply(files, function(nm) {
+  readr::read_csv(file.path("Dashboard_Online", "data", paste0(nm, ".csv")),
+                  show_col_types = FALSE)
+}), files)
+stopifnot(
+  nrow(tables$job_posting) == 9173,
+  nrow(tables$salary) == 9173,
+  nrow(tables$data_science_classification) == 229,
+  nrow(tables$job_sector_classification) == 9173,
+  nrow(tables$job_skill) == 7140,
+  !anyDuplicated(tables$job_posting$job_id),
+  !anyDuplicated(tables$job_sector_classification$job_id),
+  all(tables$job_sector_classification$job_id %in% tables$job_posting$job_id),
+  all(tables$data_science_classification$job_id %in% tables$job_posting$job_id)
+)
+knitr::kable(data.frame(table = files, rows = vapply(tables, nrow, integer(1))))
+```
 
 # 2. Project Organization
 
@@ -353,7 +505,7 @@ However, this was not a fully random validation sample. The percentage should no
 - `jobs_validation_sample.csv`
 - `jobs_validation_reviewed.csv`
 
-# 11. Step 09: Initial Technical Skill Analysis
+# 11. Step 09: Historical Data Science Subgroup Skill Analysis
 
 **Script:** `09_analyze_skills.R`
 
@@ -403,7 +555,7 @@ We corrected this by excluding the numeric column before reshaping.
 - `skill_demand_summary.csv`
 - `top_15_skills.png`
 
-# 12. Step 10: Initial Skill and Salary Analysis
+# 12. Step 10: Historical Data Science Subgroup Skill and Salary Analysis
 
 **Script:** `10_analyze_skill_salaries.R`
 
@@ -449,7 +601,7 @@ These comparisons were unadjusted descriptive associations, not causal salary pr
 - `skill_salary_comparison.csv`
 - `skill_salary_chart.png`
 
-# 13. Step 11: Initial Job Category Analysis
+# 13. Step 11: Historical Data Science Subgroup Job Category Analysis
 
 **Script:** `11_analyze_job_categories.R`
 
@@ -853,7 +1005,7 @@ The results remained stable under this limited exclusion sensitivity check.
 
 However, this does not establish that the full classification process or skill extraction dictionary is accurate.
 
-# 17. Research Findings
+# 17. Historical Data Science Subgroup Research Findings
 
 ## Finding 1: Python and SQL Are Most Frequently Mentioned
 
@@ -999,7 +1151,7 @@ They describe associations between skill mentions and advertised salary midpoint
 
 # 19. Conclusion
 
-Dataset 1 provides preliminary evidence about which technical skills are frequently mentioned in selected data science-related job postings and how those mentions relate to advertised salaries.
+The historical Data Science subgroup analysis provides preliminary evidence about skill mentions and advertised salaries within selected occupations. The updated primary analysis uses the full cleaned job market and should be interpreted using the newly generated full-market summaries.
 
 Python and SQL were the most frequently mentioned technical skills.
 
@@ -1019,7 +1171,7 @@ However, the results remain provisional because many candidate postings have not
 
 Further validation and adjustment for job characteristics would strengthen the study.
 
-# 20. PostgreSQL Relational Database Implementation
+# 20. Historical PostgreSQL Subgroup Implementation
 
 ## 20.1 Objective and Tools
 
@@ -1028,6 +1180,9 @@ After completing the revised R analysis, we organized Dataset 1 into a normalize
 This phase focuses exclusively on Dataset 1. It provides a reproducible relational structure and independent SQL summaries to compare with the revised R findings.
 
 ## 20.2 Relational Schema
+
+**Historical database state only:** the following five-table counts reflect the older 226-posting PostgreSQL implementation, **not** the current seven-table CSV snapshot documented earlier.
+
 
 | Table | Primary key | Purpose | Imported rows |
 |---|---|---|---:|
@@ -1112,72 +1267,122 @@ The saved SQL scripts are:
 
 The scripts document SQL logic; the CSV imports are performed separately through pgAdmin. For a new, empty database, create the tables, import CSVs in dependency order with `NA` as the NULL string, and then run the analysis and verification queries. On an already populated database, avoid importing the same records again. Results reflect the revised 226-job sample, not all 9,173 source postings or the broader labor market.
 
-# 21. Interactive R Shiny Dashboard (Current Development Version)
+# 21. Historical Subgroup R Shiny Dashboard (Local and Online)
 
 ## 21.1 Purpose and Scope
 
-An interactive **Data Science Job Market Insights** dashboard was developed for Dataset 1 to make the descriptive results easier to explore and present. The dashboard is implemented in R Shiny, uses `bslib` for its interface and `ggplot2` with `plotly` for interactive visualizations, and queries the normalized PostgreSQL database. It supplements, rather than replaces, the reproducible R and SQL analyses described above.
+We developed an interactive **Data Science Job Market Insights** dashboard for Dataset 1 to present selected job-posting counts, technical skill demand, advertised salaries, and posting dates. The application uses `shiny`, `bslib`, `ggplot2`, and `plotly`. These displays supplement the R and PostgreSQL analyses; they do not establish causal salary relationships or represent the entire job market.
 
-The working application is saved as `Dashboard/app.R` in the RStudio project. A separate `Dashboard/01_test_connection.R` script was used to confirm that R can connect to the local PostgreSQL database and retrieve the expected table counts.
+Two implementations are maintained:
 
-## 21.2 Architecture and Data Flow
+- **Local application:** `Dashboard/app.R` queries the normalized PostgreSQL database `data607_project3` through `DBI` and `RPostgres`.
+- **Online application:** `Dashboard_Online/app.R` reads prepared CSV snapshots from `Dashboard_Online/data/` and is designed for deployment on shinyapps.io. It does not need a connection to the local PostgreSQL server at runtime.
 
-The local dashboard follows this workflow:
+The publicly published application address is <https://mohdafwan.shinyapps.io/data607-project3/>. The URL identifies the existing deployment; whether the *latest date-chart revision* is live must be confirmed by opening the website after redeployment.
 
-1. The original postings are cleaned, classified, and validated in R.
-2. `13_normalize_dataset.R` creates the five relational CSV exports.
-3. The exports are imported into the PostgreSQL database `data607_project3` using pgAdmin.
-4. The Shiny application connects through `DBI` and `RPostgres` and runs SQL queries against the five normalized tables.
-5. `bslib` renders the summary cards and filter, while `ggplot2` and `plotly` render the charts.
+## 21.2 Data Architecture and Workflow
 
-The database connection uses `localhost` and port `5432` in the **local development environment**. The PostgreSQL password is requested interactively using `rstudioapi::askForPassword()` rather than being embedded in the source code. Passwords should not be committed to version control or included in submitted documentation.
+The revised 226-posting dataset is normalized into five related tables: `company`, `job_posting`, `salary`, `skill`, and `job_skill`. The local dashboard queries these tables directly. The online workflow uses the following scripts, run from the `DATA607-Project3` project root:
 
-## 21.3 Current Dashboard Features
+1. `Dashboard_Online/01_export_data.R` exports the five normalized tables from PostgreSQL into `Dashboard_Online/data/` as CSV snapshots. The updated version **does not overwrite files that already exist**.
+2. `Dashboard_Online/02_prepare_dashboard_data.R` reads those exports, checks the expected row counts and posting dates, and prepares `overview.csv`, `skill_demand.csv`, `category_salary.csv`, and `posting_dates.csv`. The updated version preserves existing output files and stops if detected snapshots are inconsistent.
+3. `Dashboard_Online/app.R` loads these prepared summaries and renders the online dashboard.
 
-| Feature | Current behavior | Source |
+**Snapshot safeguard:** Existing CSVs are deliberately preserved, not refreshed automatically. If source data changes, compare and validate the versions before making any deliberate replacements. The export and preparation scripts should be run from the project root because they use paths beginning with `Dashboard_Online/data/`. The online app itself reads paths relative to its app directory, such as `data/posting_dates.csv`.
+
+## 21.3 Dashboard Features and Filter Behavior
+
+| Feature | Display | Data source |
 |---|---|---|
-| Job postings card | Displays 226 selected postings | `job_posting` |
-| Eligible salaries card | Displays 178 USD-eligible salary records with nonmissing midpoints | `salary` |
-| Tracked skills card | Displays 30 technical skills | `skill` |
-| Median annual salary card | Displays the overall median advertised salary midpoint ($165,000) | `salary` |
-| Top 10 in-demand skills chart | Interactive horizontal bar chart of skill mentions | `skill`, `job_skill`, `job_posting` |
-| Salary by job category chart | Interactive horizontal bar chart of category-level median annual salary midpoints | `job_posting`, `salary` |
-| Job category dropdown | Updates the Top 10 skills chart for the selected category | Parameterized PostgreSQL query |
+| Total job postings | 226 selected postings | `job_posting` / `overview.csv` |
+| Eligible salary postings | 178 eligible USD salaries with valid midpoints | `salary` / `overview.csv` |
+| Tracked technical skills | 30 skills | `skill` / `overview.csv` |
+| Median advertised annual salary midpoint | $165,000 | `salary` / `overview.csv` |
+| Top 10 most in-demand skills | Interactive horizontal bars of distinct postings mentioning each skill | PostgreSQL joins / `skill_demand.csv` |
+| Median salary by job category | Interactive category-level median salary chart | PostgreSQL joins / `category_salary.csv` |
+| Daily job postings | Interactive count of postings by posting date | `job_posting.posted_at` / `posting_dates.csv` |
+| Daily job postings by category | Interactive stacked category breakdown by posting date | `job_posting.posted_at` / `posting_dates.csv` |
+| Job category selector | Filters skill demand and both posting-date charts | Local query or online prepared data |
 
-The dashboard initially displays the overall sample. In the current version, selecting a job category **changes the skill-demand chart only**; the summary cards and category salary chart continue to show overall results. This distinction is important when interpreting filtered views. The chart counts are descriptive, and salary values are advertised USD range midpoints rather than observed earnings.
+The summary cards and the salary-by-category chart continue to describe the **overall sample** when a category is selected. The category selector affects the skill-demand chart and both date charts. Counts represent job postings, not unique employers or hires. Salary figures are midpoints of advertised annual USD ranges, not observed employee compensation.
 
-## 21.4 Local Testing and Current Status
+## 21.4 Posting-Date Analysis
 
-The PostgreSQL connection test succeeded, and the Shiny application launched successfully in RStudio. During development, PostgreSQL `COUNT(*)` values returned to R as `integer64` triggered a formatting error in `scales::comma()`. Converting those counts to standard R numeric values resolved the issue. This conversion is safe for the small counts in the selected Dataset 1 sample.
+The `posted_at` field is retained in the normalized `job_posting` table and used to aggregate daily posting counts. PostgreSQL checks established that all **226 postings** have nonmissing dates across **seven distinct dates**, October 5–11, 2026.
 
-The job-category filter has been added to the current `app.R`. Group review and any requested dashboard changes are pending. The application has **not yet been published online**, and a public dashboard URL is therefore not available.
+| Date posted | Job postings |
+|---|---:|
+| 2026-10-05 | 43 |
+| 2026-10-06 | 62 |
+| 2026-10-07 | 50 |
+| 2026-10-08 | 34 |
+| 2026-10-09 | 33 |
+| 2026-10-10 | 3 |
+| 2026-10-11 | 1 |
+| **Total** | **226** |
 
-## 21.5 Planned Online Publication
+The job-category distribution in the same 226-posting sample is: AI/ML (59), Data Engineering (55), Data Analytics (49), Data Science (39), Statistics (10), Database (8), and Business Intelligence (6). These totals provide a cross-check for the category-by-date chart.
 
-After the group approves the final dashboard, the team plans to publish it online so classmates and the instructor can view it without running RStudio. A possible hosting service is `shinyapps.io`, subject to the team's final choice and deployment testing.
+**Interpretation:** October 6 has the largest observed daily count (62). However, these dates describe only a seven-day snapshot of the selected postings. The counts must not be interpreted as long-term hiring trends, seasonality, or changes in overall labor demand.
 
-Because the current application connects to PostgreSQL at `localhost`, it cannot use that same connection unchanged from a hosted server. Two possible deployment architectures are under consideration:
+## 21.5 Local Dashboard and PostgreSQL Connection
 
-- **Prepared data snapshot:** Export the required analysis tables or aggregates and bundle them with the hosted Shiny application. This is simpler for a static class-project dataset, but the hosted application would no longer query PostgreSQL live.
-- **Hosted PostgreSQL:** Use a securely hosted PostgreSQL instance and configure the deployed application with protected connection credentials. This retains live SQL integration but requires additional infrastructure and security configuration.
+The local application uses PostgreSQL 18 on `localhost`, port `5432`, database `data607_project3`, and the `public` schema. The password is requested interactively using `rstudioapi::askForPassword()`; it is not embedded in the R source. `Dashboard/01_test_connection.R` can be used to check connectivity and the five table counts.
 
-No hosting approach has been finalized. Once published, the final URL, hosting architecture, access instructions, and any changes to the data refresh process should be recorded here.
+The local dashboard retrieves overall metrics, skill demand, salary summaries, job categories, and daily category-by-date counts from PostgreSQL. The category-filtered skill query uses a parameterized SQL value. The date charts use posting-date counts already retrieved from the database. The application converts PostgreSQL count fields to ordinary R numeric values before formatting or plotting.
 
-## 21.6 Dashboard Limitations and Future Improvements
+To launch from the project root:
 
-The dashboard inherits the study's selection, classification, skill-detection, and salary limitations. It should not be interpreted as a representative labor-market survey or a causal estimate of skill-related pay differences.
+```{r local-dashboard-command, eval=FALSE}
+shiny::runApp("Dashboard")
+```
 
-Potential changes for group discussion include making all summary cards responsive to the job-category filter, adding skill and salary filters, adding an interactive demand-versus-salary comparison, providing downloadable filtered tables, and expanding the AI-related skill analysis. These are **proposed enhancements**, not implemented features of the current version.
+This command requires a running local PostgreSQL service and the relevant R packages. It should not be used to deploy the local PostgreSQL-dependent application directly to shinyapps.io.
 
-## 21.7 Running the Local Dashboard
+## 21.6 Online Dashboard and Deployment
 
-1. Start the local PostgreSQL service and confirm that `data607_project3` contains the normalized tables.
-2. Open the RStudio project and ensure the packages `shiny`, `bslib`, `DBI`, `RPostgres`, `dplyr`, `ggplot2`, `plotly`, `scales`, and `rstudioapi` are installed.
-3. Open `Dashboard/app.R` and select **Run App**, or run `shiny::runApp("Dashboard")` from the project root.
-4. Enter the PostgreSQL password when prompted.
-5. Check the four summary cards and two charts; select a category to test the skill-demand filter.
+The online dashboard uses prepared CSV data so that viewers do not need PostgreSQL credentials or access to the developer's computer. The required dashboard summaries are `overview.csv`, `skill_demand.csv`, `category_salary.csv`, and `posting_dates.csv` under `Dashboard_Online/data/`. The five exported normalized table CSVs support preparing these summaries.
 
-This dashboard section records the **working development version**. It should be revised after group feedback and again after successful online deployment.
+From the project root, the workflow is:
+
+```{r online-dashboard-commands, eval=FALSE}
+# Export only missing normalized-table CSV files.
+source("Dashboard_Online/01_export_data.R")
+
+# Validate snapshots and create only missing summary CSV files.
+source("Dashboard_Online/02_prepare_dashboard_data.R")
+
+# Confirm the date summary exists before launching or deploying.
+stopifnot(file.exists("Dashboard_Online/data/posting_dates.csv"))
+
+# Test the CSV-based app locally.
+shiny::runApp("Dashboard_Online")
+```
+
+After successful local testing, the existing shinyapps.io application can be updated with:
+
+```{r deploy-dashboard-command, eval=FALSE}
+rsconnect::deployApp(
+  appDir = "Dashboard_Online",
+  appName = "data607-project3",
+  account = "mohdafwan",
+  forceUpdate = TRUE
+)
+```
+
+Deployment requires a configured shinyapps.io account and the `rsconnect` package. Before redeploying, check that the correct `Dashboard_Online/app.R` is present and that `posting_dates.csv` is included. After deployment, open <https://mohdafwan.shinyapps.io/data607-project3/> and verify the four summary cards, the skill and salary charts, the two posting-date charts, and the category selector. The date-chart redeployment is **not independently confirmed in this documentation**.
+
+## 21.7 Validation and Reproducibility Checks
+
+The updated online preparation script checks for duplicate job IDs, matching job and salary IDs, valid job-skill references, parsable nonmissing posting dates, the verified totals of 226 jobs, 30 skills, and 1,142 job-skill links, and the seven daily counts shown in Section 21.4. It also checks existing summary snapshots for inconsistencies before creating new date data. The date-summary counts must total 226.
+
+The online application checks that `posting_dates.csv` has the required fields and that its posting counts agree with `overview.csv`. These checks reduce the risk of mixing incompatible snapshots, but successful execution and browser testing are still necessary to confirm that the dashboard works as expected.
+
+## 21.8 Limitations and Possible Improvements
+
+The dashboard inherits the study's selection bias, limited occupational validation, dictionary-based skill detection, missing salary eligibility for some postings, and small sample sizes in some categories. In addition, the online CSV snapshots are **static** until intentionally regenerated and redeployed. Neither dashboard establishes causal skill-based salary premiums.
+
+Possible future improvements include applying category filters to more summary metrics, adding a skill-versus-salary comparison, providing downloadable filtered tables, and expanding the AI-related analysis. These are proposals, not features verified in the current uploaded applications.
 
 # 22. Next Steps
 
@@ -1208,9 +1413,12 @@ To reproduce the revised Dataset 1 analysis:
 11. Import the CSVs in foreign-key dependency order, treating `NA` as SQL `NULL`.
 12. Run the verification and analysis queries in `SQL guide/Dataset1_Analysis.sql`.
 13. Confirm the local dashboard works using `shiny::runApp("Dashboard")` (requires the local PostgreSQL service).
-14. Select **Knit to HTML**.
+14. Run `Dashboard_Online/01_export_data.R` and `Dashboard_Online/02_prepare_dashboard_data.R` from the project root to create or validate the online CSV snapshots without overwriting existing files.
+15. Confirm `Dashboard_Online/data/posting_dates.csv` exists and test with `shiny::runApp("Dashboard_Online")`.
+16. If appropriate, redeploy the online dashboard using `rsconnect::deployApp()` and verify the public page.
+17. Select **Knit to HTML**.
 
-The final report uses these revised outputs:
+The following are the historical subgroup revised outputs; current full-market outputs are documented above:
 
 - `jobs_skills_revised.csv`
 - `jobs_salary_revised.csv`
@@ -1222,4 +1430,7 @@ The final report uses these revised outputs:
 
 The historical results from Steps 09–11 are retained for transparency.
 
-This document describes the current Dataset 1 workflow, validation decisions, normalized PostgreSQL implementation, preliminary research findings, and locally tested Shiny dashboard. Online publication and group-requested dashboard revisions remain pending.
+This document describes the Dataset 1 workflow, validation decisions, normalized PostgreSQL implementation, preliminary research findings, and both local and CSV-based online Shiny dashboards. The existing public application URL is recorded; successful deployment of the newest posting-date charts should be confirmed separately.
+# References
+
+minmaxer. (n.d.). *Job Postings with Salaries* [Data set]. Kaggle. <https://www.kaggle.com/datasets/minmaxer/job-postings-with-salaries>
