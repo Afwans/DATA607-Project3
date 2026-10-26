@@ -270,3 +270,110 @@ Questions?
 
 **Dashboard:** <https://mohdafwan.shinyapps.io/data607-project3/>
 :::
+
+# Backups
+
+## Data cleaning and quality
+
+:::: {.columns}
+::: {.column width="50%"}
+**Duplicate checks: all zero**
+
+| Check | Count |
+|:---|---:|
+| Duplicate job IDs | 0 |
+| Duplicate salary job IDs | 0 |
+| Duplicate company IDs | 0 |
+| Duplicate skill IDs | 0 |
+| Duplicate job-skill pairs | 0 |
+:::
+
+::: {.column width="50%"}
+**Salary status of the 226 postings**
+
+| Status | n |
+|:---|---:|
+| USD-eligible (used for pay analysis) | 178 |
+| Non-USD currency | 44 |
+| Outlier flag (< \$30K or > \$400K) | 4 |
+
+:::
+::::
+
+
+## Employers ask for bundles of skills
+
+:::: {.columns}
+::: {.column width="50%"}
+![](Figures/slides-breadth-1.png)
+
+::: {.small}
+A typical posting names about **5** of our 30 skills.
+:::
+:::
+
+::: {.column width="50%"}
+![](Figures/slides-family-1.png)
+:::
+::::
+
+## Demand differs by job category
+
+![](Figures/slides-demand-category-1.png){fig-align="center" height="560"}
+
+::: notes
+AI/ML: Python, ML, LLMs, PyTorch; SQL in only 7% of AI/ML postings. Data Analytics and BI: SQL plus a BI tool (Tableau, Power BI). Data Engineering: SQL and Python with pipelines, dbt, ETL, Snowflake, Databricks and cloud. Python and SQL are the only skills common (≥ 40%) in nearly every category. Small categories (n < 15) are noisy.
+:::
+
+
+## Highest-paying skills
+
+:::: {.columns}
+::: {.column width="50%"}
+| Skill | Median salary | n |
+|:---|---:|---:|
+| Generative AI | \$196,500 | 15 |
+| PyTorch | \$195,050 | 23 |
+| Deep Learning | \$193,300 | 13 |
+| LLM | \$190,900 | 51 |
+| Kubernetes | \$185,000 | 15 |
+| Machine Learning | \$182200 | 59 |
+| Data Pipelines | \$182,025 | 42 |
+| Scikit-learn | \$181,775 | 10 |
+| Docker | \$180,000 | 9 |
+| TensorFlow | \$180,000 | 13 |
+| NLP	| \$176,800 | 12 |
+| Spark | \$176,800 | 19 |
+| AWS | \$169,250 | 40 |
+:::
+
+::: {.column width="50%"}
+| Skill | Median salary | n |
+|:---|---:|---:|
+| Airflow | \$168,750 | 16 |
+| ETL | \$168,500 | 23 |
+| Google Cloud | \$168,500 | 23 |
+| Python | \$165,000 | 131 |
+| Statistics | \$164,900 | 44 |
+| Snowflak | \$164,250 | 32 |
+| Looker | 162,972 | 15 |
+| dbt | \$156,000 | 37 |
+| Databricks | \$155,000 | 28
+| SQL	| \$152,500 | 105 |
+| R	| \$151,160 | 22 |
+| Git | \$149,216 | 18 |
+| Azure	| \$148,012 | 25 |
+
+:::
+::::
+
+
+## There is no single "most valued" skill
+
+| Tier | Skills | What the data shows |
+|:---|:---|:---|
+| **Tier 1 — Must Have** | Python, SQL | Asked for in 60–72% of all postings; appear across every job category |
+| **Tier 2 — High Value** | Machine Learning, LLMs, Statistics | Tied to the highest-paying roles; growing demand |
+| **Tier 3 — Specialist Premium** | PyTorch, Deep Learning, Generative AI | Less common but linked to the largest salary premiums |
+| **Tier 4 — Category-Specific** | Spark, Databricks, dbt, Snowflake | Important in Data Engineering; less relevant in analytics roles |
+
