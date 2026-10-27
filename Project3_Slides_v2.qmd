@@ -74,15 +74,21 @@ PostgreSQL (`data607_project3`) managed in pgAdmin 4
 
 # Value Proxy 1: Demand
 
-## Python and SQL dominate demand
+## Category "Personalities"
 
 :::: {.columns}
 ::: {.column width="58%"}
-![](Figures/slides-demand-plot-1.png)
+
+
+![](Figures/slides-top5-by-category-1.png)
+
+
 :::
 
 ::: {.column width="42%"}
-::: {.big}
+::: {.small}
+**Postings that mention top skills**
+
 | Skill | Postings | Share |
 |:---|---:|---:|
 | Python | 163 | 72.1% |
@@ -91,29 +97,19 @@ PostgreSQL (`data607_project3`) managed in pgAdmin 4
 | LLM | 60 | 26.5% |
 | Statistics | 55 | 24.3% |
 
-:::
-:::
-::::
-
-
-## Each role has its own skill "personality"
-
-:::: {.columns}
-::: {.column width="62%"}
-![](Figures/slides-top5-by-category-1.png)
-:::
-
-::: {.column width="38%"}
 ::: {.small}
-- **AI/ML:** Python, Machine Learning, LLMs, PyTorch. SQL in only 7%
+- **Python and SQL** are the only skills common (≥ 40%) in nearly every category
+- **AI/ML:** Does not feature SQL heavily
 - **Analytics & BI:** SQL + a BI tool (Tableau, Power BI)
 - **Data Engineering:** SQL, Python, pipelines, dbt, Snowflake, cloud
-- **Python and SQL** are the only skills common (≥ 40%) in nearly every category
+:::
+
 :::
 :::
 ::::
 
-## Skills travel together
+
+## Skill Bundles
 
 :::: {.columns}
 ::: {.column width="60%"}
@@ -139,48 +135,57 @@ Python, SQL and Machine Learning form a **core bundle**.
 
 # Value Proxy 2: Pay
 
-## Data science pays well above the market
+## Data science and the market
 
 :::: {.columns}
 ::: {.column width="50%"}
 ![](Figures/slides-salary-histogram-1.png)
-:::
 
-::: {.column width="50%"}
-![](Figures/slides-salary-boxplot-1.png)
-:::
-::::
+:::{.small}
 
 | Group | Postings | Median | Mean | IQR outliers |
 |:---|---:|---:|---:|---:|
 | Data Science | 178 | \$165,000 | \$166,885 | 2 (1.1%) |
 | Other jobs | 7,412 | \$108,875 | \$120,410 | 78 (1.1%) |
 
-
-## Pay depends on the type of role
-
+:::
+:::
+::: {.column width="50%"}
+:::{.small}
 ![](Figures/slides-pay-context-1.png){fig-align="center" width="90%"}
 
-- Data Science and AI/ML pay the most; Data Engineering is in the middle; Data Analytics and BI pay least
-- Skills common in AI/ML roles will *look* like they carry a premium even when the role, not the skill, drives pay
+::: {style="padding-left: 2em;"}
+
+  - Data Science and AI/ML pay the most
+  - Data Analytics and BI pay least
+  - Skills common in AI/ML roles will *look* like they carry a premium even when the role, not the skill, drives pay
+  
+:::
+:::
+:::
+::::
+
+
+
+
 
 
 ## Salary premiums by skill {.smaller}
 
 :::: {.columns}
-::: {.column width="55%"}
+::: {.column width="60%"}
 ![](Figures/slides-premium-plot-1.png)
 
-**Association, not causation.** Most confidence intervals include zero (n = 178).
+
 :::
 
-::: {.column width="45%"}
+::: {.column width="40%"}
 ::: {.big}
 - **ML, LLM, PyTorch:** about **+\$28K to +\$38K**
 - **Excel, Power BI, Tableau, Data Viz:** **\$50K–\$68K less**
 - **SQL:** −\$40K, only because AI/ML (highest paid) rarely lists SQL
-- **Python:** too common to signal a premium
-- Within the same category, Excel (−26%), Data Viz (−23%) and Power BI (−18%) stay lower; these are the only significant estimates (p < 0.05)
+
+**Association, not causation.** Most confidence intervals include zero (n = 178).
 
 :::
 :::
@@ -376,4 +381,12 @@ AI/ML: Python, ML, LLMs, PyTorch; SQL in only 7% of AI/ML postings. Data Analyti
 | **Tier 2 — High Value** | Machine Learning, LLMs, Statistics | Tied to the highest-paying roles; growing demand |
 | **Tier 3 — Specialist Premium** | PyTorch, Deep Learning, Generative AI | Less common but linked to the largest salary premiums |
 | **Tier 4 — Category-Specific** | Spark, Databricks, dbt, Snowflake | Important in Data Engineering; less relevant in analytics roles |
+
+## Annual Salary Distribution Box Plot
+
+![](Figures/slides-salary-boxplot-1.png)
+
+# Data-Postings mentions
+
+![](Figures/slides-demand-plot-1.png)
 
